@@ -10,4 +10,30 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     name: import.meta.env.VITE_APP_TITLE,
   },
+  breadcrumb: {
+    hideOnlyOne: true,
+    showHome: true,
+  },
+  copyright: {
+    companyName: 'whatsApp Test',
+    companySiteLink: '',
+    date: '2025',
+  },
+  footer: {
+    enable: true,
+    fixed: true,
+  },
+  shortcutKeys: {
+    enable: false,
+    globalSearch: false,
+  },
+  sidebar: {
+    width: 210,
+  },
+  tabbar: {
+    styleType: 'card',
+  },
+  theme: {
+    mode: 'light',
+  },
 });
