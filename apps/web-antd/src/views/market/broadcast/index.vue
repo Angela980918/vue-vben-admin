@@ -1,7 +1,5 @@
 <script setup lang="ts"></script>
 
-<template>
-  <div>標簽管理</div>
-</template>
+<template><div>消息群發</div></template>
 
 <style scoped></style>

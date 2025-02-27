@@ -3,11 +3,11 @@ import type { RouteRecordRaw } from 'vue-router';
 import { BasicLayout } from '#/layouts';
 import { $t } from '#/locales';
 
-const routes: RouteRecordRaw[] = [
+const chatRoutes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
-      icon: 'token:chat',
+      icon: 'ant-design:message-outlined',
       keepAlive: true,
       order: 100,
       title: '在綫聊天',
@@ -22,7 +22,7 @@ const routes: RouteRecordRaw[] = [
           hideInMenu: true,
           hideInBreadcrumb: true,
         },
-        name: 'Chats',
+        name: 'ChatPage',
         path: '/chat',
         component: () => import('#/views/chat/index.vue'),
       },
@@ -30,4 +30,4 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-export default routes;
+export default chatRoutes;

@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import { BasicLayout } from '#/layouts';
 import { $t } from '#/locales';
 
-const customerRoutes: RouteRecordRaw[] = [
+const routes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
@@ -75,4 +75,4 @@ const customerRoutes: RouteRecordRaw[] = [
   },
 ];
 
-export default customerRoutes;
+export default routes;

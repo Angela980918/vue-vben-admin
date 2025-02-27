@@ -1,5 +1,7 @@
 <script setup lang="ts"></script>
 
-<template>在线聊天</template>
+<template>
+  <div>在线聊天</div>
+</template>
 
 <style scoped></style>

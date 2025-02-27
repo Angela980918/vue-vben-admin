@@ -1,5 +1,7 @@
 <script setup lang="ts"></script>
 
-<template>快捷用語</template>
+<template>
+  <div>快捷用語</div>
+</template>
 
 <style scoped></style>

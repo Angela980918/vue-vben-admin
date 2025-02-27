@@ -1,5 +1,7 @@
 <script setup lang="ts"></script>
 
-<template>會話列表</template>
+<template>
+  <div>會話列表</div>
+</template>
 
 <style scoped></style>

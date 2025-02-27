@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>標簽管理</div>
+  <div>Live Chat</div>
 </template>
 
 <style scoped></style>
