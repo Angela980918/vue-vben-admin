@@ -5,6 +5,7 @@ export interface UserInfo {
   roles: string[];
   username: string;
   homePath?: string;
+  currentApiKey?: string;
 }
 
 export const MOCK_USERS: UserInfo[] = [
@@ -14,6 +15,7 @@ export const MOCK_USERS: UserInfo[] = [
     realName: 'Vben',
     roles: ['super'],
     username: 'vben',
+    currentApiKey: '54016a2cf8aaa449f9c9552669796243',
   },
   {
     id: 1,

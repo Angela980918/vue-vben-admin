@@ -7,9 +7,9 @@ import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
 import {
   authenticateResponseInterceptor,
-  defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
+  ycloudResponseInterceptor,
 } from '@vben/request';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
@@ -19,9 +19,13 @@ import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
 
-const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+const { apiURL, ycloudURL } = useAppConfig(
+  import.meta.env,
+  import.meta.env.PROD,
+);
 
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
+  // console.log("baseURLbaseURLbaseURL",baseURL)
   const client = new RequestClient({
     ...options,
     baseURL,
@@ -67,21 +71,14 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['X-API-Key'] = userStore.currentApiKey; // 从 store 获取动态 key
+      // console.log("userStore.currentApiKey", userStore.currentApiKey)
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
     },
   });
 
   // 处理返回的响应数据格式
-  client.addResponseInterceptor(
-    defaultResponseInterceptor({
-      codeField: 'code',
-      dataField: 'data',
-      successCode: (code: number) => {
-        return code === 0 || code === 200;
-      },
-    }),
-  );
+  client.addResponseInterceptor(ycloudResponseInterceptor());
 
   // token过期的处理
   client.addResponseInterceptor(
@@ -109,7 +106,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   return client;
 }
 
-export const requestClient = createRequestClient(apiURL, {
+export const ycloudRequestClient = createRequestClient(ycloudURL, {
   responseReturn: 'data',
 });
 

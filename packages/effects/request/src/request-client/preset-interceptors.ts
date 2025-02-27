@@ -21,7 +21,7 @@ export const defaultResponseInterceptor = ({
   return {
     fulfilled: (response) => {
       const { config, data: responseData, status } = response;
-
+      // console.log("config, data: responseData, status", config, responseData, status)
       if (config.responseReturn === 'raw') {
         return response;
       }
@@ -39,6 +39,40 @@ export const defaultResponseInterceptor = ({
             : responseData[dataField];
         }
       }
+
+      throw Object.assign({}, response, { response });
+    },
+  };
+};
+
+// ycould-api
+export const ycloudResponseInterceptor = (): ResponseInterceptorConfig => {
+  return {
+    fulfilled: (response) => {
+      const { data: responseData, status } = response;
+
+      if (status >= 200 && status < 400) {
+        return responseData;
+      }
+
+      throw Object.assign({}, response, { response });
+    },
+  };
+};
+
+// ycould-api
+export const wcloudResponseInterceptor = (): ResponseInterceptorConfig => {
+  return {
+    fulfilled: (response) => {
+      const { data: responseData, status } = response;
+
+      // if (status >= 200 && status < 400) {
+      //   return responseData;
+      // }
+      if (status >= 200 && status < 400 && responseData.code === 200) {
+        return responseData.result;
+      }
+
       throw Object.assign({}, response, { response });
     },
   };

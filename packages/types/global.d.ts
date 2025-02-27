@@ -9,10 +9,13 @@ declare module 'vue-router' {
 
 export interface VbenAdminProAppConfigRaw {
   VITE_GLOB_API_URL: string;
+  VITE_YCLOUD_API_URL: string;
+  VITE_WHATS_API_URL: string;
 }
 
 export interface ApplicationConfig {
   apiURL: string;
+  ycloudURL: string;
 }
 
 declare global {

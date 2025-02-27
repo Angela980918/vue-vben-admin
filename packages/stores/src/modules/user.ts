@@ -25,6 +25,7 @@ interface BasicUserInfo {
 }
 
 interface AccessState {
+  currentApiKey: string;
   /**
    * 用户信息
    */
@@ -46,12 +47,14 @@ export const useUserStore = defineStore('core-user', {
       // 设置角色信息
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
+      this.currentApiKey = userInfo?.currentApiKey ?? '';
     },
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },
   },
   state: (): AccessState => ({
+    currentApiKey: '',
     userInfo: null,
     userRoles: [],
   }),

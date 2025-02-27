@@ -6,6 +6,20 @@ export default defineConfig(async () => {
     vite: {
       server: {
         proxy: {
+          '/v2': {
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\//, ''),
+            // mock代理目标地址
+            target: 'https://api.ycloud.com',
+            ws: true,
+          },
+          '/test': {
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\//, ''),
+            // mock代理目标地址
+            target: 'https://api.ycloud.com',
+            ws: true,
+          },
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
@@ -13,6 +27,7 @@ export default defineConfig(async () => {
             target: 'http://localhost:5320/api',
             ws: true,
           },
+
         },
       },
     },

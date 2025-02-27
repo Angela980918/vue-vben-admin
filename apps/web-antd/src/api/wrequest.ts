@@ -7,11 +7,11 @@ import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
 import {
   authenticateResponseInterceptor,
-  defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
+  wcloudResponseInterceptor,
 } from '@vben/request';
-import { useAccessStore, useUserStore } from '@vben/stores';
+import { useAccessStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
 
@@ -19,9 +19,10 @@ import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
 
-const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+const { apiURL, wapiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
+  // console.log("baseURLbaseURLbaseURL",baseURL)
   const client = new RequestClient({
     ...options,
     baseURL,
@@ -64,24 +65,27 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   client.addRequestInterceptor({
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
-      const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
-      config.headers['X-API-Key'] = userStore.currentApiKey; // 从 store 获取动态 key
       config.headers['Accept-Language'] = preferences.app.locale;
+
+      // 动态设置 Content-Type
+      if (config.data instanceof FormData) {
+        // 如果是 FormData，设置为 multipart/form-data
+        config.headers['Content-Type'] = 'multipart/form-data';
+      } else if (config.data) {
+        // 如果有数据且不是 FormData，默认设置为 application/json
+        config.headers['Content-Type'] = 'application/json';
+      } else {
+        // 如果没有数据，不需要设置 Content-Type
+        delete config.headers['Content-Type'];
+      }
+
       return config;
     },
   });
 
   // 处理返回的响应数据格式
-  client.addResponseInterceptor(
-    defaultResponseInterceptor({
-      codeField: 'code',
-      dataField: 'data',
-      successCode: (code: number) => {
-        return code === 0 || code === 200;
-      },
-    }),
-  );
+  client.addResponseInterceptor(wcloudResponseInterceptor());
 
   // token过期的处理
   client.addResponseInterceptor(
@@ -109,7 +113,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   return client;
 }
 
-export const requestClient = createRequestClient(apiURL, {
+export const wcloudRequestClient = createRequestClient(wapiURL, {
   responseReturn: 'data',
 });
 

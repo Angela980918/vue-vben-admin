@@ -71,8 +71,23 @@ class RequestClient {
   /**
    * GET请求方法
    */
-  public get<T = any>(url: string, config?: RequestClientConfig): Promise<T> {
-    return this.request<T>(url, { ...config, method: 'GET' });
+  public get<T = any>(
+    url: string,
+    data?: any,
+    config?: RequestClientConfig,
+  ): Promise<T> {
+    return this.request<T>(url, { ...config, data, method: 'GET' });
+  }
+
+  /**
+   * PATCH请求方法
+   */
+  public patch<T = any>(
+    url: string,
+    data?: any,
+    config?: RequestClientConfig,
+  ): Promise<T> {
+    return this.request<T>(url, { ...config, data, method: 'PATCH' });
   }
 
   /**
@@ -109,6 +124,7 @@ class RequestClient {
         url,
         ...config,
       });
+      // console.log("responseresponse",response)
       return response as T;
     } catch (error: any) {
       throw error.response ? error.response.data : error;

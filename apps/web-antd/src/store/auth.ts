@@ -9,7 +9,12 @@ import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { notification } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
-import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import {
+  getAccessCodesApi,
+  getWhatsAppUserInfo,
+  loginApi,
+  logoutApi,
+} from '#/api';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -33,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       loginLoading.value = true;
       const { accessToken } = await loginApi(params);
-
+      // console.log("accessTokenaccessTokenaccessToken",accessToken)
       // 如果成功获取到 accessToken
       if (accessToken) {
         accessStore.setAccessToken(accessToken);
@@ -43,9 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
           fetchUserInfo(),
           getAccessCodesApi(),
         ]);
-
+        // console.log("fetchUserInfoResultfetchUserInfoResultfetchUserInfoResult",fetchUserInfoResult)
         userInfo = fetchUserInfoResult;
-
+        // console.log("userInfouserInfouserInfo", userInfo)
         userStore.setUserInfo(userInfo);
         accessStore.setAccessCodes(accessCodes);
 
@@ -73,7 +78,9 @@ export const useAuthStore = defineStore('auth', () => {
       userInfo,
     };
   }
-
+  // function setCurrentApiKey(key: string) {
+  //   currentApiKey.value = key;
+  // }
   async function logout(redirect: boolean = true) {
     try {
       await logoutApi();
@@ -96,7 +103,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUserInfo() {
     let userInfo: null | UserInfo = null;
-    userInfo = await getUserInfoApi();
+    userInfo = await getWhatsAppUserInfo();
+    // console.log("userInfouserInfouserInfo",userInfo)
     userStore.setUserInfo(userInfo);
     return userInfo;
   }
