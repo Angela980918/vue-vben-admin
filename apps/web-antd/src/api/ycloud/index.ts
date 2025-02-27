@@ -5,4 +5,3 @@ export * from './message';
 export * from './phone';
 export * from './sms';
 export * from './template';
-export * from './waba';
