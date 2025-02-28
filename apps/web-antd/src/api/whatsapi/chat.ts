@@ -3,7 +3,7 @@ import { wcloudRequestClient } from '#/api/wrequest';
 /**
  * 查詢沟通列表
  */
-export async function getAllCustomer(wabaId: string = '449711484896804') {
+export async function getAllCustomerApi(wabaId: string = '449711484896804') {
   // return whatsappInstance({
   //   url: '/chat/getAllCustomerLatestChats?wabaId=449711484896804', method: 'GET'
   // })
