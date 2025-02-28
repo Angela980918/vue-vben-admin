@@ -3,6 +3,15 @@ import type { Rule } from 'ant-design-vue/es/form';
 
 import { reactive, ref, toRaw, watch } from 'vue';
 
+import {
+  Form as AForm,
+  FormItem as AFormItem,
+  Input as AInput,
+  Modal as AModal,
+  Select as ASelect,
+  SelectOption as ASelectOption,
+} from 'ant-design-vue';
+
 const props = defineProps({
   formData: {
     type: Object,
@@ -108,13 +117,13 @@ defineExpose({
 </script>
 <template>
   <div>
-    <a-modal
+    <AModal
       v-model:open="open"
       title="客戶信息"
       @ok="onSubmit"
       @cancel="resetForm"
     >
-      <a-form
+      <AForm
         ref="formRef"
         :model="formState"
         :rules="rules"
@@ -122,23 +131,23 @@ defineExpose({
         :wrapper-col="wrapperCol"
         style="padding: 10px"
       >
-        <a-form-item label="名稱" name="nickname">
-          <a-input v-model:value="formState.nickname" />
-        </a-form-item>
-        <a-form-item label="選擇地區" name="countryCode">
-          <a-select v-model:value="formState.countryCode" placeholder="請選擇">
-            <a-select-option value="HK">中國香港</a-select-option>
-            <a-select-option value="CN">中國內地</a-select-option>
-            <a-select-option value="US">美國</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="电话" name="phoneNumber">
-          <a-input v-model:value="formState.phoneNumber" />
-        </a-form-item>
-        <a-form-item label="電郵" name="email">
-          <a-input v-model:value="formState.email" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+        <AFormItem label="名稱" name="nickname">
+          <AInput v-model:value="formState.nickname" />
+        </AFormItem>
+        <AFormItem label="選擇地區" name="countryCode">
+          <ASelect v-model:value="formState.countryCode" placeholder="請選擇">
+            <ASelectOption value="HK">中國香港</ASelectOption>
+            <ASelectOption value="CN">中國內地</ASelectOption>
+            <ASelectOption value="US">美國</ASelectOption>
+          </ASelect>
+        </AFormItem>
+        <AFormItem label="电话" name="phoneNumber">
+          <AInput v-model:value="formState.phoneNumber" />
+        </AFormItem>
+        <AFormItem label="電郵" name="email">
+          <AInput v-model:value="formState.email" />
+        </AFormItem>
+      </AForm>
+    </AModal>
   </div>
 </template>

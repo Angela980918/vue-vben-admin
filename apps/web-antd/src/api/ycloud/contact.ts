@@ -34,7 +34,7 @@ export async function getContactListApi(
   return await ycloudRequestClient.get<ContactListInfo>(url);
 }
 
-export async function createContact({
+export async function createContactApi({
   nickname,
   phoneNumber,
   countryCode,
@@ -58,7 +58,7 @@ export async function retrieveContact(id: string) {
   return await ycloudRequestClient.get<ContactInfo>(`/contact/contacts/${id}`);
 }
 
-export async function updateContact(data: ContactInfo) {
+export async function updateContactApi(data: ContactInfo) {
   const { id } = data;
   // return ycloudInstance({
   //   url: `/contact/contacts/${id}`, method: 'patch', data: data
@@ -69,8 +69,6 @@ export async function updateContact(data: ContactInfo) {
   );
 }
 
-export async function deleteContact(id: string) {
-  return await ycloudRequestClient.delete<ContactInfo>(
-    `/contact/contacts/${id}`,
-  );
+export async function deleteContactApi(id: number | string) {
+  return await ycloudRequestClient.delete<any>(`/contact/contacts/${id}`);
 }

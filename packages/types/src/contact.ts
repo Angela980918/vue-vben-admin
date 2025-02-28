@@ -48,11 +48,12 @@ interface ContactInfo {
   phoneNumber: string;
   email: string;
   lastSeen?: string;
-  lastMessageToPhoneNumber?: string;
-  tags: Array<string>;
-  createTime?: string;
-  customAttributes?: Array<{ name: string; value: object | string }>;
-  ownerEmail: string;
+  lastMessageToPhoneNumber?: string; //
+  tags: Array<string>; // 标签
+  createTime?: string; // 创建时间
+  customAttributes?: Array<{ name: string; value: object | string }>; // 自定义属性
+  ownerEmail: string; // 联系人所属用户
+  badgeCount: number; // 未读消息数
 }
 
-export type { ContactInfo, ContactListInfo, OptionParams };
+export type { ContactInfo, ContactListInfo, ItemInfo, OptionParams };
