@@ -77,27 +77,32 @@ export const loadQuickList = (
   );
 };
 
-// /**
-//  * 上传快捷用语
-//  */
-// export const uploadQuickMsg = (data) => {
-//   return whatsappInstance({
-//     url: `/materials/upload-quick-reply`, method: 'POST', data: data
-//   })
-// }
-//
-// /**
-//  * 上傳临时文件
-//  */
-// export const uploadTempFile = (file, category, userId) => {
-//   const materialFile = new FormData();
-//   materialFile.append("file", file);
-//   materialFile.append("fileCategory", category)
-//   materialFile.append("userId", userId)
-//   return whatsappInstance({
-//     url: '/materials/upload-temp-material', method: 'post', data: materialFile,
-//     headers: {
-//       'Content-Type': 'multipart/form-data',
-//     }
-//   })
-// }
+/**
+ * 上传快捷用语
+ */
+export async function uploadQuickMsg (data: object) {
+  // return whatsappInstance({
+  //   url: `/materials/upload-quick-reply`, method: 'POST', data: data
+  // })
+  return wcloudRequestClient.post<any>(
+    `/materials/upload-quick-reply`, data
+  );
+}
+/**
+ * 上傳临时文件
+ */
+export async function uploadTempFile (file: File, category: string, userId: string) {
+  const materialFile = new FormData();
+  materialFile.append("file", file);
+  materialFile.append("fileCategory", category)
+  materialFile.append("userId", userId)
+  // return whatsappInstance({
+  //   url: '/materials/upload-temp-material', method: 'post', data: materialFile,
+  //   headers: {
+  //     'Content-Type': 'multipart/form-data',
+  //   }
+  // })
+  return wcloudRequestClient.post<any>(
+    '/materials/upload-temp-material', materialFile
+  );
+}

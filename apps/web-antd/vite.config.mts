@@ -8,9 +8,9 @@ export default defineConfig(async () => {
         proxy: {
           '/v2': {
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\//, ''),
+            rewrite: (path) => path.replace(/^\/v2/, ''),
             // mock代理目标地址
-            target: 'https://api.ycloud.com',
+            target: 'https://api.ycloud.com/v2',
             ws: true,
           },
           '/test': {

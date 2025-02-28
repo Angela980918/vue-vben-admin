@@ -30,7 +30,7 @@ export async function getContactListApi(
     data as Record<string, string>,
   ).toString();
 
-  const url = `/v2/contact/contacts?${queryString}`;
+  const url = `/contact/contacts?${queryString}`;
   return await ycloudRequestClient.get<ContactListInfo>(url);
 }
 
