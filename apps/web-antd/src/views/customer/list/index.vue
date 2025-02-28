@@ -316,7 +316,13 @@ onMounted(() => {
           </template>
 
           <template v-if="column.key === 'operation'">
-            <a @click="checkInfo(record as TableItem)">編輯</a>
+            <AButton
+              size="small"
+              type="primary"
+              @click="checkInfo(record as TableItem)"
+            >
+              編輯
+            </AButton>
           </template>
         </template>
       </ATable>
