@@ -14,7 +14,7 @@ export const handleTemplateMsg = (name, language) => {
   const result = rawTemplate.find(
     (item) => item.name === name && item.language === language,
   );
-  // console.log("resultresult",result)
+
   const { components } = result;
   const msgContent = {};
   for (const index in result.components) {
@@ -104,3 +104,11 @@ export const formatTime = (dateString) => {
 //
 //   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 // };
+
+export const MessageType = {
+  failed: 'failed',
+  read: 'read',
+  sent: 'sent',
+  arrow: 'delivered',
+  accept: 'accepted',
+};

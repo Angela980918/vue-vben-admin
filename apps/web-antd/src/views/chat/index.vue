@@ -1,30 +1,28 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
+import { ref } from 'vue';
+
 import {
   Divider as ADivider,
   Layout as ALayout,
   LayoutContent as ALayoutContent,
+  LayoutSider as ALayoutSider,
   Space as ASpace,
 } from 'ant-design-vue';
 
+import ChatRoom from '#/components/chatBox/content/chatRoom.vue';
 import ChatBoxLeft from '#/components/chatBox/left/chatBox-Left.vue';
-// import { getWhatsAppUserInfo } from '#/api';
-// const tempStore = useTemplateStore();
-// const chatStore = useChatStore();
-// const custmerStore = useCustomerStore();
+import ChatBoxRight from '#/components/chatBox/right/chatBox-right.vue';
 
-// onMounted(async () => {
-//   // await authStore.fetchUserInfo();
-//   await tempStore.loadTemplates();
-//   // await getWhatsAppUserInfo().then((result) => result);
-//   // await tempStore.loadQuickMsg();
-//   // await tempStore.setMaterialListData('wabaId=449711484896804');
-//   await custmerStore.setContactList();
-// });
+const showRight = ref(false);
+function setShowRight() {
+  showRight.value = !showRight.value;
+}
+
 const contentStyle: CSSProperties = {
   textAlign: 'center',
-  minHeight: '600px',
+  minHeight: 600,
   lineHeight: '120px',
   color: '#000',
 };
@@ -49,12 +47,15 @@ const contentStyle: CSSProperties = {
           <ALayout>
             <!--            <ALayoutContent style="text-align: center; min-height: 600px; line-height: 120px; color: #000">-->
             <ALayoutContent :style="contentStyle">
-              <!--              <chat-room @setShowRight="setShowRight">-->
-              <!--              </chat-room>-->
+              <ChatRoom @set-show-right="setShowRight" />
             </ALayoutContent>
-            <!--            <ALayoutSider v-if="showRight" width="400" style="background: #fff; border-left: 1px solid #f0f0f0">-->
-            <!--&lt;!&ndash;              <chat-box-right  />&ndash;&gt;-->
-            <!--            </ALayoutSider>-->
+            <ALayoutSider
+              v-if="showRight"
+              width="400"
+              style="background: #fff; border-left: 1px solid #f0f0f0"
+            >
+              <ChatBoxRight />
+            </ALayoutSider>
           </ALayout>
         </ALayout>
       </ASpace>

@@ -1,11 +1,10 @@
-import {computed, ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
 
 import { getContactListApi } from '#/api';
 
 export const useCustomerStore = defineStore('customerStore', () => {
-
   // 当前沟通用户的 ID
   const currentUserId = ref(1);
   // const currentIndex = ref(1);
@@ -18,7 +17,7 @@ export const useCustomerStore = defineStore('customerStore', () => {
 
   // 未分配客户的模拟数据
   const unassignedCustomers = ref([]);
-  const searchWord = ref("");
+  const searchWord = ref('');
   // 聯繫人信息
   const contactList = ref([]);
   const page = ref(1);
@@ -27,9 +26,11 @@ export const useCustomerStore = defineStore('customerStore', () => {
   const getAssignedCustomers = computed(() => assignedCustomers.value);
   const getAllUnReadNum = computed(() => {
     const allCustomers = [...assignedCustomers.value];
-    return allCustomers.reduce((count, item) => count + (item.badgeCount || 0), 0);
+    return allCustomers.reduce(
+      (count, item) => count + (item.badgeCount || 0),
+      0,
+    );
   });
-
 
   function setCurrentUser(id: string) {
     currentUserId.value = id;
@@ -58,11 +59,11 @@ export const useCustomerStore = defineStore('customerStore', () => {
   }
 
   async function setContactList() {
-    let response = await getContactListApi(page.value);
-    console.log("responseresponseresponse",response)
-    if(response !== undefined) {
+    const response = await getContactListApi(page.value);
+    // console.log("responseresponseresponse",response)
+    if (response !== undefined) {
       total.value = response.total;
-      response.items.map(item => {
+      response.items.forEach((item) => {
         item.key = item.id;
       });
     }
@@ -73,9 +74,9 @@ export const useCustomerStore = defineStore('customerStore', () => {
   async function changeContactList(page) {
     page.value = page;
 
-    let response = await getContactListApi(page, 10);
-    if(response !== undefined) {
-      response.items.map(item => {
+    const response = await getContactListApi(page, 10);
+    if (response !== undefined) {
+      response.items.forEach((item) => {
         total.value = response.total;
         item.key = item.id;
       });
@@ -83,14 +84,14 @@ export const useCustomerStore = defineStore('customerStore', () => {
     contactList.value = response.items;
   }
 
-  function contactOperate(isCreate,value) {
-    if(isCreate) {
+  function contactOperate(isCreate, value) {
+    if (isCreate) {
       value.key = value.id;
       contactList.value.unshift(value);
-    }else {
-      const index = contactList.value.findIndex(item => item.id === value.id);
+    } else {
+      const index = contactList.value.findIndex((item) => item.id === value.id);
       if (index !== -1) {
-        contactList.value[index] = value;  // 直接更新数组中的元素
+        contactList.value[index] = value; // 直接更新数组中的元素
       }
     }
   }
@@ -104,7 +105,6 @@ export const useCustomerStore = defineStore('customerStore', () => {
     page.value = 1;
     total.value = 1;
   }
-
 
   return {
     $reset,
@@ -127,6 +127,6 @@ export const useCustomerStore = defineStore('customerStore', () => {
     setSearchWord,
     setContactList,
     changeContactList,
-    contactOperate
+    contactOperate,
   };
 });

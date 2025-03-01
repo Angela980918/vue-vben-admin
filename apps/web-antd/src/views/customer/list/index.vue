@@ -41,8 +41,7 @@ const state = reactive<{
   loading: false,
 });
 
-// eslint-disable-next-line no-console
-console.log('customerStore', customerStore.getAssignedCustomers);
+// console.log('customerStore', customerStore.getAssignedCustomers);
 
 // 按鈕狀態
 const isCreate = ref(true);

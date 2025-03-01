@@ -3,16 +3,13 @@ import type { CSSProperties } from 'vue';
 
 import { computed, onBeforeMount } from 'vue';
 
-import { getAllCustomerApi } from '#/api';
-// import ChatBoxLeftSearch from "@/components/chatBox/left/chatBox-Left-Search.vue";
-// import ChatBoxLeftList from "@/components/chatBox/left/chatBox-Left-List.vue";
+import { LayoutSider as ALayoutSider } from 'ant-design-vue';
+
+import { getAllCustomerApi, getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
-
-// import * as ycloudApi from "@/api/ycloud/index.js";
-// import * as whatsappApi from "@/api/whatsapp/index.js";
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
@@ -77,7 +74,7 @@ const loadMessageList = async () => {
     page: 1,
     pageSize: 20,
   };
-  const res = await whatsappApi.chatApi.getMessageList(data);
+  const res = await getMessageList(data);
 
   res.messageList.reverse().forEach((item, index) => {
     let fileExtension = '';
@@ -145,7 +142,7 @@ const siderStyle: CSSProperties = {
 </script>
 
 <template>
-  <a-layout-sider width="300" :collapsed-width="300" :style="siderStyle">
+  <ALayoutSider width="300" :collapsed-width="300" :style="siderStyle">
     <!--  搜索框  -->
     <ChatBoxLeftSearch />
 
@@ -154,7 +151,7 @@ const siderStyle: CSSProperties = {
       :assigned-customers-data="assignedCustomers"
       @load-chat-message="loadChatMessage"
     />
-  </a-layout-sider>
+  </ALayoutSider>
 </template>
 
 <style scoped></style>

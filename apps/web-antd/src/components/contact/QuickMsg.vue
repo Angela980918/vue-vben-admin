@@ -1,0 +1,775 @@
+<script lang="ts" setup>
+import type { UploadProps } from 'ant-design-vue';
+
+import {
+  computed,
+  nextTick,
+  onBeforeMount,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue';
+
+import { FileTextOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
+import {
+  Button as AButton,
+  Flex as AFlex,
+  Image as AImage,
+  Input as AInput,
+  Modal as AModal,
+  Select as ASelect,
+  Table as ATable,
+} from 'ant-design-vue';
+
+// import {cosApi} from "@/api/whatsapp/index.js";
+import { sendMessageApi, uploadQuickMsgApi } from '#/api';
+import Confirm from '#/components/chatBox/content/message/Confirm.vue';
+import SelectItem from '#/components/contact/SelectItem.vue';
+// import {useTempStore} from "@/store/useTempStore";
+// import {useChatStore} from "@/store/chatStore";
+import { useChatStore, useTemplateStore } from '#/store';
+
+import '@wangeditor/editor/dist/css/style.css'; // 引入 css
+
+// const handleRemove: UploadProps['onRemove'] = file => {
+//   const index = fileList.value.indexOf(file);
+//   const fileArrayIndex = selectFileArr.value.findIndex(item => file.name === item.file_name);
+//   if (fileArrayIndex !== -1) {
+//     const newFileArray = selectFileArr.value.slice();
+//     newFileArray.slice(fileArrayIndex, 1);
+//     selectFileArr.value = newFileArray;
+//   }
+//   const newFileList = fileList.value.slice();
+//   newFileList.splice(index, 1);
+//   fileList.value = newFileList;
+// };
+
+const props = defineProps({
+  showQuickList: {
+    type: Boolean,
+    default: false,
+  },
+  msgName: {
+    type: String,
+    default: '快捷回復',
+  },
+  fileArray: {
+    type: Array,
+    default: () => [],
+  },
+  fileContent: {
+    type: String,
+    default: '',
+  },
+});
+const templateStore = useTemplateStore();
+const chatStore = useChatStore();
+const open = ref(false);
+
+// 确认栏
+const confirmRef = ref(null);
+const selectName = ref(null);
+
+const selectFileArr = ref([]);
+const selectContent = ref(null);
+
+const headerTxt = ref('');
+
+const quickList = computed(() => templateStore.getQuickMsg);
+const currentPhone = computed(() => chatStore.currentPhone);
+const sendQuickMsg = async () => {
+  const fromNumber = '+8613672967202';
+  const toNumber = currentPhone.value;
+  const files = selectFileArr.value;
+  const messageContent = selectContent.value;
+
+  const sendMessage = async (data) => {
+    const result = await sendMessageApi(data);
+    const message = {
+      direction: 'outbound',
+      _id: result.id,
+      status: result.status,
+      type: result.type,
+      deliverTime: result.createTime,
+      content: {},
+    };
+
+    if (data.type === 'text') {
+      message.content.body = result.text.body;
+    } else {
+      message.content.link = result[result.type].link;
+      const url = message.content.link;
+      // message.content.filename = fileExtension;
+      message.fileExtension = url.split('.').pop();
+      message.content.caption = result[result.type].caption;
+    }
+
+    chatStore.addMessage(message);
+  };
+
+  if (files.length > 1) {
+    for (const item of files) {
+      await sendMessage({
+        from: fromNumber,
+        to: toNumber,
+        type: item.file_type === 'file' ? 'document' : item.file_type,
+        link: `https://cos.jackycode.cn/${item.file_path}`,
+        message: '',
+      });
+    }
+  } else if (files.length === 1) {
+    await sendMessage({
+      from: fromNumber,
+      to: toNumber,
+      type: files[0].file_type === 'file' ? 'document' : files[0].file_type,
+      link: `https://cos.jackycode.cn/${files[0].file_path}`,
+      message: messageContent,
+    });
+  }
+
+  if (messageContent && files.length !== 1) {
+    await sendMessage({
+      from: fromNumber,
+      to: toNumber,
+      type: 'text',
+      message: messageContent,
+    });
+  }
+};
+
+//
+const selectedRow = ref<null | number>(1);
+const fileList = ref<UploadProps['fileList']>([]);
+
+// 選擇上傳庫
+const selectItemRef = ref(null);
+const options = ref([
+  { value: '449711484896804', label: 'DataS素材库' },
+  { value: '67890', label: '个人素材库' },
+]);
+const value1 = ref(options.value[0].value);
+
+// 上傳modal
+const type = ref('');
+const accountChange = ref('public');
+
+// 編輯器配置
+const editorRef = shallowRef();
+const toolbarConfig = {
+  toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
+};
+const editorConfig = {
+  placeholder: '请输入内容...',
+};
+const handleCreated = (editor) => {
+  editorRef.value = editor;
+};
+
+// 切換公共\個人素材庫
+const changeOptions = () => {
+  let source = '';
+  source =
+    value1.value.length === 0 > 6
+      ? `wabaId=${value1.value}`
+      : `userId=${value1.value}`;
+  templateStore.setMaterialListData(source);
+};
+
+const handleOk = async () => {
+  const list = [];
+  // console.log("selectFileArrselectFileArr", headerTxt.value)
+  selectFileArr.value.forEach((item) => {
+    list.push(item.id);
+  });
+
+  const data = {
+    fileIds: list,
+    title: headerTxt.value,
+    content: selectContent.value,
+    userId: 'user-67890',
+    userType: 'user',
+  };
+
+  await uploadQuickMsgApi(data);
+};
+
+const setOpen = () => {
+  open.value = !open.value;
+};
+
+const btnUpload = (fileType) => {
+  type.value = fileType;
+  nextTick(() => selectItemRef.value.showModal());
+};
+
+const getSelected = (value) => {
+  const list = selectFileArr.value;
+  list.push(value);
+  // console.log("list-list", list)
+  selectFileArr.value = list;
+};
+
+// 分页配置
+const pagination = {
+  pageSize: 8,
+};
+
+const columns = [
+  {
+    title: '快捷消息',
+    dataIndex: 'title',
+    width: '30%',
+  },
+  {
+    title: '消息內容',
+    dataIndex: 'content',
+    width: '30%',
+  },
+  {
+    title: '操作',
+    key: 'operation',
+  },
+];
+
+const preViewQuick = (data) => {
+  selectContent.value = data?.content;
+  selectFileArr.value = data?.attachments;
+
+  selectedRow.value = data?._id;
+};
+
+// 点击列
+const handleRowClick = (record: any) => {
+  return {
+    onClick: () => {
+      preViewQuick(record);
+      selectedRow.value = record._id; // 更新选中行的 ID
+    },
+  };
+};
+
+const setRowClassName = (record: any) => {
+  return record._id === selectedRow.value ? 'table-striped' : '';
+};
+
+watch(
+  () => props.fileArray,
+  (newVal) => {
+    selectFileArr.value = newVal;
+    // console.log("selectFileArr.valueselectFileArr.value",selectFileArr.value)
+    if (newVal.length > 0) {
+      // console.log("")
+      newVal.forEach((item) => {
+        const newFile = {
+          uid: item?.file_id || '1',
+          name: item?.file_name,
+          status: 'done',
+          response: '',
+          url: `https://cos.jackycode.cn/${item?.file_path}`,
+        };
+        fileList.value.push(newFile);
+      });
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => props.fileContent,
+  (newVal) => {
+    selectContent.value = newVal;
+  },
+  { immediate: true },
+);
+
+watch(
+  () => props.msgName,
+  (newVal) => {
+    headerTxt.value = newVal;
+  },
+  { immediate: true },
+);
+
+const confirm = (record) => {
+  const { title } = record;
+  selectName.value = title;
+  confirmRef.value.showModal();
+};
+
+// 上傳檢查
+// const beforeUpload = async (file) => {
+//   const isAllowedType = ['image/jpeg', 'image/png', 'video/mp4', 'application/*'].includes(file.type);
+//
+//   if (!isAllowedType) {
+//     // message.error('仅支持 JPG/PNG/PDF 文件!');
+//     return false;
+//   }
+//
+//   let type = file.type.split('/')[0];
+//   if (type === 'application') {
+//     type = 'document'
+//   }
+//
+//   let {code, message, result} = await uploadTempFileApi(file, type, '67890');
+//
+//   let newFile = {
+//     uid: result?._id || '1',
+//     name: result?.file_name || file.name,
+//     status: code === 200 ? 'done' : 'error',
+//     response: code === 200 ? '' : "错误信息",  // 修复拼写错误
+//     url: result?.file_path ? 'https://cos.jackycode.cn/' + result.file_path : ''
+//   };
+//   fileList.value.push(newFile);
+//   selectFileArr.value.push(result);
+//
+//   return false;
+// };
+
+onBeforeMount(() => {
+  !props.showQuickList && changeOptions(options.value[0].value);
+});
+
+onMounted(() => {
+  props.showQuickList && preViewQuick(quickList.value[0]);
+});
+
+defineExpose({
+  setOpen: () => {
+    setOpen();
+  },
+});
+</script>
+
+<template>
+  <div>
+    <AModal
+      v-model:open="open"
+      :title="props.msgName !== '' ? props.msgName : '快捷回復'"
+      style="justify-items: center"
+      @ok="handleOk"
+      :width="1000"
+    >
+      <div class="flex-container">
+        <!--                显示可选快捷信息列表-->
+        <ATable
+          v-show="showQuickList"
+          class="ant-table-striped"
+          :columns="columns"
+          :pagination="pagination"
+          :custom-row="handleRowClick"
+          row-key="_id"
+          :row-class-name="setRowClassName"
+          :key="(record) => record._id"
+          :data-source="quickList"
+          style="min-width: 600px"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'operation'">
+              <span>
+                <AButton @click="confirm(record)" type="primary">发送</AButton>
+              </span>
+            </template>
+          </template>
+        </ATable>
+
+        <!--                显示可编辑或可新增内容-->
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            min-width: 600px;
+            padding: 10px;
+          "
+          v-show="!showQuickList"
+        >
+          <!--                   快捷回復標題 -->
+          <div style="display: flex; flex-direction: column">
+            <span style="font-size: 18px">標題</span>
+            <div style=" max-width: 400px;padding: 12px 0; margin-top: 10px">
+              <AInput name="headerInput" v-model:value="headerTxt" show-count />
+            </div>
+          </div>
+
+          <!--                   选择公共库还是个人账号 -->
+          <div style="display: flex; flex-direction: column">
+            <span style="font-size: 18px">賬號</span>
+            <div style=" max-width: 400px;padding: 12px 0; margin-top: 10px">
+              <ASelect
+                v-model:value="value1"
+                style="width: 200px"
+                :options="options"
+                @change="changeOptions"
+              />
+            </div>
+          </div>
+
+          <!--                   快捷回復文件 -->
+          <div style="display: flex; flex-direction: column; margin-top: 10px">
+            <span style="font-size: 18px">选择素材</span>
+            <div style="display: flex; flex-direction: row">
+              <AButton @click="btnUpload('image')" style="margin-right: 12px">
+                <UploadOutlined />
+                上傳圖片
+              </AButton>
+              <AButton @click="btnUpload('document')" style="margin: 0 12px">
+                <UploadOutlined />
+                上傳文檔
+              </AButton>
+              <AButton @click="btnUpload('video')" style="margin: 0 12px">
+                <UploadOutlined />
+                上傳視頻
+              </AButton>
+            </div>
+          </div>
+          <!--                   快捷回復內容 -->
+          <div style="display: flex; flex-direction: column; margin-top: 10px">
+            <span style="font-size: 18px">編輯內容</span>
+            <div
+              style="
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 100%;
+                border: 1px solid #ccc;
+              "
+            >
+              <Toolbar
+                style="border-bottom: 1px solid #ccc"
+                :editor="editorRef"
+                :default-config="toolbarConfig"
+                mode="default"
+              />
+              <Editor
+                style="
+                  box-sizing: border-box;
+                  width: 100%;
+                  height: 300px;
+                  overflow-y: hidden;
+                  word-break: break-word;
+                  word-wrap: break-word;
+                  overflow-wrap: break-word;
+                  white-space: pre-wrap;
+                "
+                v-model="selectContent"
+                :default-config="editorConfig"
+                mode="default"
+                @on-created="handleCreated"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!--                预览消息效果-->
+        <div class="phoneBox">
+          <div class="phone">
+            <div class="phoneTop"></div>
+            <div
+              class="phoneCenter"
+              style="max-height: 500px; overflow-y: auto"
+            >
+              <template v-if="selectContent === '' && selectFileArr.length > 1">
+                <div v-for="(item, index) in selectFileArr" :key="index">
+                  <div class="arrow"></div>
+                  <div class="content">
+                    <div class="mediaCenter">
+                      <div v-if="item.file_type === 'image'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <AImage
+                            height="100%"
+                            width="100%"
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                          />
+                        </AFlex>
+                      </div>
+
+                      <div v-else-if="item.file_type === 'video'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <iframe
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            style="width: 100%; height: 100%"
+                          >
+                          </iframe>
+                        </AFlex>
+                      </div>
+
+                      <div v-else-if="item.file_type === 'document'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <iframe
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            style="width: 100%; height: 130px"
+                          >
+                          </iframe>
+                        </AFlex>
+                      </div>
+
+                      <div v-else>
+                        <AFlex
+                          style="
+                            width: 100%;
+                            height: 130px;
+                            background: rgb(215 213 223);
+                          "
+                          justify="center"
+                          align="center"
+                        >
+                          <FileTextOutlined
+                            style="font-size: 50px; color: #fff"
+                          />
+                        </AFlex>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <template
+                v-else-if="selectContent === '' && selectFileArr.length === 1"
+              >
+                <div v-for="(item, index) in selectFileArr" :key="index + 1">
+                  <div class="arrow"></div>
+                  <div class="content">
+                    <div class="mediaCenter">
+                      <div v-if="item.file_type === 'image'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <AImage
+                            height="100%"
+                            width="100%"
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                          />
+                        </AFlex>
+                      </div>
+
+                      <div v-else-if="item.file_type === 'video'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <iframe
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            style="width: 100%; height: 100%"
+                          >
+                          </iframe>
+                        </AFlex>
+                      </div>
+
+                      <div v-else-if="item.file_type === 'document'">
+                        <AFlex
+                          justify="center"
+                          align="center"
+                          style="width: 100%; height: 130px"
+                        >
+                          <iframe
+                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            style="width: 100%; height: 130px"
+                          >
+                          </iframe>
+                        </AFlex>
+                      </div>
+
+                      <div v-else>
+                        <AFlex
+                          style="
+                            width: 100%;
+                            height: 130px;
+                            background: rgb(215 213 223);
+                          "
+                          justify="center"
+                          align="center"
+                        >
+                          <FileTextOutlined
+                            style="font-size: 50px; color: #fff"
+                          />
+                        </AFlex>
+                      </div>
+                      <!-- eslint-disable-next-line vue/no-v-html -->
+                      <p class="contentBody" v-html="selectContent"></p>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <div v-else-if="selectContent !== '' && selectFileArr.length > 1">
+                <div class="arrow"></div>
+                <div class="content">
+                  <div class="mediaCenter">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <p class="contentBody" v-html="selectContent"></p>
+                  </div>
+                </div>
+              </div>
+              <div
+                v-else-if="selectContent !== '' && selectFileArr.length === 0"
+              >
+                <div class="arrow"></div>
+                <div class="content">
+                  <div class="mediaCenter">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <p class="contentBody" v-html="selectContent"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phoneBottom"></div>
+          </div>
+        </div>
+      </div>
+      <Confirm
+        ref="confirmRef"
+        @send-msg="sendQuickMsg"
+        :msg-name="selectName"
+        msg-type="快捷回復"
+      />
+    </AModal>
+    <SelectItem
+      :account="accountChange"
+      :type="type"
+      @get-selected="getSelected"
+      ref="selectItemRef"
+    />
+  </div>
+</template>
+
+<style scoped>
+.flex-container {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.phoneBox {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: calc(100% - 616px);
+  min-width: 320px;
+  height: calc(100% - 120px);
+  -webkit-box-pack: center;
+
+  .phone {
+    top: 74px;
+    right: 92px;
+    display: flex;
+    flex-direction: column;
+    min-height: 595px;
+    max-height: 100%;
+
+    .phoneTop {
+      position: relative;
+      bottom: -1px;
+      flex-shrink: 0;
+      width: 320px;
+      height: 83px;
+      background-image: url("https://app.salesmartly.com/img/phoneheader.4b8c90cf.png");
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+
+    .phoneCenter {
+      position: relative;
+      box-sizing: border-box;
+      width: 320px;
+      height: calc(100% - 146px);
+      min-height: 445px;
+      padding: 18px 13px 9px;
+      overflow-y: auto;
+      background-color: rgb(232 224 213);
+      border-right: 5.5px solid rgb(26 30 34);
+      border-left: 5.5px solid rgb(26 30 34);
+
+      .arrow {
+        position: absolute;
+        left: 7px;
+        width: 0;
+        height: 0;
+        border-color: rgb(255 255 255) rgb(255 255 255) transparent
+          transparent;
+        border-style: solid;
+        border-width: 3.5px;
+        border-image: initial;
+      }
+
+      .content {
+        padding: 8px;
+        margin-top: 20px;
+        background-color: rgb(255 255 255);
+        border-radius: 0 8px 8px;
+
+        .contentHeader {
+          margin: 0 0 4px;
+          font-family: Roboto, Helvetica, Arial, sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 24px;
+          letter-spacing: 0.0094em;
+          word-break: break-word;
+          white-space: break-spaces;
+        }
+
+        .contentBody {
+          margin: 0;
+          font-family: Roboto, Helvetica, Arial, sans-serif;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 24px;
+          letter-spacing: 0.0107em;
+          word-break: break-word;
+          white-space: break-spaces;
+        }
+
+        .contentFooter {
+          margin: 4px 0 0;
+          font-family: Roboto, Helvetica, Arial, sans-serif;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 22px;
+          color: rgb(162 157 174);
+          letter-spacing: 0.0094em;
+          overflow-wrap: break-word;
+        }
+      }
+    }
+
+    .phoneCenter::-webkit-scrollbar {
+      display: none;
+    }
+
+    .phoneBottom {
+      position: relative;
+      top: -1px;
+      flex-shrink: 0;
+      width: 320px;
+      height: 63px;
+      background-image: url("https://app.salesmartly.com/img/phonebottom.a32a8d85.png");
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+  }
+}
+
+.ant-table-striped {
+  padding: 10px;
+}
+
+.ant-table-striped :deep(.table-striped) td {
+  background-color: #e8e8e8;
+}
+</style>

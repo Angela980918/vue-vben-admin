@@ -1,20 +1,21 @@
+import type { MessageData } from '@vben/types';
+
 import { ycloudRequestClient } from '#/api/yrequest';
+// interface MessageData {
+//   from: string;
+//   to: string;
+//   type: 'document' | 'image' | 'template' | 'text' | 'video';
+//   message?: string;
+//   link?: string;
+//   context?: string;
+//   externalId?: string;
+//   filterUnsubscribed?: boolean;
+//   filterBlocked?: boolean;
+//   enqueue?: boolean;
+//   template?: object;
+// }
 
-interface MessageData {
-  from: string;
-  to: string;
-  type: 'document' | 'image' | 'template' | 'text' | 'video';
-  message?: string;
-  link?: string;
-  context?: string;
-  externalId?: string;
-  filterUnsubscribed?: boolean;
-  filterBlocked?: boolean;
-  enqueue?: boolean;
-  template?: object;
-}
-
-export async function sendMessage({
+export async function sendMessageApi({
   from,
   to,
   type,

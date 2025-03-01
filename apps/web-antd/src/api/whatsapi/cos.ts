@@ -18,7 +18,7 @@ export async function uploadFile(file: File) {
 /**
  * 上傳素材
  */
-export async function uploadMaterial(
+export async function uploadMaterialApi(
   file: File,
   category: string,
   userId: string,
@@ -80,22 +80,24 @@ export const loadQuickList = (
 /**
  * 上传快捷用语
  */
-export async function uploadQuickMsg (data: object) {
+export async function uploadQuickMsgApi(data: object) {
   // return whatsappInstance({
   //   url: `/materials/upload-quick-reply`, method: 'POST', data: data
   // })
-  return wcloudRequestClient.post<any>(
-    `/materials/upload-quick-reply`, data
-  );
+  return wcloudRequestClient.post<any>(`/materials/upload-quick-reply`, data);
 }
 /**
  * 上傳临时文件
  */
-export async function uploadTempFile (file: File, category: string, userId: string) {
+export async function uploadTempFileApi(
+  file: File,
+  category: string,
+  userId: string,
+) {
   const materialFile = new FormData();
-  materialFile.append("file", file);
-  materialFile.append("fileCategory", category)
-  materialFile.append("userId", userId)
+  materialFile.append('file', file);
+  materialFile.append('fileCategory', category);
+  materialFile.append('userId', userId);
   // return whatsappInstance({
   //   url: '/materials/upload-temp-material', method: 'post', data: materialFile,
   //   headers: {
@@ -103,6 +105,7 @@ export async function uploadTempFile (file: File, category: string, userId: stri
   //   }
   // })
   return wcloudRequestClient.post<any>(
-    '/materials/upload-temp-material', materialFile
+    '/materials/upload-temp-material',
+    materialFile,
   );
 }

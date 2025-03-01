@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import {
   Avatar as AAvatar,
   Badge as ABadge,
-  Collapse as ACol,
+  Col as ACol,
   Flex as AFlex,
   Row as ARow,
 } from 'ant-design-vue';
