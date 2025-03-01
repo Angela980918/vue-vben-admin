@@ -42,10 +42,15 @@
     "@vben/types": "workspace:*",
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "ant-design-vue": "catalog:",
     "axios": "^1.7.9",
     "dayjs": "catalog:",
+    "emoji-mart-vue-fast": "^15.0.3",
+    "lodash": "^4.17.21",
     "pinia": "catalog:",
+    "recorderx": "^2.0.2",
     "vue": "catalog:",
     "vue-router": "catalog:"
   }
