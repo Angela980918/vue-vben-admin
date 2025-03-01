@@ -5,3 +5,4 @@ export type Map = {
 
 export * from './customer-list';
 export * from './error';
+export * from './template';
