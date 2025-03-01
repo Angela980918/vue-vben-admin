@@ -14,8 +14,10 @@ import {
 
 import { createContactApi, deleteContactApi, updateContactApi } from '#/api';
 import ContactModal from '#/components/ContactModal.vue';
+import { countryNameMap } from '#/map';
 import { useCustomerStore } from '#/store/customerStore';
 import { formatDate } from '#/tools';
+import { getLabel } from '#/utils/common';
 
 // 表格欄位定義
 interface TableItem {
@@ -41,7 +43,8 @@ const state = reactive<{
   loading: false,
 });
 
-// console.log('customerStore', customerStore.getAssignedCustomers);
+// eslint-disable-next-line no-console
+console.log('customerStore', customerStore.getAssignedCustomers);
 
 // 按鈕狀態
 const isCreate = ref(true);
@@ -76,7 +79,7 @@ const columns: ColumnType<TableItem>[] = [
   },
   {
     key: 2,
-    title: '聯繫客服',
+    title: '聯繫客服邮箱',
     dataIndex: 'ownerEmail',
   },
   {
@@ -91,14 +94,14 @@ const columns: ColumnType<TableItem>[] = [
   },
   {
     key: 5,
-    title: '電郵地址',
+    title: '電郵',
     dataIndex: 'email',
+    width: '10%',
   },
   {
     key: 6,
     title: '手機號碼',
     dataIndex: 'phoneNumber',
-    width: '10%',
   },
   {
     key: 7,
@@ -127,6 +130,23 @@ const columns: ColumnType<TableItem>[] = [
     fixed: 'right',
   },
 ];
+
+// 更新筛选方法
+// const dataFilter = () => {
+//   filterData.value = data.value.filter((item) => {
+//     return (
+//       // ... 其他筛选条件
+//       selectCountry.value.length === 0 ||
+//       selectCountry.value.some((c) => c.value === item.countryCode)
+//     );
+//   });
+// };
+
+// 国家地区
+// const selectCountry = ref([]);
+// const allCountry = ref<SelectProps['options']>(countryNameMap);
+const getCountryLabel = (countryCode: string) =>
+  getLabel(countryNameMap, countryCode);
 
 // CheckBox選擇狀態改變
 const onSelectChange = (selectedRowKeys: Key[]) => {
@@ -298,6 +318,10 @@ onMounted(() => {
                 {{ tag.toUpperCase() }}
               </ATag>
             </span>
+          </template>
+
+          <template v-if="column.dataIndex === 'countryName'">
+            {{ getCountryLabel(record.countryName) }}
           </template>
 
           <template v-if="column.dataIndex === 'createTime'">

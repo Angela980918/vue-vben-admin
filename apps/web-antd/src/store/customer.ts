@@ -43,13 +43,6 @@ export const useCustomerStore = defineStore('customerStore', () => {
     }));
   }
 
-  function setUnassignedCustomers(customers: Array<object>) {
-    unassignedCustomers.value = customers.map((customer, index) => ({
-      ...customer,
-      isActive: index === 0, // 默认第一个客户 isActive 为 true
-    }));
-  }
-
   function setCurrentUserInfo(user: object) {
     currentCustomerInfo.value = user;
   }
@@ -122,7 +115,6 @@ export const useCustomerStore = defineStore('customerStore', () => {
 
     setCurrentUser,
     setAssignedCustomers,
-    setUnassignedCustomers,
     setCurrentUserInfo,
     setSearchWord,
     setContactList,
