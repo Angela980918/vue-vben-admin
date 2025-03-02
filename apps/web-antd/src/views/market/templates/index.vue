@@ -223,7 +223,7 @@ onBeforeMount(async () => {
       class="card-box h-full flex-col lg:flex"
       style="width: 100%; overflow-x: auto"
     >
-      <div class="px-3 lg:flex">
+      <div class="mt-3 flex px-3 lg:flex">
         <WASelect
           name="selectAccount"
           direction="vertical"

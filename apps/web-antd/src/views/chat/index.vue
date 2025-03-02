@@ -29,8 +29,8 @@ const contentStyle: CSSProperties = {
 </script>
 
 <template>
-  <div class="p-5">
-    <div class="card-box p-4 py-6 lg:flex">
+  <div class="p-3">
+    <div class="card-box h-full flex-col lg:flex">
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>
           <ChatBoxLeft

@@ -178,11 +178,10 @@ const handleChange = (value: any) => {
     :style="{
       'flex-direction': props.direction === 'vertical' ? 'column' : 'row',
       'align-items': props.direction === 'vertical' ? 'flex-start' : 'center',
-      'margin-top': props.direction === 'vertical' ? '10px' : '18px',
       width:
         props.type === 'editor' || props.type === 'upload-file' ? '100%' : '',
     }"
-    class="selectCard w-full lg:w-1/3"
+    class="selectCard flex w-full"
   >
     <span
       class="selectCardTitle"
@@ -212,10 +211,10 @@ const handleChange = (value: any) => {
 
     <template v-else-if="props.type === 'select-common'">
       <ASelect
+        class="w-full"
         :name="props.name"
         v-model:value="selectItem"
         @change="handleChange"
-        style="flex-grow: 1; width: 100%"
         :options="selectOptions"
         :disabled="props.disabled"
       />

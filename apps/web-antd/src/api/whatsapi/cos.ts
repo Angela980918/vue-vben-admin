@@ -22,21 +22,31 @@ export async function uploadMaterialApi(
   file: File,
   category: string,
   userId: string,
+  uploadType: string,
+  wabaId: string,
+  roomId: string,
 ) {
   const materialFile = new FormData();
   materialFile.append('file', file);
   materialFile.append('fileCategory', category);
-  materialFile.append('userId', userId);
-  // return whatsappInstance({
-  //   url: '/materials/upload-material', method: 'post', data: materialFile,
-  //   headers: {
-  //     'Content-Type': 'multipart/form-data',
-  //   }
-  // })
-  return wcloudRequestClient.post<any>(
-    '/materials/upload-material',
-    materialFile,
-  );
+  materialFile.append('uploadType', uploadType);
+  if (uploadType === 'room') {
+    materialFile.append('roomId', roomId);
+  } else {
+    const userParams = [userId, wabaId];
+    const hasUserId = userParams[0] !== undefined;
+    const hasWabaId = userParams[1] !== undefined;
+    if (hasUserId && hasWabaId) {
+      throw new Error('非room上传不能同时包含userId和wabaId');
+    }
+    if (!hasUserId && !hasWabaId) {
+      throw new Error('非room上传必须包含userId或wabaId');
+    }
+    // 添加有效参数
+    if (hasUserId) materialFile.append('userId', userId);
+    else materialFile.append('wabaId', wabaId);
+  }
+  return wcloudRequestClient.post<any>('/materials/upload-file', materialFile);
 }
 
 /**

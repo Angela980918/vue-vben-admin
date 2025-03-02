@@ -22,7 +22,7 @@ interface TemplateInfo {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 
-export async function createTemplate({
+export async function createTemplateApi({
   wabaId = '449711484896804',
   name,
   language = 'zh_HK',
@@ -116,7 +116,7 @@ export async function deleteTemplate({
  * @param components
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export async function editTemplate({
+export async function editTemplateApi({
   wabaId = '449711484896804',
   name,
   language = 'zh_HK',
