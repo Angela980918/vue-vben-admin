@@ -40,9 +40,8 @@ const props = defineProps({
     type: Number,
     default: 512,
   },
-  // 當前選擇
-  selectValue: {
-    type: String,
+  value: {
+    type: [String, Number],
     default: '',
   },
   // 可選項
@@ -79,15 +78,25 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  modelValue: { type: [String, Number, Array, Object], default: '' },
 });
 
-const emits = defineEmits(['handleChange']);
+const emits = defineEmits(['update:modelValue']);
+
 // 上傳的文件
 const fileListUrl = ref([]);
 const fileUrl = ref(props.fileUrl); // 上傳文件返回地址
 const key = 'uploadFile';
 const uploadContent = ref('文件上传中');
-const inputContents = ref(props.selectValue);
+const inputContents = ref(props.inputContents);
+
+watch(
+  () => inputContents.value,
+  (newValue) => {
+    // eslint-disable-next-line no-console
+    console.log('inputContents', newValue);
+  },
+);
 
 // 富文本编辑器配置
 const editorRef = shallowRef();
@@ -110,19 +119,16 @@ const editorConfig = {
 };
 
 // 事件觸發
-
 const handleChange = (value) => {
-  // console.log('handleChange', props.type, value);
   const changeHandlers = {
-    'input-text': () => emits('handleChange', inputContents.value),
-    'select-common': () => emits('handleChange', value),
+    'input-text': () => emits('update:modelValue', value.target.value),
+    'select-common': () => emits('update:modelValue', value),
     'upload-file': () => {
-      // console.log('handleChange - upload-file', value);
-      emits('handleChange', fileUrl.value);
+      emits('update:modelValue', fileUrl.value);
     },
     editor: () => {
       // console.log('handleChange - editor', valueHtml.value)
-      emits('handleChange', valueHtml.value);
+      emits('update:modelValue', valueHtml.value);
     },
   };
   changeHandlers[props.type]?.();
@@ -144,7 +150,7 @@ const customUpload = async (options) => {
   // console.log('customUpload', file);
   message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
   await uploadMaterialApi(file, 'image', 1, 'material').then((response) => {
-    fileUrl.value = `cos.jackycode.cn/${response.file_path}`;
+    fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
     onSuccess(file);
     message.success({
       content: '文件上传成功',
@@ -197,7 +203,7 @@ onBeforeMount(() => {
       :disabled="props.disabled"
       :maxlength="props.maxTxt"
       show-count
-      v-model:value="inputContents"
+      :value="modelValue"
       @change="handleChange"
     />
   </template>
@@ -205,7 +211,7 @@ onBeforeMount(() => {
   <template v-else-if="props.type === 'select-common'">
     <ASelect
       :name="props.name"
-      v-model:value="inputContents"
+      :value="modelValue"
       :options="props.selectOptions"
       :disabled="props.disabled"
       @change="handleChange"
