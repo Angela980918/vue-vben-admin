@@ -52,6 +52,12 @@ const formState: UnwrapRef<FormState> = reactive({
 
 const labelCol = { style: { width: '100px' } };
 
+// 模板編輯原数据
+const isUpdated = ref(false); // 可更新状态
+const isPending = ref(false); // 审核状态
+const isDisable = ref(false);
+const TempStore = useTemplateStore();
+
 // 分類
 const allCategory = ref<SelectProps['options']>(categoryMap);
 // console.log('allCategory', allCategory.value);
@@ -176,21 +182,6 @@ const onSubmit = async () => {
   //   };
   // };
 
-  // 重置表單的邏輯
-  // const resetFields = () => {
-  //   // 清空表單或重置數據邏輯
-  //   if (isUpdated.value) {
-  //     formState.selectHeader = '';
-  //     formState.titleContents = '';
-  //     formState.selectMedia = '';
-  //     formState.selectFile = '';
-  //     formState.editor = '';
-  //     formState.footer = '';
-  //   } else {
-  //     formRef.value.resetFields();
-  //   }
-  // };
-
   // formRef.value
   //   .validate()
   //   .then(async () => {
@@ -234,15 +225,24 @@ const onSubmit = async () => {
   //   });
 };
 
-// 模板編輯原数据
-const isUpdated = ref(false); // 可更新状态
-const isPending = ref(false); // 审核状态
-const isDisable = ref(false);
-const TempStore = useTemplateStore();
+// 重置表單的邏輯
+const resetFields = () => {
+  // 清空表單或重置數據邏輯
+  if (isUpdated.value) {
+    formState.selectHeader = '';
+    formState.titleContents = '';
+    formState.selectMedia = '';
+    formState.selectFile = '';
+    formState.editor = '';
+    formState.footer = '';
+  } else {
+    formRef.value.resetFields();
+  }
+};
+
 onBeforeMount(() => {
   const createTempData = TempStore.createTempData;
-  // console.log('createTempData', createTempData)
-  if (createTempData.length > 0) {
+  if (createTempData && Object.keys(createTempData).length > 0) {
     isUpdated.value = true;
     isDisable.value = true;
     formState.tempName = createTempData.name;

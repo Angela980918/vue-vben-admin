@@ -2,6 +2,7 @@
 import {
   defineEmits,
   defineProps,
+  nextTick,
   onBeforeMount,
   onBeforeUnmount,
   ref,
@@ -139,9 +140,17 @@ const handleCreated = (editor) => {
 };
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
-  const editor = editorRef.value;
-  if (editor === null) return;
-  editor.destroy();
+  nextTick(() => {
+    const editor = editorRef.value;
+    // eslint-disable-next-line no-console
+    console.log('editor', editor);
+    if (editor) {
+      editor.destroy();
+    }
+  });
+  // const editor = editorRef.value;
+  // if (editor === undefined) return;
+  // editor.destroy();
 });
 
 // 文件上传
