@@ -84,6 +84,17 @@ export const useCustomerStore = defineStore('customerStore', {
         }
       }
     },
+
+    $reset() {
+      this.currentUserId = 1;
+      this.currentIndex = 1;
+      this.currentCustomerInfo = {};
+      this.assignedCustomers = [];
+      this.searchWord = '';
+      this.contactList = [];
+      this.page = 1;
+      this.total = 0;
+    },
   },
 
   getters: {
