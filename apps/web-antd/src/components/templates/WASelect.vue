@@ -3,7 +3,7 @@ import type { UploadFile } from 'ant-design-vue';
 
 import type { PropType } from 'vue';
 
-import { defineProps, onBeforeUnmount, ref, shallowRef } from 'vue';
+import { defineProps, nextTick, onBeforeUnmount, ref, shallowRef } from 'vue';
 
 import { SearchOutlined, UploadOutlined } from '@ant-design/icons-vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
@@ -115,9 +115,14 @@ const editorConfig = {
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
-  const editor = editorRef.value;
-  if (editor === null) return;
-  editor.destroy();
+  nextTick(() => {
+    const editor = editorRef.value;
+    // eslint-disable-next-line no-console
+    console.log('editor', editor);
+    if (editor) {
+      editor.destroy();
+    }
+  });
 });
 
 const handleCreated = (editor: any) => {

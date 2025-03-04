@@ -4,7 +4,7 @@ import type { Rule } from 'ant-design-vue/es/form';
 
 import type { UnwrapRef } from 'vue';
 
-import { onBeforeMount, onUnmounted, reactive, ref, watch } from 'vue';
+import { onBeforeMount, onUnmounted, reactive, ref, toRaw, watch } from 'vue';
 
 import {
   FileImageOutlined,
@@ -22,6 +22,7 @@ import {
   message,
 } from 'ant-design-vue';
 
+import { createTemplateApi, editTemplateApi } from '#/api';
 import SelectInput from '#/components/templates/SelectInput.vue';
 import { categoryMap, headerMap, languageMap, mediaMap } from '#/map';
 import { useTemplateStore } from '#/store';
@@ -131,6 +132,47 @@ const rules: Record<string, Rule[]> = {
   footer: [{ required: false, message: '請輸入底部', trigger: 'blur' }],
 };
 
+// 表單請求體轉換
+const processFormData = (rwaData) => {
+  const components = [];
+  if (rwaData.selectHeader) {
+    if (rwaData.selectHeader === 'TEXT') {
+      components.push({
+        text: rwaData.titleContents,
+        format: 'TEXT',
+        type: 'HEADER',
+      });
+    } else if (rwaData.selectHeader === 'MEDIA') {
+      components.push({
+        format: rwaData.selectMedia,
+        type: 'HEADER',
+        example: {
+          header_url: [rwaData.selectFile],
+        },
+      });
+    }
+  }
+
+  if (rwaData.footer) {
+    components.push({
+      text: rwaData.footer,
+      type: 'FOOTER',
+    });
+  }
+
+  components.push({
+    type: 'BODY',
+    text: rwaData.editor,
+  });
+
+  return {
+    category: rwaData.selectCategory, // 类别
+    name: rwaData.tempName, // 模板名称
+    language: rwaData.selectLanguage, // 语言
+    components, // 动态组件数组
+  };
+};
+
 // 提交
 const submitKey = 'submit';
 const submitContent = ref('模板數據校驗中');
@@ -141,88 +183,45 @@ const onSubmit = async () => {
     duration: 1,
   }); // 显示加载中的消息
 
-  // 表單請求體轉換
-  // const processFormData = (rwaData) => {
-  //   const components = [];
-  //   if (rwaData.selectHeader) {
-  //     if (rwaData.selectHeader === 'TEXT') {
-  //       components.push({
-  //         text: rwaData.titleContents,
-  //         format: 'TEXT',
-  //         type: 'HEADER',
-  //       });
-  //     } else if (rwaData.selectHeader === 'MEDIA') {
-  //       components.push({
-  //         format: rwaData.selectMedia,
-  //         type: 'HEADER',
-  //         example: {
-  //           header_url: [rwaData.selectFile],
-  //         },
-  //       });
-  //     }
-  //   }
-  //
-  //   if (rwaData.footer) {
-  //     components.push({
-  //       text: rwaData.footer,
-  //       type: 'FOOTER',
-  //     });
-  //   }
-  //
-  //   components.push({
-  //     type: 'BODY',
-  //     text: rwaData.editor,
-  //   });
-  //
-  //   return {
-  //     category: rwaData.selectCategory, // 类别
-  //     name: rwaData.tempName, // 模板名称
-  //     language: rwaData.selectLanguage, // 语言
-  //     components, // 动态组件数组
-  //   };
-  // };
+  formRef.value
+    .validate()
+    .then(async () => {
+      submitContent.value = '模板數據提交中';
+      message.loading({
+        content: submitContent.value,
+        key: submitKey,
+        duration: 2,
+      }); // 显示加载中的消息
+      // console.log('values', formState, toRaw(formState));
+      const rawFormState = toRaw(formState);
+      // console.log('rawFormState', rawFormState);
 
-  // formRef.value
-  //   .validate()
-  //   .then(async () => {
-  //     submitContent.value = '模板數據提交中';
-  //     message.loading({
-  //       content: submitContent.value,
-  //       key: submitKey,
-  //       duration: 2,
-  //     }); // 显示加载中的消息
-  //     // console.log('values', formState, toRaw(formState));
-  //     const rawFormState = toRaw(formState);
-  //     // console.log('rawFormState', rawFormState);
-  //
-  //     const reqData = processFormData(rawFormState);
-  //     let response: any;
-  //     try {
-  //       response = await (isUpdated.value
-  //         ? editTemplateApi(reqData)
-  //         : createTemplateApi(reqData));
-  //       // console.log('接口返回數據:', response); // 打印返回數據
-  //       message.success({
-  //         content: '模板數據提交成功',
-  //         key: submitKey,
-  //         duration: 2,
-  //       });
-  //     } catch (error) {
-  //       // console.log('error', error);
-  //       message.error({
-  //         content:
-  //           `${error.message} \n ${error.response.data.error.message}` ||
-  //           '模板數據提交失敗',
-  //         key: submitKey,
-  //         duration: 2,
-  //       });
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     error.errorFields.forEach((item, index) => {
-  //       message.error({ content: item.errors[0], duration: index + 1 });
-  //     });
-  //   });
+      const reqData = processFormData(rawFormState);
+      try {
+        await (isUpdated.value
+          ? editTemplateApi(reqData)
+          : createTemplateApi(reqData));
+        message.success({
+          content: '模板數據提交成功',
+          key: submitKey,
+          duration: 2,
+        });
+      } catch (apiError) {
+        // console.log('error', error);
+        message.error({
+          content: apiError?.message?.trim() || '模板數據提交失敗',
+          key: submitKey,
+          duration: 2,
+        });
+      }
+    })
+    .catch((validationError) => {
+      // eslint-disable-next-line no-console
+      console.log('validationError', validationError);
+      validationError.errorFields.forEach((item, index) => {
+        message.error({ content: item.errors[0], duration: index + 1 });
+      });
+    });
 };
 
 // 重置表單的邏輯
