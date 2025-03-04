@@ -239,7 +239,7 @@ const resetFields = () => {
   }
 };
 
-onBeforeMount(() => {
+const updateCreateTempData = async () => {
   const createTempData = TempStore.createTempData;
   if (createTempData && Object.keys(createTempData).length > 0) {
     isUpdated.value = true;
@@ -279,6 +279,17 @@ onBeforeMount(() => {
       // console.log('isPending.value', isPending.value)
     }
   }
+};
+
+watch(
+  () => TempStore.createTempData,
+  async () => {
+    await updateCreateTempData();
+  },
+);
+
+onBeforeMount(async () => {
+  await updateCreateTempData();
 });
 
 onUnmounted(() => {
