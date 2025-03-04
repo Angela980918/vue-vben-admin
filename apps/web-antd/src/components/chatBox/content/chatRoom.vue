@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { computed, h, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
 
+import { useUserStore } from '@vben/stores';
+
 import {
   CheckCircleTwoTone,
   CheckOutlined,
@@ -41,7 +43,7 @@ const videoPlayer = ref(null);
 const syncLoading = ref(false);
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
-
+const userStore = useUserStore();
 const chatStore = useChatStore();
 
 const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo);
@@ -104,7 +106,8 @@ const scrollToBottom = (prevHeight = null) => {
       if (prevHeight === null) {
         chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
       } else {
-        const firstMessageElement = document.querySelector(`#${prevHeight}`);
+        // eslint-disable-next-line unicorn/prefer-query-selector
+        const firstMessageElement = document.getElementById(prevHeight);
         if (firstMessageElement)
           firstMessageElement.scrollIntoView({
             behavior: 'auto',
@@ -170,7 +173,7 @@ watch(
 <template>
   <div :style="{ width: '100%', height: '100%' }">
     <!-- 聊天框 -->
-    <ALayout style=" flex-direction: column;height: 100%">
+    <ALayout style="flex-direction: column; height: 100%">
       <ImageView
         :img-url="imgUrl"
         :visiable="visiable"
@@ -236,7 +239,7 @@ watch(
                   <AAvatar
                     style="margin-bottom: 10px"
                     size="large"
-                    src="https://randomuser.me/api/portraits/women/7.jpg"
+                    :src="userStore.userInfo.avatar"
                   />
                 </div>
                 <div
