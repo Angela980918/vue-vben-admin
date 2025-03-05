@@ -5,6 +5,18 @@ import { wcloudRequestClient } from '#/api/wrequest';
 /**
  * 获取用户信息
  */
+export async function getWhatsAppLogin(data) {
+  return wcloudRequestClient.post<UserInfo>('/test/login', data);
+}
+
+export async function getWhatsAppUserToken(data) {
+  return wcloudRequestClient.post<any>('/test/token', data);
+}
+
 export async function getWhatsAppUserInfo() {
-  return wcloudRequestClient.post<UserInfo>('/test/login');
+  return wcloudRequestClient.get<any>('/test/user-info');
+}
+
+export async function refreshToken() {
+  return wcloudRequestClient.post<any>('/test/refresh-token');
 }

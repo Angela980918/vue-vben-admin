@@ -3,37 +3,39 @@ import { wcloudRequestClient } from '#/api/wrequest';
 /**
  * 上傳文件
  */
-export async function uploadFile(file: File) {
-  const uploadData = new FormData();
-  uploadData.append('file', file);
-  // return whatsappInstance({
-  //   url: '/cos/upload', method: 'post', data: uploadData,
-  //   headers: {
-  //     'Content-Type': 'multipart/form-data',
-  //   }
-  // })
-  return wcloudRequestClient.post<any>('/cos/upload', uploadData);
-}
+// export async function uploadFile(file: File) {
+//   const uploadData = new FormData();
+//   uploadData.append('file', file);
+//   // return whatsappInstance({
+//   //   url: '/cos/upload', method: 'post', data: uploadData,
+//   //   headers: {
+//   //     'Content-Type': 'multipart/form-data',
+//   //   }
+//   // })
+//   return wcloudRequestClient.post<any>('/cos/upload', uploadData);
+// }
 
 /**
  * 上傳素材
  */
 export async function uploadMaterialApi(
   file: File,
-  category: string,
-  userId: string,
   uploadType: string,
-  wabaId: string,
-  roomId: string,
+  category: string,
+  options: {
+    roomId?: string,
+    wabaId?: string,
+    userId?: string
+  }
 ) {
   const materialFile = new FormData();
   materialFile.append('file', file);
   materialFile.append('fileCategory', category);
   materialFile.append('uploadType', uploadType);
   if (uploadType === 'room') {
-    materialFile.append('roomId', roomId);
+    materialFile.append('roomId', options.roomId || 'roomId');
   } else {
-    const userParams = [userId, wabaId];
+    const userParams = [options.userId, options.wabaId];
     const hasUserId = userParams[0] !== undefined;
     const hasWabaId = userParams[1] !== undefined;
     if (hasUserId && hasWabaId) {
@@ -43,8 +45,8 @@ export async function uploadMaterialApi(
       throw new Error('非room上传必须包含userId或wabaId');
     }
     // 添加有效参数
-    if (hasUserId) materialFile.append('userId', userId);
-    else materialFile.append('wabaId', wabaId);
+    if (hasUserId) materialFile.append('userId', options.userId || 'userId');
+    else materialFile.append('wabaId',options.wabaId || 'wabaId');
   }
   return wcloudRequestClient.post<any>('/materials/upload-file', materialFile);
 }
@@ -52,14 +54,14 @@ export async function uploadMaterialApi(
 /**
  * 删除素材文件
  */
-export async function deleteMaterial(data: object) {
+export async function deleteMaterial(data: string) {
   // return whatsappInstance({
   //   url: '/materials/delete-materials', method: 'DELETE', data: data,
   //   headers: {
   //     'Content-Type': 'multipart/form-data',
   //   }
   // })
-  return wcloudRequestClient.delete<any>('/materials/delete-materials', data);
+  return wcloudRequestClient.delete<any>(`/materials/delete-materials?${data}`);
 }
 
 /**
@@ -76,14 +78,16 @@ export async function libraryFiles(data: object) {
  * 查詢快捷用語
  */
 export const loadQuickList = (
-  userId: string = '449711484896804',
-  userType: string = 'user',
+  id: string
 ) => {
-  // return whatsappInstance({
-  //   url: `/materials/find-quick-reply?userId=449711484896804&userId=67890&userType=user`, method: 'GET'
-  // })
+  let source = '';
+  if(id.length > 6) {
+    source = `wabaId=${id}`
+  }else {
+    source = `userId=${id}`
+  }
   return wcloudRequestClient.get<any>(
-    `/materials/find-quick-reply?userId=${userId}&userType=${userType}`,
+    `/materials/find-quick-reply?${source}`,
   );
 };
 

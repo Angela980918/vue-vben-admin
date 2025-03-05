@@ -12,11 +12,11 @@ export function useAppConfig(
     ? window._VBEN_ADMIN_PRO_APP_CONF_
     : (env as VbenAdminProAppConfigRaw);
 
-  const { VITE_GLOB_API_URL, VITE_YCLOUD_API_URL, VITE_WHATS_API_URL } = config;
+  const { VITE_GLOB_API_URL, VITE_GLOB_YCLOUD_API_URL, VITE_GLOB_WHATS_API_URL } = config;
 
   return {
     apiURL: VITE_GLOB_API_URL,
-    ycloudURL: VITE_YCLOUD_API_URL,
-    wapiURL: VITE_WHATS_API_URL,
+    ycloudURL: VITE_GLOB_YCLOUD_API_URL,
+    wapiURL: VITE_GLOB_WHATS_API_URL,
   };
 }

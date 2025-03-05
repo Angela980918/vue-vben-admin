@@ -11,11 +11,14 @@ import { defineStore } from 'pinia';
 
 import {
   getAccessCodesApi,
+  getWhatsAppLogin,
   getWhatsAppUserInfo,
+  getWhatsAppUserToken,
   loginApi,
   logoutApi,
 } from '#/api';
 import { $t } from '#/locales';
+import {wsconnect} from "#/utils/wscontect";
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -38,22 +41,30 @@ export const useAuthStore = defineStore('auth', () => {
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      const { accessToken } = await loginApi(params);
+      let data = {
+        password: params.password,
+        account: params.username,
+        role: params.selectAccount
+      };
+      console.log("params",params);
+
+      const { token } = await getWhatsAppUserToken(data);
       // console.log("accessTokenaccessTokenaccessToken",accessToken)
+
       // 如果成功获取到 accessToken
-      if (accessToken) {
-        accessStore.setAccessToken(accessToken);
+      if (token) {
+        accessStore.setAccessToken(token);
 
         // 获取用户信息并存储到 accessStore 中
-        const [fetchUserInfoResult, accessCodes] = await Promise.all([
-          fetchUserInfo(),
-          getAccessCodesApi(),
+        const [fetchUserInfoResult] = await Promise.all([
+          fetchUserInfo(data),
+          // getAccessCodesApi(),
         ]);
         // console.log("fetchUserInfoResultfetchUserInfoResultfetchUserInfoResult",fetchUserInfoResult)
         userInfo = fetchUserInfoResult;
         // console.log("userInfouserInfouserInfo", userInfo)
         userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes(accessCodes);
+        accessStore.setAccessCodes( ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010']);
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
@@ -84,7 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
   // }
   async function logout(redirect: boolean = true) {
     try {
-      await logoutApi();
+      // await logoutApi();
+      wsconnect.allDisContect();
     } catch {
       // 不做任何处理
     }
@@ -102,7 +114,15 @@ export const useAuthStore = defineStore('auth', () => {
     });
   }
 
-  async function fetchUserInfo() {
+  async function fetchUserInfo(data) {
+    let userInfo: null | UserInfo = null;
+    userInfo = await getWhatsAppLogin(data);
+    // console.log("userInfouserInfouserInfo",userInfo)
+    userStore.setUserInfo(userInfo);
+    return userInfo;
+  }
+
+  async function getUserInfo() {
     let userInfo: null | UserInfo = null;
     userInfo = await getWhatsAppUserInfo();
     // console.log("userInfouserInfouserInfo",userInfo)
@@ -119,6 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
     authLogin,
     fetchUserInfo,
     loginLoading,
+    getUserInfo,
     logout,
   };
 });

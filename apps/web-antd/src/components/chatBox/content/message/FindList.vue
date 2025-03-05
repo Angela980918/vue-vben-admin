@@ -9,6 +9,7 @@ import {
 } from 'ant-design-vue';
 
 import { useChatStore } from '#/store';
+import { libraryFiles } from '#/api';
 
 const props = defineProps({
   type: {
@@ -44,19 +45,26 @@ const paginatedData = computed(() => {
 const loading = ref(false);
 
 watch(
-  () => chatStore.chatMessages,
+  () => chatStore.currentChatId,
   (newValue) => {
     data.list = [];
     // let test = "";
-    newValue.forEach((item) => {
-      if (item.type === props.type) {
-        data.list.push({ link: item.content.link });
-      } else if (
-        item.type === 'template' &&
-        item.content.header?.format.toLowerCase() === props.type
-      ) {
-        data.list.push({ link: item.content.header.content });
-      }
+    // newValue.forEach((item) => {
+    //   if (item.type === props.type) {
+    //     data.list.push({ link: item.content.link });
+    //   } else if (
+    //     item.type === 'template' &&
+    //     item.content.header?.format.toLowerCase() === props.type
+    //   ) {
+    //     data.list.push({ link: item.content.header.content });
+    //   }
+    // });
+
+    let source = `queryType=room&roomId=${chatStore.currentChatId}&fileCategory=${props.type}`;
+    libraryFiles(source).then((res) => {
+      res.forEach((item) => {
+        data.list.push({ link: `https://cos.jackycode.cn/${item.file_path}` });
+      })
     });
 
     // 更新分页总数

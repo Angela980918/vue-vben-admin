@@ -6,9 +6,10 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import { useAuthStore } from '#/store';
+import { useAuthStore, useTemplateStore } from '#/store';
 
 import { generateAccess } from './access';
+import {wsconnect} from "#/utils/wscontect";
 
 /**
  * 通用守卫配置
@@ -90,9 +91,15 @@ function setupAccessGuard(router: Router) {
       return true;
     }
 
+    let data = {
+      account: 'admin',
+      password: 'admin168',
+      role: 'super'
+    }
+    console.log("userStore",userStore.userInfo)
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    const userInfo = userStore.userInfo || (await authStore.getUserInfo());
     const userRoles = userInfo.roles ?? [];
 
     // 生成菜单和路由
@@ -102,6 +109,15 @@ function setupAccessGuard(router: Router) {
       // 则会在菜单中显示，但是访问会被重定向到403
       routes: accessRoutes,
     });
+    console.log("userInfo",userInfo);
+    const { wabaAccount } = userInfo;
+
+    // 讀取數據
+    const tempStore = useTemplateStore();
+    await tempStore.loadQuickMsg(wabaAccount[0].wabaId);
+    await tempStore.loadTemplates();
+    await tempStore.setMaterialListData(`queryType=material&wabaId=${wabaAccount[0].wabaId}`);
+    await wsconnect.createConnect();
 
     // 保存菜单信息和路由信息
     accessStore.setAccessMenus(accessibleMenus);

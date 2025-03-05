@@ -100,22 +100,17 @@ const footerStyle = {
 const chatRoom = ref(null);
 const chatRoom26 = ref(null);
 const scrollToBottom = (prevHeight = null) => {
-  nextTick(() => {
-    const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
-    if (chatRoomElement) {
-      if (prevHeight === null) {
-        chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
-      } else {
-        // eslint-disable-next-line unicorn/prefer-query-selector
-        const firstMessageElement = document.getElementById(prevHeight);
-        if (firstMessageElement)
-          firstMessageElement.scrollIntoView({
-            behavior: 'auto',
-            block: 'start',
-          });
-      }
-    }
-  });
+    nextTick(() => {
+        const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
+        if (chatRoomElement) {
+            if (prevHeight === null) {
+                chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
+            }else {
+                const firstMessageElement = document.getElementById(prevHeight);
+                if (firstMessageElement) firstMessageElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
+        }
+    });
 };
 const handleVisiable = (link) => {
   if (link !== undefined) {

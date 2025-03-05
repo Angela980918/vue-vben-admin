@@ -145,11 +145,13 @@ const fileList = ref<UploadProps['fileList']>([]);
 
 // 選擇上傳庫
 const selectItemRef = ref(null);
-const options = ref([
-  { value: '449711484896804', label: 'DataS素材库' },
-  { value: '67890', label: '个人素材库' },
-]);
+// const options = ref([
+//   { value: '449711484896804', label: 'DataS素材库' },
+//   { value: '67890', label: '个人素材库' },
+// ]);
+const options = computed(() => templateStore.selectOptions);
 const value1 = ref(options.value[0].value);
+// const value1 = ref(options.value[0].value);
 
 // 上傳modal
 const type = ref('');
@@ -171,9 +173,9 @@ const handleCreated = (editor) => {
 const changeOptions = () => {
   let source = '';
   source =
-    value1.value.length === 0 > 6
-      ? `wabaId=${value1.value}`
-      : `userId=${value1.value}`;
+    value1.value.length > 6
+      ? `queryType=material&wabaId=${value1.value}`
+      : `queryType=material&userId=${value1.value}`;
   templateStore.setMaterialListData(source);
 };
 
@@ -188,20 +190,31 @@ const handleOk = async () => {
     fileIds: list,
     title: headerTxt.value,
     content: selectContent.value,
-    userId: 'user-67890',
-    userType: 'user',
   };
+
+  if(value1.value.length > 6) {
+    data.wabdId = value1.value
+  }else {
+    data.userId = value1.value
+  }
 
   await uploadQuickMsgApi(data);
 };
 
-const setOpen = () => {
+const setOpen = (value?: string) => {
   open.value = !open.value;
+  if(value) {
+    value1.value = value;
+    // console.log("quickList.value[0]", quickList.value[0], props.showQuickList);
+    templateStore.loadQuickMsg(value);
+    // props.showQuickList && preViewQuick(quickList.value[0]);
+    // props.showQuickList && preViewQuick(quickList.value[0]);
+  }
 };
 
 const btnUpload = (fileType) => {
   type.value = fileType;
-  nextTick(() => selectItemRef.value.showModal());
+  nextTick(() => selectItemRef.value.showModal(value1.value));
 };
 
 const getSelected = (value) => {
@@ -254,7 +267,7 @@ const setRowClassName = (record: any) => {
   return record._id === selectedRow.value ? 'table-striped' : '';
 };
 
-watch(
+!props.showQuickList && watch(
   () => props.fileArray,
   (newVal) => {
     selectFileArr.value = newVal;
@@ -276,7 +289,7 @@ watch(
   { immediate: true },
 );
 
-watch(
+!props.showQuickList && watch(
   () => props.fileContent,
   (newVal) => {
     selectContent.value = newVal;
@@ -284,13 +297,19 @@ watch(
   { immediate: true },
 );
 
-watch(
+!props.showQuickList && watch(
   () => props.msgName,
   (newVal) => {
     headerTxt.value = newVal;
   },
   { immediate: true },
 );
+
+props.showQuickList && watch(() => templateStore.quickMessage, (newValue) => {
+  quickList.value = newValue;
+  preViewQuick(quickList.value[0]);
+  
+})
 
 const confirm = (record) => {
   const { title } = record;
@@ -327,6 +346,10 @@ const confirm = (record) => {
 //   return false;
 // };
 
+function loadAccountQuickMsg(value: string) {
+  templateStore.loadQuickMsg(value);
+}
+
 onBeforeMount(() => {
   !props.showQuickList && changeOptions(options.value[0].value);
 });
@@ -336,8 +359,8 @@ onMounted(() => {
 });
 
 defineExpose({
-  setOpen: () => {
-    setOpen();
+  setOpen: (value: string) => {
+    setOpen(value);
   },
 });
 </script>
@@ -351,6 +374,19 @@ defineExpose({
       @ok="handleOk"
       :width="1000"
     >
+      <!--                   选择公共库还是个人账号 -->
+      <div v-show="showQuickList" style="display: flex; flex-direction: column; padding: 10px;">
+            <span style="font-size: 18px">賬號</span>
+            <div style=" max-width: 400px; margin-top: 10px">
+              <ASelect
+                v-model:value="value1"
+                style="width: 200px"
+                :options="options"
+                @change="loadAccountQuickMsg"
+              />
+            </div>
+          </div>
+
       <div class="flex-container">
         <!--                显示可选快捷信息列表-->
         <ATable
@@ -468,7 +504,7 @@ defineExpose({
               class="phoneCenter"
               style="max-height: 500px; overflow-y: auto"
             >
-              <template v-if="selectContent === '' && selectFileArr.length > 1">
+              <template v-if="selectFileArr?.length > 1">
                 <div v-for="(item, index) in selectFileArr" :key="index">
                   <div class="arrow"></div>
                   <div class="content">
@@ -536,7 +572,7 @@ defineExpose({
               </template>
 
               <template
-                v-else-if="selectContent === '' && selectFileArr.length === 1"
+                v-if="selectFileArr?.length === 1"
               >
                 <div v-for="(item, index) in selectFileArr" :key="index + 1">
                   <div class="arrow"></div>
@@ -606,7 +642,7 @@ defineExpose({
                 </div>
               </template>
 
-              <div v-else-if="selectContent !== '' && selectFileArr.length > 1">
+              <div v-else-if="selectContent !== '' && selectFileArr?.length > 1">
                 <div class="arrow"></div>
                 <div class="content">
                   <div class="mediaCenter">
@@ -616,7 +652,7 @@ defineExpose({
                 </div>
               </div>
               <div
-                v-else-if="selectContent !== '' && selectFileArr.length === 0"
+                v-else-if="selectContent !== '' && selectFileArr?.length === 0"
               >
                 <div class="arrow"></div>
                 <div class="content">
@@ -641,7 +677,7 @@ defineExpose({
     <SelectItem
       :account="accountChange"
       :type="type"
-      @get-selected="getSelected"
+      @getSelected="getSelected"
       ref="selectItemRef"
     />
   </div>

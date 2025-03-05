@@ -26,12 +26,13 @@ import data from 'emoji-mart-vue-fast/data/all.json';
 import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
 import Recorderx from 'recorderx';
 
-import { sendMessageApi, uploadFile } from '#/api';
+import { sendMessageApi, uploadMaterialApi } from '#/api';
 import TemplateList from '#/components/chatBox/content/message/TemplateList.vue';
 import QuickMsg from '#/components/contact/QuickMsg.vue';
-import { useChatStore } from '#/store';
+import { useChatStore, useTemplateStore } from '#/store';
 
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import { useUserStore } from '@vben/stores';
 // 语音录制
 const isRecording = ref(false); // 是否正在录音
 const audioUrl = ref(''); // 录音文件的 URL
@@ -77,9 +78,10 @@ const sendDocMessage = async (event: Event) => {
   }
 
   if (files && files.length > 0) {
-    const response = await uploadFile(fileContent); // 上传文件
-
-    docTxt.value = response;
+    const response = await uploadMaterialApi(fileContent!, 'room', type!, { roomId: chatStore.currentChatId.toString() }); // 上传文件
+    console.log("responseresponse", response);
+    
+    docTxt.value = `https://cos.jackycode.cn/${response.file_path}`;
     messageType.value = type;
     // sendMessage(type)
   }
@@ -168,8 +170,12 @@ function handleSubmit() {
   colTemp.value.controlTemp();
 }
 
+const userInfo = useUserStore().userInfo;
+const { wabaAccount } = userInfo;
+
+const wabaId = ref(wabaAccount[0].wabaId);
 function showQuickMsg() {
-  quickRef.value!.setOpen();
+  nextTick(() =>  quickRef.value!.setOpen(wabaId.value));
 }
 
 // 发送消息
@@ -339,7 +345,7 @@ const stopRecording = () => {
     />
 
     <!--        快捷回复-->
-    <QuickMsg ref="quickRef" :show-quick-list="true" />
+    <QuickMsg ref="quickRef" :showQuickList="true" />
 
     <!--        输入文本信息-->
     <ATextarea
@@ -409,6 +415,7 @@ const stopRecording = () => {
         align-items: center;
         justify-content: space-between;
         margin-top: 10px;
+        max-height: 50px;
       "
     >
       <div>

@@ -29,7 +29,7 @@ const contentStyle: CSSProperties = {
 </script>
 
 <template>
-  <div class="p-3">
+  <div class="px-3; pt-3">
     <div class="card-box h-full flex-col lg:flex">
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>

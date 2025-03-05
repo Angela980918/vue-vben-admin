@@ -35,14 +35,16 @@ const type = ref(props.type);
 const fileList = ref([]);
 const startSelect = ref(null);
 const selectType = ref('*/*');
+const account = ref(props.account);
 
-watch(
-  [() => props.type, () => props.account],
-  (newValue) => {
-    if (newValue[0] === '') {
-      newValue[0] = props.type;
-    }
-    switch (newValue[0]) {
+function getFileName(data) {
+  console.log("data",data);
+  
+  return data.file_name;
+}
+
+function loadNewData() {
+  switch (props.type) {
       case 'document': {
         fileList.value = tempStore.docList;
         selectType.value = '.pdf';
@@ -60,10 +62,8 @@ watch(
       }
     }
     // console.log("fileListfileList", fileList.value)
-    type.value = newValue[0];
-  },
-  { deep: true },
-);
+    type.value = props.type;
+}
 
 const columns: TableColumnsType = [
   { title: '素材', width: 100, dataIndex: 'path', key: 'path', fixed: 'left' },
@@ -96,8 +96,12 @@ const selectOthers = () => {
 //     });
 // }videoPlayer
 
-const showModal = () => {
+const showModal = (value?: string) => {
   open.value = !open.value;
+  if(value) {
+    account.value = value;
+    loadNewData();
+  }
 };
 
 // 選中已有素材
@@ -110,21 +114,21 @@ const clickFile = (value) => {
 const selectOtherFile = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = target.files;
-  const fileContent = files[0];
+  const fileContent = files![0];
 
   //     上傳到臨時文件夾
   try {
-    await uploadMaterialApi(fileContent, props.type, '67890').then((result) => {
+    await uploadMaterialApi(fileContent!, 'temp', props.type, account.value.length > 6 ? { wabaId: account.value } : { userId: account.value } ).then((result) => {
       const newFile = {
-        key: result?._id || '1',
+        key: result?.id || '1',
+        id: result?.id || '1',
         fileName: result?.file_name || fileContent.name,
         file_path: result?.file_path || '',
-        file_type: type.value,
+        file_type: props.type,
       };
-
-      if (code === 200) {
-        emits('getSelected', newFile);
-      }
+      console.log("result",result);
+      
+      emits('getSelected', newFile);
     });
   } catch (error) {
     console.error('上传过程中发生错误:', error);
@@ -132,8 +136,8 @@ const selectOtherFile = async (event: Event) => {
 };
 
 defineExpose({
-  showModal: () => {
-    showModal();
+  showModal: (value: string) => {
+    showModal(value);
   },
 });
 
@@ -196,6 +200,13 @@ const handleOk = () => {
                 type="video/mp4"
               />
             </video>
+          </template>
+
+          <template v-if="column.key === 'fileName'">
+            <!--                        {{ 'https://cos.jackycode.cn/'+ record.file_path}}-->
+            <span>
+             {{ getFileName(record) }}
+            </span>
           </template>
 
           <template v-if="column.key === 'operation'">
