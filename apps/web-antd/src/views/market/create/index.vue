@@ -4,7 +4,17 @@ import type { Rule } from 'ant-design-vue/es/form';
 
 import type { UnwrapRef } from 'vue';
 
-import { onBeforeMount, onUnmounted, reactive, ref, toRaw, watch } from 'vue';
+import {
+  nextTick,
+  onBeforeMount,
+  onUnmounted,
+  reactive,
+  ref,
+  toRaw,
+  watch,
+} from 'vue';
+
+import { useUserStore } from '@vben/stores';
 
 import {
   FileImageOutlined,
@@ -28,6 +38,7 @@ import { categoryMap, headerMap, languageMap, mediaMap } from '#/map';
 import { useTemplateStore } from '#/store';
 
 interface FormState {
+  selectAccount: string;
   tempName: string;
   selectCategory: string;
   selectLanguage: string;
@@ -40,6 +51,7 @@ interface FormState {
 }
 
 const formState: UnwrapRef<FormState> = reactive({
+  selectAccount: '',
   tempName: '',
   selectCategory: '',
   selectLanguage: '',
@@ -58,6 +70,14 @@ const isUpdated = ref(false); // 可更新状态
 const isPending = ref(false); // 审核状态
 const isDisable = ref(false);
 const TempStore = useTemplateStore();
+const UserStore = useUserStore();
+
+// 所有賬號
+const allAccounts = ref(
+  TempStore.selectOptions.filter(
+    (item) => item.value !== UserStore.userInfo.id,
+  ),
+);
 
 // 分類
 const allCategory = ref<SelectProps['options']>(categoryMap);
@@ -92,6 +112,9 @@ watch(
   },
 );
 const rules: Record<string, Rule[]> = {
+  selectAccount: [
+    { required: true, message: '当前公司不能為空', trigger: 'blur' },
+  ],
   tempName: [
     { required: true, message: '模板名稱不能為空', trigger: 'blur' },
     {
@@ -235,12 +258,15 @@ const resetFields = () => {
     formState.editor = '';
     formState.footer = '';
   } else {
-    formRef.value.resetFields();
+    nextTick(() => {
+      formRef.value.resetFields();
+    });
   }
 };
 
 const updateCreateTempData = async () => {
   const createTempData = TempStore.createTempData;
+  formState.selectAccount = TempStore.createTempAccount;
   if (createTempData && Object.keys(createTempData).length > 0) {
     isUpdated.value = true;
     isDisable.value = true;
@@ -278,12 +304,18 @@ const updateCreateTempData = async () => {
       isPending.value = true;
       // console.log('isPending.value', isPending.value)
     }
+  } else {
+    isUpdated.value = false;
+    isDisable.value = false;
+    resetFields();
   }
 };
 
 watch(
   () => TempStore.createTempData,
   async () => {
+    // eslint-disable-next-line no-console
+    console.log('TempStore.createTempData', TempStore.createTempData);
     await updateCreateTempData();
   },
 );
@@ -310,6 +342,17 @@ onUnmounted(() => {
             :model="formState"
             :disabled="isPending"
           >
+            <ACol span="10">
+              <AFormItem label="当前公司" name="selectAccount">
+                <SelectInput
+                  type="select-common"
+                  :select-options="allAccounts"
+                  v-model="formState.selectAccount"
+                  :disabled="isDisable || isPending"
+                />
+              </AFormItem>
+            </ACol>
+
             <ACol span="16" class="align-middle">
               <AFormItem label="模板名稱" name="tempName">
                 <SelectInput

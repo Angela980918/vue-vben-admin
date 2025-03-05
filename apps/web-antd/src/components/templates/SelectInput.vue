@@ -153,26 +153,6 @@ onBeforeUnmount(() => {
   // editor.destroy();
 });
 
-// 文件上传
-const customUpload = async (options) => {
-  const { file, onSuccess } = options;
-  // console.log('customUpload', file);
-  message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
-  await uploadMaterialApi(file, 'image', 1, 'material').then((response) => {
-    fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
-    onSuccess(file);
-    message.success({
-      content: '文件上传成功',
-      key: 'upload-key',
-      duration: 2,
-    });
-  });
-};
-
-// 清空上傳
-const handleRemove = () => {
-  fileUrl.value = '';
-};
 // 文檔類型限制
 const fileType = ref('');
 const uploadTxt = (uploadType) => {
@@ -191,6 +171,30 @@ const uploadTxt = (uploadType) => {
     }
     // No default
   }
+};
+
+// 文件上传
+const customUpload = async (options) => {
+  const { file, onSuccess } = options;
+  // console.log('customUpload', file);
+  message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
+
+  await uploadMaterialApi(file, 'material', props.uploadType.toLowerCase(), {
+    userId: '1',
+  }).then((response) => {
+    fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
+    onSuccess(file);
+    message.success({
+      content: '文件上传成功',
+      key: 'upload-key',
+      duration: 2,
+    });
+  });
+};
+
+// 清空上傳
+const handleRemove = () => {
+  fileUrl.value = '';
 };
 
 const TempStore = useTemplateStore();

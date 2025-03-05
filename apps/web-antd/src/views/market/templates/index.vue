@@ -8,6 +8,8 @@ import type { MapValue } from '#/map';
 import { computed, onBeforeMount, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { useUserStore } from '@vben/stores';
+
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -96,7 +98,7 @@ const columns = [
 
 // 模板数据
 const TempStore = useTemplateStore();
-
+const UserStore = useUserStore();
 // 原始数据
 const data = computed(() => {
   return TempStore.tempData as TemplateData[];
@@ -106,8 +108,12 @@ const data = computed(() => {
 const filterData = ref<TemplateData[]>([]);
 
 // 賬號選擇
-const selectAccount = ref([]);
-const accounts = ref([]);
+const allAccounts = ref(
+  TempStore.selectOptions.filter(
+    (item) => item.value !== UserStore.userInfo.id,
+  ),
+);
+const selectAccount = ref(TempStore.createTempAccount);
 
 // 搜索欄
 const searchContents = ref('');
@@ -125,7 +131,12 @@ const selectStatus = ref([]);
 const tempStatus = ref<SelectProps['options']>(statusMap);
 
 // 新建模板
-const createTemplate = () => {};
+const createTemplate = async () => {
+  await TempStore.resetCreateTempData();
+  router.push({
+    name: 'MarketCreateTemplate',
+  });
+};
 
 const state = reactive<{
   loading: boolean;
@@ -194,8 +205,11 @@ const updateSelection = (value, allItems, selectArray) => {
 };
 
 // 筛选
-const accountChange = () => {
-  // updateSelection(value, accounts.value, selectAccount);
+const accountChange = (value: string) => {
+  // eslint-disable-next-line no-console
+  console.log('accountChange', value);
+  TempStore.createTempAccount = value;
+  // updateSelection(value, allAccounts.value, selectAccount);
 };
 const nameChange = (value: string) => {
   searchContents.value = value;
@@ -230,7 +244,7 @@ onBeforeMount(async () => {
           title="賬號"
           type="select-common"
           :select-item="selectAccount"
-          :options="accounts"
+          :options="allAccounts"
           @handle-change="accountChange"
         />
 
