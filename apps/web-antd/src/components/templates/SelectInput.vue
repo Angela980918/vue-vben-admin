@@ -90,6 +90,7 @@ const fileUrl = ref(props.fileUrl); // 上傳文件返回地址
 const key = 'uploadFile';
 const uploadContent = ref('文件上传中');
 const inputContents = ref(props.inputContents);
+const TempStore = useTemplateStore();
 
 watch(
   () => inputContents.value,
@@ -180,7 +181,7 @@ const customUpload = async (options) => {
   message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
 
   await uploadMaterialApi(file, 'material', props.uploadType.toLowerCase(), {
-    userId: '1',
+    wabaId: TempStore.createTempAccount,
   }).then((response) => {
     fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
     onSuccess(file);
@@ -196,8 +197,6 @@ const customUpload = async (options) => {
 const handleRemove = () => {
   fileUrl.value = '';
 };
-
-const TempStore = useTemplateStore();
 onBeforeMount(() => {
   if (TempStore.createTempData && TempStore.createTempData.components) {
     const bodyComponent = TempStore.createTempData.components.find(

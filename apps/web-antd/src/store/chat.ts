@@ -1,21 +1,19 @@
-import {computed, ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
 
 import { getMessageList } from '#/api';
-import {handleTemplateMsg} from "#/utils/common";
+import { handleTemplateMsg } from '#/utils/common';
 
 export const useChatStore = defineStore('chatStore', () => {
-
-  const currentChatId = ref(1)  // 当前聊天的 ID
+  const currentChatId = ref(1); // 当前聊天的 ID
   // const currentIndex = ref(1);
 
-  const currentPhone = ref("")
+  const currentPhone = ref('');
 
   const currentCustomerInfo = ref({});
 
   const chatMessages = ref([]);
-  const wabaId = ref("449711484896804");
 
   const page = ref(1);
 
@@ -36,37 +34,40 @@ export const useChatStore = defineStore('chatStore', () => {
   // 加载聊天记录的模拟数据
   async function loadMoreMessages() {
     page.value = page.value + 1;
-    let data = {
+    const data = {
       id: currentChatId.value,
       page: page.value,
-      pageSize: 20
-    }
+      pageSize: 20,
+    };
     const res = await getMessageList(data);
-    let currentCustomer = currentCustomerInfo.value;
-    res.messageList.reverse().map((item,index) => {
-      let fileExtension = "";
+    const currentCustomer = currentCustomerInfo.value;
+    res.messageList.reverse().forEach((item, index) => {
+      let fileExtension = '';
       item.name = currentCustomer.name;
       item.color = currentCustomer.color;
-      item.msgIndex = page.value + `-${index}` +'-index';
-      if(item.type === 'template') {
+      item.msgIndex = `${page.value}-${index}` + `-index`;
+      if (item.type === 'template') {
         const name = item.content.name;
         const language = item.content.language.code;
         item.content = handleTemplateMsg(name, language);
-        if(item.content.header !== undefined && item.content.header.format === 'DOCUMENT') {
+        if (
+          item.content.header !== undefined &&
+          item.content.header.format === 'DOCUMENT'
+        ) {
           const url = item.content.header.content;
           // console.log("url",url)
           fileExtension = url.split('.').pop();
           item.fileExtension = fileExtension;
         }
-      }else if(item.type === 'document') {
+      } else if (item.type === 'document') {
         const url = item.content.link;
         const filename = url.split('/').pop();
         fileExtension = filename.split('.');
         item.content.filename = filename;
         item.fileExtension = fileExtension[1];
       }
-    })
-    chatMessages.value = [...res.messageList,...chatMessages.value]
+    });
+    chatMessages.value = [...res.messageList, ...chatMessages.value];
   }
 
   function setMessageList(messageList) {
@@ -92,14 +93,14 @@ export const useChatStore = defineStore('chatStore', () => {
 
   function updateMessage(id, status, message = {}) {
     let add = true;
-    chatMessages.value.map(item => {
-      if(item.direction === 'outbound' && item._id === id) {
+    chatMessages.value.forEach((item) => {
+      if (item.direction === 'outbound' && item._id === id) {
         add = false;
         item.status = status;
       }
-    })
-    if(add && status === 'sent') {
-      chatMessages.value.push(message)
+    });
+    if (add && status === 'sent') {
+      chatMessages.value.push(message);
     }
   }
 
@@ -115,11 +116,10 @@ export const useChatStore = defineStore('chatStore', () => {
 
   function $reset() {
     currentChatId.value = 1;
-    currentPhone.value = "";
-    chatMessages.value = "449711484896804";
+    currentPhone.value = '';
+    chatMessages.value = '449711484896804';
     page.value = 1;
   }
-
 
   return {
     $reset,
@@ -127,7 +127,6 @@ export const useChatStore = defineStore('chatStore', () => {
     currentPhone,
     currentCustomerInfo,
     chatMessages,
-    wabaId,
     page,
 
     getChatMessages,

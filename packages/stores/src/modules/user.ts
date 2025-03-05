@@ -26,6 +26,7 @@ interface BasicUserInfo {
 
 interface AccessState {
   currentApiKey: string;
+  selectAccount: string;
   /**
    * 用户信息
    */
@@ -34,7 +35,6 @@ interface AccessState {
    * 用户角色
    */
   userRoles: string[];
-  selectAccount: string;
 }
 
 /**
@@ -42,6 +42,9 @@ interface AccessState {
  */
 export const useUserStore = defineStore('core-user', {
   actions: {
+    setSelectAccount(wabaId: string) {
+      this.selectAccount = wabaId;
+    },
     setUserInfo(userInfo: BasicUserInfo | null) {
       // 设置用户信息
       this.userInfo = userInfo;
@@ -49,31 +52,30 @@ export const useUserStore = defineStore('core-user', {
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
       this.currentApiKey = userInfo?.currentApiKey ?? '';
-      const { wabaAccount } = userInfo
+      const { wabaAccount } = userInfo;
       this.selectAccount = wabaAccount[0].wabaId;
     },
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },
-    setSelectAccount(wabaId: string) {
-      this.selectAccount = wabaId;
-    }
   },
   getters: {
     getApiKey: (state) => {
       const { wabaAccount } = state.userInfo;
-      const index = wabaAccount.findIndex((item) => item.wabaId === state.selectAccount);
-      if(index !== -1) {
+      const index = wabaAccount.findIndex(
+        (item) => item.wabaId === state.selectAccount,
+      );
+      if (index !== -1) {
         return wabaAccount[index].apikey;
       }
       return null;
-    }
+    },
   },
   state: (): AccessState => ({
     currentApiKey: '',
+    selectAccount: '',
     userInfo: null,
     userRoles: [],
-    selectAccount: '',
   }),
 });
 

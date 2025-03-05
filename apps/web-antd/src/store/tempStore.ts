@@ -6,7 +6,6 @@ import { isEqual } from 'lodash';
 import { defineStore } from 'pinia';
 
 import { getTemplateList, libraryFiles, loadQuickList } from '#/api';
-import { useChatStore } from '#/store/chat';
 
 export const useTemplateStore = defineStore('template', () => {
   // const accessStore = useAccessStore();
@@ -41,10 +40,12 @@ export const useTemplateStore = defineStore('template', () => {
   createTempAccount.value = selectOptions.value[0].value;
 
   const getRawTemplateList = computed(() => {
-    const wabaId = useChatStore().wabaId;
     const list = [];
     rawTempData.value.forEach((item) => {
-      if (item.status === 'APPROVED' && item.wabaId === wabaId) {
+      if (
+        item.status === 'APPROVED' &&
+        item.wabaId === createTempAccount.value
+      ) {
         const cloumn = {
           key: item.key,
           name: item.name,
