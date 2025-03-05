@@ -10,6 +10,7 @@ import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
+import {useUserStore} from "@vben/stores";
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
@@ -28,8 +29,8 @@ const generateRandomColor = () => {
 };
 
 // 加载用户列表
-const loadCustomerList = async () => {
-  await getAllCustomerApi().then((result) => {
+const loadCustomerList = async (wabaId: string) => {
+  await getAllCustomerApi(wabaId).then((result) => {
     const customer = [];
     result.forEach((item) => {
       item.key = item._id;
@@ -117,9 +118,9 @@ async function loadChatMessage(guestPhone, id) {
 }
 
 onBeforeMount(async () => {
-  // console.log("assignedCustomers11111111", assignedCustomers.value)
   if (assignedCustomers.value.length === 0) {
-    await loadCustomerList();
+    console.log("useUserStore().selectAccount",useUserStore().selectAccount)
+    await loadCustomerList(useUserStore().selectAccount);
   } else {
     chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
     // chatStore.setCurrentChatId();

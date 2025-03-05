@@ -80,7 +80,7 @@ const sendDocMessage = async (event: Event) => {
   if (files && files.length > 0) {
     const response = await uploadMaterialApi(fileContent!, 'room', type!, { roomId: chatStore.currentChatId.toString() }); // 上传文件
     console.log("responseresponse", response);
-    
+
     docTxt.value = `https://cos.jackycode.cn/${response.file_path}`;
     messageType.value = type;
     // sendMessage(type)
@@ -170,10 +170,9 @@ function handleSubmit() {
   colTemp.value.controlTemp();
 }
 
-const userInfo = useUserStore().userInfo;
-const { wabaAccount } = userInfo;
+const userStore = useUserStore();
 
-const wabaId = ref(wabaAccount[0].wabaId);
+const wabaId = ref(userStore.selectAccount);
 function showQuickMsg() {
   nextTick(() =>  quickRef.value!.setOpen(wabaId.value));
 }

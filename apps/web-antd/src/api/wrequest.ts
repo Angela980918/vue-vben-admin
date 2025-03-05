@@ -17,7 +17,6 @@ import { message } from 'ant-design-vue';
 
 import { useAuthStore } from '#/store';
 
-import { refreshTokenApi } from './core';
 import {refreshToken} from "#/api/whatsapi";
 
 const { apiURL, wapiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);

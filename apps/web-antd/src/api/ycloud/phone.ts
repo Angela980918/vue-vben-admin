@@ -1,7 +1,7 @@
 import { ycloudRequestClient } from '#/api/yrequest';
 
 export async function createPhoneNumber({
-  wabaId = '449711484896804',
+  wabaId,
   phoneNumber,
 }: {
   phoneNumber: string;
@@ -34,7 +34,7 @@ export async function getPhoneList(
 }
 
 export async function updatePhoneProfile({
-  wabaId = '449711484896804',
+  wabaId,
   phoneNumber,
   data,
 }: {
@@ -54,7 +54,7 @@ export async function updatePhoneProfile({
 }
 
 export async function retrievePhoneNumber({
-  wabaId = '449711484896804',
+  wabaId,
   phoneNumber,
   profile = false,
 }: {
@@ -75,7 +75,7 @@ export async function retrievePhoneNumber({
 }
 
 export async function retrieveCommerceSetting({
-  wabaId = '449711484896804',
+  wabaId,
   phoneNumber,
 }: {
   phoneNumber: string;
@@ -87,7 +87,7 @@ export async function retrieveCommerceSetting({
 }
 
 export async function updateCommerceSetting({
-  wabaId = '449711484896804',
+  wabaId,
   phoneNumber,
   data,
 }: {

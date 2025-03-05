@@ -23,7 +23,7 @@ interface TemplateInfo {
  */
 
 export async function createTemplateApi({
-  wabaId = '449711484896804',
+  wabaId,
   name,
   language = 'zh_HK',
   category,
@@ -90,7 +90,7 @@ export async function getTemplateList(
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export async function deleteTemplate({
-  wabaId = '449711484896804',
+  wabaId,
   name,
   language,
 }: {
@@ -117,7 +117,7 @@ export async function deleteTemplate({
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export async function editTemplateApi({
-  wabaId = '449711484896804',
+  wabaId,
   name,
   language = 'zh_HK',
   components,
@@ -148,7 +148,7 @@ export async function editTemplateApi({
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export async function retrieveTemplate({
-  wabaId = '449711484896804',
+  wabaId,
   name,
   language = 'zh_HK',
 }: {

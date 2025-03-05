@@ -18,6 +18,7 @@ import { message } from 'ant-design-vue';
 import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
+import {computed} from "vue";
 
 const { apiURL, ycloudURL } = useAppConfig(
   import.meta.env,
@@ -25,6 +26,7 @@ const { apiURL, ycloudURL } = useAppConfig(
 );
 
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
+  console.log("optionsoptionsoptions", options)
   // console.log("baseURLbaseURLbaseURL",baseURL)
   const client = new RequestClient({
     ...options,
@@ -70,7 +72,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       const accessStore = useAccessStore();
       const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
-      config.headers['X-API-Key'] = userStore.currentApiKey; // 从 store 获取动态 key
+      config.headers['X-API-Key'] = userStore.getApiKey; // 从 store 获取动态 key
       // console.log("userStore.currentApiKey", userStore.currentApiKey)
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;

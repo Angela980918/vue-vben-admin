@@ -30,7 +30,7 @@ export const useChatStore = defineStore('chatStore', () => {
     currentPhone.value = phone;
   }
 
-  function setPage(customers: Array<object>) {
+  function setPage() {
     page.value = 1;
   }
   // 加载聊天记录的模拟数据

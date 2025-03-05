@@ -114,21 +114,21 @@ export const useAuthStore = defineStore('auth', () => {
     });
   }
 
-  async function fetchUserInfo(data) {
+  async function fetchUserInfo(data?: object) {
     let userInfo: null | UserInfo = null;
-    userInfo = await getWhatsAppLogin(data);
+    userInfo = data ? await getWhatsAppLogin(data) : await getWhatsAppUserInfo();
     // console.log("userInfouserInfouserInfo",userInfo)
     userStore.setUserInfo(userInfo);
     return userInfo;
   }
 
-  async function getUserInfo() {
-    let userInfo: null | UserInfo = null;
-    userInfo = await getWhatsAppUserInfo();
-    // console.log("userInfouserInfouserInfo",userInfo)
-    userStore.setUserInfo(userInfo);
-    return userInfo;
-  }
+  // async function getUserInfo() {
+  //   let userInfo: null | UserInfo = null;
+  //   userInfo =
+  //   // console.log("userInfouserInfouserInfo",userInfo)
+  //   userStore.setUserInfo(userInfo);
+  //   return userInfo;
+  // }
 
   function $reset() {
     loginLoading.value = false;
@@ -139,7 +139,6 @@ export const useAuthStore = defineStore('auth', () => {
     authLogin,
     fetchUserInfo,
     loginLoading,
-    getUserInfo,
     logout,
   };
 });

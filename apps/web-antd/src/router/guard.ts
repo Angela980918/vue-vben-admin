@@ -99,8 +99,8 @@ function setupAccessGuard(router: Router) {
     console.log("userStore",userStore.userInfo)
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.getUserInfo());
-    const userRoles = userInfo.roles ?? [];
+    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    const userRoles = userInfo!.roles ?? [];
 
     // 生成菜单和路由
     const { accessibleMenus, accessibleRoutes } = await generateAccess({
@@ -109,14 +109,12 @@ function setupAccessGuard(router: Router) {
       // 则会在菜单中显示，但是访问会被重定向到403
       routes: accessRoutes,
     });
-    console.log("userInfo",userInfo);
-    const { wabaAccount } = userInfo;
 
     // 讀取數據
     const tempStore = useTemplateStore();
-    await tempStore.loadQuickMsg(wabaAccount[0].wabaId);
+    await tempStore.loadQuickMsg(userStore.selectAccount);
     await tempStore.loadTemplates();
-    await tempStore.setMaterialListData(`queryType=material&wabaId=${wabaAccount[0].wabaId}`);
+    await tempStore.setMaterialListData(`queryType=material&wabaId=${userStore.selectAccount}`);
     await wsconnect.createConnect();
 
     // 保存菜单信息和路由信息
