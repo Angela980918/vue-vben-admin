@@ -119,7 +119,7 @@ async function loadChatMessage(guestPhone, id) {
 
 onBeforeMount(async () => {
   if (assignedCustomers.value.length === 0) {
-    console.log("useUserStore().selectAccount",useUserStore().selectAccount)
+
     await loadCustomerList(useUserStore().selectAccount);
   } else {
     chatStore.setCurrentUserInfo(assignedCustomers.value[0]);

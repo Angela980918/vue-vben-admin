@@ -36,7 +36,8 @@ import ImageView from '#/components/chatBox/content/message/ImageView.vue';
 import { useChatStore, useCustomerStore } from '#/store';
 import { formatTime } from '#/tools';
 
-import '@wangeditor/editor/dist/css/style.css'; // 引入 css
+import '@wangeditor/editor/dist/css/style.css';
+import TemplateList from "#/components/chatBox/content/message/TemplateList.vue"; // 引入 css
 
 const emits = defineEmits(['setShowRight']);
 const videoPlayer = ref(null);
@@ -46,7 +47,10 @@ const customerStore = useCustomerStore();
 const userStore = useUserStore();
 const chatStore = useChatStore();
 
+const currentPhone = computed(() => chatStore.currentPhone);
 const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo);
+
+// const showTemp = ref(false);
 
 watch(
   () => chatStore.currentChatId,
@@ -99,6 +103,7 @@ const footerStyle = {
 // 滚动到最底部的函数
 const chatRoom = ref(null);
 const chatRoom26 = ref(null);
+const colTemp = ref(null);
 const scrollToBottom = (prevHeight = null) => {
     nextTick(() => {
         const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
@@ -112,13 +117,13 @@ const scrollToBottom = (prevHeight = null) => {
         }
     });
 };
-const handleVisiable = (link) => {
-  if (link !== undefined) {
-    imgUrl.value = link;
-  }
-  // console.log("link", link)
-  visiable.value = !visiable.value;
-};
+// const handleVisiable = (link) => {
+//   if (link !== undefined) {
+//     imgUrl.value = link;
+//   }
+//   // console.log("link", link)
+//   visiable.value = !visiable.value;
+// };
 
 const getAvatarText = (name: string) => {
   if (name === undefined) return;
@@ -139,14 +144,19 @@ const scrolling = (e) => {
     chatStore.loadMoreMessages();
   }
 };
-// 在数据更新后自动滚动到底部
-onMounted(async () => {
-  // scrollToBottom();
-});
 
-onUpdated(async () => {
-  // scrollToBottom();
-});
+function handleSubmit() {
+  colTemp.value.controlTemp();
+}
+
+// 在数据更新后自动滚动到底部
+// onMounted(async () => {
+//   // scrollToBottom();
+// });
+//
+// onUpdated(async () => {
+//   // scrollToBottom();
+// });
 
 watch(
   () => data,
@@ -169,11 +179,18 @@ watch(
   <div :style="{ width: '100%', height: '100%' }">
     <!-- 聊天框 -->
     <ALayout style="flex-direction: column; height: 100%">
-      <ImageView
-        :img-url="imgUrl"
-        :visiable="visiable"
-        @handle-change="handleVisiable"
+<!--      <ImageView-->
+<!--        :img-url="imgUrl"-->
+<!--        :visiable="visiable"-->
+<!--        @handle-change="handleVisiable"-->
+<!--      />-->
+
+      <!--        模板消息选择-->
+      <TemplateList
+        :current-phone="currentPhone"
+        ref="colTemp"
       />
+
       <!-- 头部：聊天标题或信息 -->
       <ALayoutHeader :style="headerStyle">
         <AFlex style="height: 100%" justify="space-between" align="center">
@@ -267,8 +284,8 @@ watch(
                     <div
                       style="
                         position: relative;
-                        max-width: 350px;
-                        max-height: 350px;
+                        max-width: 225px;
+                        max-height: 225px;
                         overflow: hidden;
                       "
                     >
@@ -502,7 +519,14 @@ watch(
 
       <!-- 底部输入框 -->
       <ALayoutFooter :style="footerStyle">
-        <ChatMessage />
+        <div v-if="chatStore.needSendTempFirst" class="flex flex-col flex-center cursor-pointer" @click="handleSubmit">
+          <span class="font-medium" style="font-size: 18px">客戶最近聯繫時間已超過24小時，請先发送模板信息</span>
+          <AButton  type="primary" style="width: 200px; font-size: 16px" shape="round">
+            (立即发送)
+          </AButton>
+        </div>
+
+        <ChatMessage @openTemp="handleSubmit" v-else />
       </ALayoutFooter>
     </ALayout>
   </div>
@@ -596,6 +620,8 @@ watch(
 
   .contentHeader {
     margin: 0 0 4px;
+    max-width: 225px;
+    max-height: 225px;
     font-family: Roboto, Helvetica, Arial, sans-serif;
     font-size: 16px;
     font-weight: 600;

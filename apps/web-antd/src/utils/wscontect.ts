@@ -109,7 +109,7 @@ export const wsconnect = {
       console.log("已经链接")
       // 啟用心跳
       let heart = setInterval(() => {
-        console.log("心跳")
+        // console.log("心跳")
         if(connectWS!.connected) {
           // 心跳啟動
           connectWS!.emit('heart', {

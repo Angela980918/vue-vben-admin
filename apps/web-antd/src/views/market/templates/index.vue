@@ -226,7 +226,7 @@ const statusChange = (value: MapValue<typeof statusMap>): void => {
 };
 
 onBeforeMount(async () => {
-  await TempStore.loadTemplates();
+  // await TempStore.loadTemplates();
   dataFilter();
 });
 </script>

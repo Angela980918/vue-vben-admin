@@ -27,7 +27,7 @@ withDefaults(defineProps<Props>(), {
   pageTitle: '',
   sloganImage: '',
   toolbar: true,
-  toolbarList: () => ['color', 'language', 'layout', 'theme'],
+  toolbarList: () => [],
 });
 
 const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
@@ -79,20 +79,20 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
       >
         <div class="login-background absolute left-0 top-0 size-full"></div>
         <div class="flex-col-center -enter-x mr-20 h-full">
-          <template v-if="sloganImage">
-            <img
-              :alt="appName"
-              :src="sloganImage"
-              class="animate-float h-64 w-2/5"
-            />
-          </template>
-          <SloganIcon v-else :alt="appName" class="animate-float h-64 w-2/5" />
-          <div class="text-1xl text-foreground mt-6 font-sans lg:text-2xl">
-            {{ pageTitle }}
-          </div>
-          <div class="dark:text-muted-foreground mt-2">
-            {{ pageDescription }}
-          </div>
+<!--          <template v-if="sloganImage">-->
+<!--            <img-->
+<!--              :alt="appName"-->
+<!--              :src="sloganImage"-->
+<!--              class="animate-float h-64 w-2/5"-->
+<!--            />-->
+<!--          </template>-->
+<!--          <SloganIcon v-else :alt="appName" class="animate-float h-64 w-2/5" />-->
+<!--          <div class="text-1xl text-foreground mt-6 font-sans lg:text-2xl">-->
+<!--            {{ pageTitle }}-->
+<!--          </div>-->
+<!--          <div class="dark:text-muted-foreground mt-2">-->
+<!--            {{ pageDescription }}-->
+<!--          </div>-->
         </div>
       </div>
     </div>

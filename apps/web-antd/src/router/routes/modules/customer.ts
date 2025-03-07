@@ -28,27 +28,27 @@ const customerRoutes: RouteRecordRaw[] = [
         component: () => import('#/views/customer/list/index.vue'),
       },
       // 會話列表
-      {
-        meta: {
-          icon: 'ant-design:comment-outlined',
-          title: $t('會話列表'),
-          keepAlive: true,
-        },
-        name: 'SessionList',
-        path: 'sessions',
-        component: () => import('#/views/customer/sessions/index.vue'),
-      },
+      // {
+      //   meta: {
+      //     icon: 'ant-design:comment-outlined',
+      //     title: $t('會話列表'),
+      //     keepAlive: true,
+      //   },
+      //   name: 'SessionList',
+      //   path: 'sessions',
+      //   component: () => import('#/views/customer/sessions/index.vue'),
+      // },
       // 標簽管理
-      {
-        meta: {
-          icon: 'ant-design:tags-outlined',
-          title: $t('標簽管理'),
-          keepAlive: true,
-        },
-        name: 'TagManagement',
-        path: 'tags',
-        component: () => import('#/views/customer/tags/index.vue'),
-      },
+      // {
+      //   meta: {
+      //     icon: 'ant-design:tags-outlined',
+      //     title: $t('標簽管理'),
+      //     keepAlive: true,
+      //   },
+      //   name: 'TagManagement',
+      //   path: 'tags',
+      //   component: () => import('#/views/customer/tags/index.vue'),
+      // },
       // 快捷用語
       {
         meta: {

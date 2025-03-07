@@ -30,4 +30,4 @@ const chatBotRoutes: RouteRecordRaw[] = [
   },
 ];
 
-export default chatBotRoutes;
+// export default chatBotRoutes;

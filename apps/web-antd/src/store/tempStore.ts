@@ -1,11 +1,11 @@
-import { computed, ref, toRaw } from 'vue';
+import {computed, ref, toRaw} from 'vue';
 
-import { useUserStore } from '@vben/stores';
+import {useUserStore} from '@vben/stores';
 
-import { isEqual } from 'lodash';
-import { defineStore } from 'pinia';
+import {isEqual} from 'lodash';
+import {defineStore} from 'pinia';
 
-import { getTemplateList, libraryFiles, loadQuickList } from '#/api';
+import {getTemplateList, libraryFiles, loadQuickList} from '#/api';
 
 export const useTemplateStore = defineStore('template', () => {
   // const accessStore = useAccessStore();
@@ -31,13 +31,17 @@ export const useTemplateStore = defineStore('template', () => {
   const userInfo = useUserStore().userInfo;
   const list = [];
   const selectOptions = ref([]);
-  const { wabaAccount } = userInfo;
+  const {wabaAccount} = userInfo;
   wabaAccount.forEach((item) => {
-    list.push({ value: item.wabaId, label: item.name });
+    list.push({value: item.wabaId, label: item.name});
   });
-  list.push({ value: userInfo?.id, label: userInfo?.username });
+  list.push({value: userInfo?.id, label: userInfo?.username});
   selectOptions.value = list;
   createTempAccount.value = selectOptions.value[0].value;
+
+  const page = ref(1);
+  const size = ref(10);
+  const total = ref(0);
 
   const getRawTemplateList = computed(() => {
     const list = [];
@@ -81,23 +85,35 @@ export const useTemplateStore = defineStore('template', () => {
   });
 
   async function loadTemplates() {
-    // if (isTemplatesLoaded.value) return;
 
-    // await getContactListApi().then((result) => {
-    //   // console.log("resultresultresult",result)
-    //   return result;
-    // });
-
-    await getTemplateList().then((result) => {
-      if (
-        result.items.length > 0 &&
-        !isEqual(rawTempData.value, result.items)
-      ) {
-        setRawTempData(result.items);
-        setTempData(result.items);
-        isTemplatesLoaded.value = true;
+    await getTemplateList(page.value).then((result) => {
+      // if (
+      //   result.items.length > 0 &&
+      //   !isEqual(rawTempData.value, result.items)
+      // ) {
+      total.value = result.total;
+      setRawTempData(result.items);
+      setTempData(result.items);
+      isTemplatesLoaded.value = true;
+      if (result.total > size.value) {
+        startBackLoadTemplate();
       }
+      // }
     });
+  }
+
+  async function startBackLoadTemplate() {
+    page.value = page.value + 1;
+    await getTemplateList(page.value).then(result => {
+      result.items.forEach((item, index) => item.key = index);
+      rawTempData.value = [ ...rawTempData.value.map(item => toRaw(item)), ...result.items ]
+      tempData.value = [ ...rawTempData.value ];
+
+      size.value += result.length;
+      if(result.total > size.value) {
+        'requestIdleCallback' in window && requestIdleCallback(() => startBackLoadTemplate());
+      }
+    })
   }
 
   function setRawTempData(data: any) {
@@ -130,7 +146,7 @@ export const useTemplateStore = defineStore('template', () => {
     await libraryFiles(source)
       .then((result) => {
         if (result !== undefined) {
-          const { document, image, video } = result;
+          const {document, image, video} = result;
           imageList.value = image;
           docList.value = document;
           videoList.value = video;

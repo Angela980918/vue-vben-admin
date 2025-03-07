@@ -19,10 +19,11 @@ import { sendMessageApi } from '#/api';
 // import Confirm from "@/components/chatBox/content/message/Confirm.vue";
 import Confirm from '#/components/chatBox/content/message/Confirm.vue';
 import { useChatStore, useTemplateStore } from '#/store';
+import {useUserStore} from "@vben/stores";
 import { handleTemplateMsg } from '#/utils/common';
 
 const chatStore = useChatStore();
-
+const userStore = useUserStore();
 const template = useTemplateStore();
 const currentPhone = computed(() => chatStore.currentPhone);
 const containerTemp = ref({});
@@ -127,7 +128,6 @@ const handleSubmit = () => {
 
 defineExpose({
   controlTemp: () => {
-    // console.log("4444444")
     handleSubmit();
   },
 });
@@ -149,7 +149,7 @@ const sendTemplate = async () => {
         code: language,
       },
     },
-    from: '+8613672967202',
+    from: userStore.selectPhone,
     to: currentPhone.value.toString(),
   };
   const msgContent = handleTemplateMsg(name, language);

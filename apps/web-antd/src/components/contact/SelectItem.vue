@@ -38,8 +38,6 @@ const selectType = ref('*/*');
 const account = ref(props.account);
 
 function getFileName(data) {
-  console.log("data",data);
-  
   return data.file_name;
 }
 
@@ -127,7 +125,7 @@ const selectOtherFile = async (event: Event) => {
         file_type: props.type,
       };
       console.log("result",result);
-      
+
       emits('getSelected', newFile);
     });
   } catch (error) {

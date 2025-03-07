@@ -17,16 +17,16 @@ const marketRoutes: RouteRecordRaw[] = [
     redirect: '/market/broadcast', // 默认重定向到消息群发
     children: [
       // 消息群发
-      {
-        meta: {
-          icon: 'ant-design:cluster-outlined',
-          title: $t('消息群發'),
-          keepAlive: true,
-        },
-        name: 'MarketBroadcast',
-        path: 'broadcast',
-        component: () => import('#/views/market/broadcast/index.vue'),
-      },
+      // {
+      //   meta: {
+      //     icon: 'ant-design:cluster-outlined',
+      //     title: $t('消息群發'),
+      //     keepAlive: true,
+      //   },
+      //   name: 'MarketBroadcast',
+      //   path: 'broadcast',
+      //   component: () => import('#/views/market/broadcast/index.vue'),
+      // },
       // WhatsApp模板
       {
         meta: {

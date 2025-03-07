@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 
 import { getMessageList } from '#/api';
 import { handleTemplateMsg } from '#/utils/common';
+import {useCustomerStore} from "#/store/customerStore";
 
 export const useChatStore = defineStore('chatStore', () => {
   const currentChatId = ref(1); // 当前聊天的 ID
@@ -19,6 +20,8 @@ export const useChatStore = defineStore('chatStore', () => {
 
   const getChatMessages = computed(() => chatMessages.value);
   const getCurrentChatId = computed(() => currentChatId.value);
+
+  const needSendTempFirst = ref(false);
 
   function setCurrentChatId(id: string) {
     currentChatId.value = id;
@@ -107,6 +110,17 @@ export const useChatStore = defineStore('chatStore', () => {
   function setCurrentUserInfo(user) {
     // console.log("usr",user)
     currentCustomerInfo.value = user;
+    //   验证上次联系时间是否超过24小时
+    const list = computed(() => useCustomerStore().getContactList);
+    list.value.map(item => {
+      console.log("useUserStore().selectAccount",item.id, )
+      if(item.phoneNumber === user.phoneNumber) {
+        // 时间差值计算（兼容UTC时区）
+        const lastSeenDate = new Date(item.lastSeen);
+        const timeDiff = new Date().getTime() - lastSeenDate.getTime();
+        needSendTempFirst.value = timeDiff > 86400000;
+      }
+    })
   }
 
   function clearChat() {
@@ -128,6 +142,7 @@ export const useChatStore = defineStore('chatStore', () => {
     currentCustomerInfo,
     chatMessages,
     page,
+    needSendTempFirst,
 
     getChatMessages,
     getCurrentChatId,

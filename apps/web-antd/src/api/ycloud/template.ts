@@ -65,22 +65,14 @@ export async function createTemplateApi({
 
 export async function getTemplateList(
   page: number = 1,
-  limit: number = 100,
-  includeTotal: boolean = false,
-  filter: object = {},
+  limit: number = 10
 ) {
   const acc: Record<string, any> = {};
-  for (const key of Object.keys(filter)) {
-    acc[`filter.${key}`] = filter[key];
-  }
+  // for (const key of Object.keys(filter)) {
+  //   acc[`filter.${key}`] = filter[key];
+  // }
 
-  const data = {
-    page,
-    limit,
-    includeTotal,
-    ...acc,
-  };
-  return await ycloudRequestClient.get<any>('/whatsapp/templates', data);
+  return await ycloudRequestClient.get<any>(`/whatsapp/templates?page=${page}&limit=${limit}&includeTotal=true`);
 }
 
 /** 刪除模板

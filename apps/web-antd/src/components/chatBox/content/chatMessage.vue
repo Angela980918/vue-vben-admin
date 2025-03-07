@@ -33,6 +33,9 @@ import { useChatStore, useTemplateStore } from '#/store';
 
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { useUserStore } from '@vben/stores';
+
+const emit = defineEmits(['openTemp']);
+
 // 语音录制
 const isRecording = ref(false); // 是否正在录音
 const audioUrl = ref(''); // 录音文件的 URL
@@ -49,12 +52,12 @@ const messageType = ref('text');
 
 const quickRef = ref(null);
 const showEmoji = ref(false);
-const colTemp = ref(null);
+// const colTemp = ref(null);
 const emojiIndex = new EmojiIndex(data);
 const textAreaRef = ref(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const smileIcon = ref(null);
-const showTemp = ref(false);
+// const showTemp = ref(false);
 const pickerStyle = ref({ top: '0', left: '0' }); // Picker的位置
 
 const uploadDoc = () => {
@@ -79,7 +82,6 @@ const sendDocMessage = async (event: Event) => {
 
   if (files && files.length > 0) {
     const response = await uploadMaterialApi(fileContent!, 'room', type!, { roomId: chatStore.currentChatId.toString() }); // 上传文件
-    console.log("responseresponse", response);
 
     docTxt.value = `https://cos.jackycode.cn/${response.file_path}`;
     messageType.value = type;
@@ -167,7 +169,8 @@ function selectEmoji(emoji) {
 
 function handleSubmit() {
   // showTemp.value = !showTemp.value
-  colTemp.value.controlTemp();
+  // colTemp.value.controlTemp();
+  emit('openTemp')
 }
 
 const userStore = useUserStore();
@@ -181,7 +184,7 @@ function showQuickMsg() {
 async function sendMessage() {
   // console.log("docTxt.value", docTxt.value)
   const data: MessageData = {
-    from: '+8613672967202',
+    from: userStore.selectPhone,
     to: currentPhone.value,
     type: 'text',
     message: contentTxt.value,
@@ -275,11 +278,12 @@ const audioStart = async () => {
     // console.log('录音开始');
   } catch (error) {
     console.error('无法访问麦克风:', error);
+    message.error('無法連接麥克風');
   }
 };
 
 // 停止录音
-const stopRecording = () => {
+const stopRecording = async () => {
   if (recorder) {
     recorder.pause(); // 停止录音
     isRecording.value = false;
@@ -301,6 +305,10 @@ const stopRecording = () => {
     });
     const formData = new FormData();
     formData.append('audio', audioFile);
+    await uploadMaterialApi(audioFile, 'room', 'audio', { roomId: chatStore.currentChatId }).then((result) => {
+      docTxt.value = `https://cos.jackycode.cn/${result.file_path}`;
+      messageType.value = 'audio';
+    })
   }
 };
 
@@ -337,11 +345,11 @@ const stopRecording = () => {
     </div>
 
     <!--        模板消息选择-->
-    <TemplateList
-      :current-phone="currentPhone"
-      ref="colTemp"
-      v-show="showTemp"
-    />
+<!--    <TemplateList-->
+<!--      :current-phone="currentPhone"-->
+<!--      ref="colTemp"-->
+<!--      v-show="showTemp"-->
+<!--    />-->
 
     <!--        快捷回复-->
     <QuickMsg ref="quickRef" :showQuickList="true" />

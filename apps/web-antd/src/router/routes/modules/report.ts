@@ -30,4 +30,4 @@ const reportRoutes: RouteRecordRaw[] = [
   },
 ];
 
-export default reportRoutes;
+// export default reportRoutes;

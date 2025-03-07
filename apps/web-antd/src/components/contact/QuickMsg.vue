@@ -30,6 +30,7 @@ import SelectItem from '#/components/contact/SelectItem.vue';
 // import {useTempStore} from "@/store/useTempStore";
 // import {useChatStore} from "@/store/chatStore";
 import { useChatStore, useTemplateStore } from '#/store';
+import {useUserStore} from "@vben/stores";
 
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
@@ -66,6 +67,7 @@ const props = defineProps({
 });
 const templateStore = useTemplateStore();
 const chatStore = useChatStore();
+const userStore = useUserStore();
 const open = ref(false);
 
 // 确认栏
@@ -80,7 +82,7 @@ const headerTxt = ref('');
 const quickList = computed(() => templateStore.getQuickMsg);
 const currentPhone = computed(() => chatStore.currentPhone);
 const sendQuickMsg = async () => {
-  const fromNumber = '+8613672967202';
+  const fromNumber = userStore.selectPhone;
   const toNumber = currentPhone.value;
   const files = selectFileArr.value;
   const messageContent = selectContent.value;
@@ -308,7 +310,7 @@ const setRowClassName = (record: any) => {
 props.showQuickList && watch(() => templateStore.quickMessage, (newValue) => {
   quickList.value = newValue;
   preViewQuick(quickList.value[0]);
-  
+
 })
 
 const confirm = (record) => {

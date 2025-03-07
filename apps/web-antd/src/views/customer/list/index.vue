@@ -65,7 +65,7 @@ const pagination = computed(() => {
       isDelete.value = false;
       state.selectedRowKeys = [];
       pagination.value.current = page;
-      customerStore.changeContactList(page);
+      // customerStore.changeContactList(page);
     },
   };
 });
@@ -228,9 +228,6 @@ watch(
   },
 );
 
-onMounted(() => {
-  customerStore.setContactList();
-});
 </script>
 
 <template>

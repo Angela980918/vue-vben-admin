@@ -27,6 +27,7 @@ interface BasicUserInfo {
 interface AccessState {
   currentApiKey: string;
   selectAccount: string;
+  selectPhone: string
   /**
    * 用户信息
    */
@@ -45,6 +46,9 @@ export const useUserStore = defineStore('core-user', {
     setSelectAccount(wabaId: string) {
       this.selectAccount = wabaId;
     },
+    setSelectPhone(phone: string) {
+      this.selectPhone = phone;
+    },
     setUserInfo(userInfo: BasicUserInfo | null) {
       // 设置用户信息
       this.userInfo = userInfo;
@@ -54,6 +58,7 @@ export const useUserStore = defineStore('core-user', {
       this.currentApiKey = userInfo?.currentApiKey ?? '';
       const { wabaAccount } = userInfo;
       this.selectAccount = wabaAccount[0].wabaId;
+      this.selectPhone = wabaAccount[0].phoneNumber;
     },
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
@@ -76,6 +81,7 @@ export const useUserStore = defineStore('core-user', {
     selectAccount: '',
     userInfo: null,
     userRoles: [],
+    selectPhone: ''
   }),
 });
 

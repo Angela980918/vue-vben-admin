@@ -6,7 +6,7 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import { useAuthStore, useTemplateStore } from '#/store';
+import {useAuthStore, useCustomerStore, useTemplateStore} from '#/store';
 
 import { generateAccess } from './access';
 import {wsconnect} from "#/utils/wscontect";
@@ -112,9 +112,11 @@ function setupAccessGuard(router: Router) {
 
     // 讀取數據
     const tempStore = useTemplateStore();
+    const customerStore = useCustomerStore();
     await tempStore.loadQuickMsg(userStore.selectAccount);
     await tempStore.loadTemplates();
     await tempStore.setMaterialListData(`queryType=material&wabaId=${userStore.selectAccount}`);
+    await customerStore.setContactList();
     await wsconnect.createConnect();
 
     // 保存菜单信息和路由信息

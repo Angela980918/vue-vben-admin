@@ -26,7 +26,6 @@ const { apiURL, ycloudURL } = useAppConfig(
 );
 
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
-  console.log("optionsoptionsoptions", options)
   // console.log("baseURLbaseURLbaseURL",baseURL)
   const client = new RequestClient({
     ...options,
