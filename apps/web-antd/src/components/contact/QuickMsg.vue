@@ -181,24 +181,28 @@ const changeOptions = () => {
 };
 
 const handleOk = async () => {
-  const list = [];
-  selectFileArr.value.forEach((item) => {
-    list.push(item.id);
-  });
-
-  const data = {
-    fileIds: list,
-    title: headerTxt.value,
-    content: selectContent.value,
-  };
-
-  if(value1.value.length > 6) {
-    data.wabaId = value1.value
+  if(isCheck.value) {
+    open.value = false;
   }else {
-    data.userId = value1.value
-  }
+    const list = [];
+    selectFileArr.value.forEach((item) => {
+      list.push(item.id);
+    });
 
-  await uploadQuickMsgApi(data);
+    const data = {
+      fileIds: list,
+      title: headerTxt.value,
+      content: selectContent.value,
+    };
+
+    if(value1.value.length > 6) {
+      data.wabaId = value1.value
+    }else {
+      data.userId = value1.value
+    }
+
+    await uploadQuickMsgApi(data);
+  }
 };
 
 const setOpen = (value?: string) => {
@@ -329,8 +333,8 @@ onMounted(() => {
 
 defineExpose({
   setOpen: (value: string, check?: boolean) => {
-    if(check) {
-      isCheck.value = !check;
+    if(check !== undefined) {
+      isCheck.value = check;
     }
     setOpen(value);
   },
@@ -345,7 +349,6 @@ defineExpose({
       style="justify-items: center"
       @ok="handleOk"
       :width="1000"
-      :footer="isCheck"
     >
       <!--                   选择公共库还是个人账号 -->
       <div v-show="showQuickList" style="display: flex; flex-direction: column; padding: 10px;">
