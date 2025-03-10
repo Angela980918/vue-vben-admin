@@ -3,13 +3,14 @@ import type { ColumnType } from 'ant-design-vue/es/table';
 
 import type { ContactInfo } from '@vben/types';
 
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
-
+import {computed, nextTick, reactive, ref, watch} from 'vue';
+import { SyncOutlined } from "@ant-design/icons-vue";
 import {
-  Button as AButton,
+  Button as AButton, message,
   Modal as AModal,
   Table as ATable,
   Tag as ATag,
+  Tooltip as ATooltip,
 } from 'ant-design-vue';
 
 import { createContactApi, deleteContactApi, updateContactApi } from '#/api';
@@ -42,9 +43,6 @@ const state = reactive<{
   selectedRowKeys: [],
   loading: false,
 });
-
-// eslint-disable-next-line no-console
-console.log('customerStore', customerStore.getAssignedCustomers);
 
 // 按鈕狀態
 const isCreate = ref(true);
@@ -158,7 +156,7 @@ const startCreate = () => {
   state.loading = true;
   isCreate.value = true;
   if (!showContact.value) return;
-  showContact.value.showModal();
+  showContact.value.showModal(true);
 
   setTimeout(() => {
     state.loading = false;
@@ -172,6 +170,7 @@ const createContact = async (value: any) => {
       customerStore.contactOperate(isCreate.value, result);
     }, 1000);
     showContact.value!.showModal();
+    message.success('新增聯繫人成功')
   });
 };
 
@@ -180,6 +179,7 @@ const updateContact = async (value: any) => {
     customerStore.contactOperate(isCreate.value, result);
     isCreate.value = false;
     showContact.value!.showModal();
+    message.success('修改聯繫人成功')
   });
 };
 
@@ -200,7 +200,12 @@ const setShowDelete = () => {
 
 const deleteContact = () => {
   state.selectedRowKeys.map(async (item: Key) => {
-    await deleteContactApi(item).then(() => {});
+    await deleteContactApi(item).then(() => {
+      let index = data.value.findIndex(value => value.id === item);
+      if(index !== -1) {
+        data.value = data.value.splice(index, 1);
+      }
+    });
   });
   nextTick(() => {
     showDelete.value = false;
@@ -264,11 +269,19 @@ watch(
           創建聯繫人
         </AButton>
 
+        <ATooltip title="刷新">
+          <AButton @click="customerStore.setContactList('刷新成功')" type="primary" shape="round" size="middle" style="margin-left: 20px">
+            <template #icon>
+              <SyncOutlined />
+            </template>
+          </AButton>
+        </ATooltip>
+
         <AButton
           v-if="isDelete"
           danger
           :loading="state.loading"
-          style="margin-left: 10px"
+          style="margin-left: 20px"
           @click="setShowDelete"
         >
           刪除聯繫人

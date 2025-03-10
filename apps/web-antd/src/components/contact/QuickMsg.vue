@@ -139,6 +139,8 @@ const sendQuickMsg = async () => {
       message: messageContent,
     });
   }
+
+  open.value = !open.value;
 };
 
 //
@@ -147,13 +149,10 @@ const fileList = ref<UploadProps['fileList']>([]);
 
 // 選擇上傳庫
 const selectItemRef = ref(null);
-// const options = ref([
-//   { value: '449711484896804', label: 'DataS素材库' },
-//   { value: '67890', label: '个人素材库' },
-// ]);
+
 const options = computed(() => templateStore.selectOptions);
 const value1 = ref(options.value[0].value);
-// const value1 = ref(options.value[0].value);
+const isCheck = ref(false);
 
 // 上傳modal
 const type = ref('');
@@ -183,7 +182,6 @@ const changeOptions = () => {
 
 const handleOk = async () => {
   const list = [];
-  // console.log("selectFileArrselectFileArr", headerTxt.value)
   selectFileArr.value.forEach((item) => {
     list.push(item.id);
   });
@@ -195,7 +193,7 @@ const handleOk = async () => {
   };
 
   if(value1.value.length > 6) {
-    data.wabdId = value1.value
+    data.wabaId = value1.value
   }else {
     data.userId = value1.value
   }
@@ -273,9 +271,7 @@ const setRowClassName = (record: any) => {
   () => props.fileArray,
   (newVal) => {
     selectFileArr.value = newVal;
-    // console.log("selectFileArr.valueselectFileArr.value",selectFileArr.value)
     if (newVal.length > 0) {
-      // console.log("")
       newVal.forEach((item) => {
         const newFile = {
           uid: item?.file_id || '1',
@@ -319,35 +315,6 @@ const confirm = (record) => {
   confirmRef.value.showModal();
 };
 
-// 上傳檢查
-// const beforeUpload = async (file) => {
-//   const isAllowedType = ['image/jpeg', 'image/png', 'video/mp4', 'application/*'].includes(file.type);
-//
-//   if (!isAllowedType) {
-//     // message.error('仅支持 JPG/PNG/PDF 文件!');
-//     return false;
-//   }
-//
-//   let type = file.type.split('/')[0];
-//   if (type === 'application') {
-//     type = 'document'
-//   }
-//
-//   let {code, message, result} = await uploadTempFileApi(file, type, '67890');
-//
-//   let newFile = {
-//     uid: result?._id || '1',
-//     name: result?.file_name || file.name,
-//     status: code === 200 ? 'done' : 'error',
-//     response: code === 200 ? '' : "错误信息",  // 修复拼写错误
-//     url: result?.file_path ? 'https://cos.jackycode.cn/' + result.file_path : ''
-//   };
-//   fileList.value.push(newFile);
-//   selectFileArr.value.push(result);
-//
-//   return false;
-// };
-
 function loadAccountQuickMsg(value: string) {
   templateStore.loadQuickMsg(value);
 }
@@ -361,7 +328,10 @@ onMounted(() => {
 });
 
 defineExpose({
-  setOpen: (value: string) => {
+  setOpen: (value: string, check?: boolean) => {
+    if(check) {
+      isCheck.value = !check;
+    }
     setOpen(value);
   },
 });
@@ -375,6 +345,7 @@ defineExpose({
       style="justify-items: center"
       @ok="handleOk"
       :width="1000"
+      :footer="isCheck"
     >
       <!--                   选择公共库还是个人账号 -->
       <div v-show="showQuickList" style="display: flex; flex-direction: column; padding: 10px;">

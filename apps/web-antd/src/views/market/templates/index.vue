@@ -23,7 +23,7 @@ import {
   Button as AButton,
   Dropdown as ADropdown,
   Menu as AMenu,
-  MenuItem as AMenuItem,
+  MenuItem as AMenuItem, message,
   Space as ASpace,
   Table as ATable,
   Tag as ATag,
@@ -35,6 +35,7 @@ import { categoryMap, errorMap, languageMap, statusMap } from '#/map';
 import { useTemplateStore } from '#/store';
 import { formatDate } from '#/tools/time';
 import { getLabel } from '#/utils/common';
+import {deleteTemplateApi} from "#/api";
 
 type Key = number | string;
 
@@ -137,6 +138,23 @@ const createTemplate = async () => {
     name: 'MarketCreateTemplate',
   });
 };
+
+// 刪除模板
+const deleteTemplate = () => {
+  // console.log("select", state.selectedRowKeys);
+  state.selectedRowKeys.forEach(async item => {
+    let data = filterData.value[item];
+    await deleteTemplateApi({ wabaId: data.wabaId, name: data.name, language: data.language }).then(result => {
+      let index = TempStore.tempData.findIndex(value => value.name === data.name && value.language === data.language);
+      if(index !== -1) {
+        TempStore.tempData.splice(index, 1);
+        dataFilter();
+      }
+    })
+    message.success('刪除成功')
+  })
+
+}
 
 const state = reactive<{
   loading: boolean;
@@ -299,7 +317,7 @@ onBeforeMount(async () => {
               創建模板
             </AButton>
 
-            <AButton type="primary" danger @click="createTemplate">
+            <AButton type="primary" danger @click="deleteTemplate">
               刪除
             </AButton>
           </ASpace>

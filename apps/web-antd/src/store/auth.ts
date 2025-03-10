@@ -46,7 +46,6 @@ export const useAuthStore = defineStore('auth', () => {
         account: params.username,
         role: params.selectAccount
       };
-      console.log("params",params);
 
       const { token } = await getWhatsAppUserToken(data);
       // console.log("accessTokenaccessTokenaccessToken",accessToken)

@@ -103,9 +103,9 @@ watch(
   () => formState,
   (newValue, oldValue) => {
     // eslint-disable-next-line no-console
-    console.log('formState newValue', newValue);
+    // console.log('formState newValue', newValue);
     // eslint-disable-next-line no-console
-    console.log('formState oldValue', oldValue);
+    // console.log('formState oldValue', oldValue);
   },
   {
     deep: true,
@@ -189,6 +189,7 @@ const processFormData = (rwaData) => {
   });
 
   return {
+    wabaId: rwaData.selectAccount,
     category: rwaData.selectCategory, // 类别
     name: rwaData.tempName, // 模板名称
     language: rwaData.selectLanguage, // 语言
@@ -220,6 +221,7 @@ const onSubmit = async () => {
       // console.log('rawFormState', rawFormState);
 
       const reqData = processFormData(rawFormState);
+      // console.log("reqDatareqDatareqData", reqData)
       try {
         await (isUpdated.value
           ? editTemplateApi(reqData)

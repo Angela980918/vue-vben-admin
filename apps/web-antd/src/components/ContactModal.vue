@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { Rule } from 'ant-design-vue/es/form';
 
-import { reactive, ref, toRaw, watch } from 'vue';
+import {nextTick, reactive, ref, toRaw, watch} from 'vue';
 
 import {
   Form as AForm,
@@ -80,7 +80,12 @@ const onSubmit = () => {
     });
 };
 
-const showModal = () => {
+const showModal = (create?: boolean) => {
+  nextTick(() => {
+    if(create) {
+      formRef.value.resetFields();
+    }
+  });
   open.value = !open.value;
 };
 
@@ -110,8 +115,8 @@ watch(
 );
 
 defineExpose({
-  showModal: () => {
-    showModal();
+  showModal: (create?: boolean) => {
+    showModal(create);
   },
 });
 </script>

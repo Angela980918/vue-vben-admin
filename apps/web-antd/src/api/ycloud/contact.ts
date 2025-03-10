@@ -34,6 +34,8 @@ export async function getContactListApi(
   return await ycloudRequestClient.get<ContactListInfo>(url);
 }
 
+//
+
 export async function createContactApi({
   nickname,
   phoneNumber,

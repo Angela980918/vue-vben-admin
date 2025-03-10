@@ -81,7 +81,7 @@ export async function getTemplateList(
  * @param language
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
-export async function deleteTemplate({
+export async function deleteTemplateApi({
   wabaId,
   name,
   language,

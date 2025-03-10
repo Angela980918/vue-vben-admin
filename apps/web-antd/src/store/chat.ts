@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
 
-import { getMessageList } from '#/api';
+import {getContactListApi, getMessageList} from '#/api';
 import { handleTemplateMsg } from '#/utils/common';
 import {useCustomerStore} from "#/store/customerStore";
 
@@ -78,6 +78,9 @@ export const useChatStore = defineStore('chatStore', () => {
   }
 
   function addMessage(message) {
+    if(message.direction === 'inbound' && needSendTempFirst.value) {
+      needSendTempFirst.value = false;
+    }
     chatMessages.value.push(message);
   }
 
@@ -107,18 +110,22 @@ export const useChatStore = defineStore('chatStore', () => {
     }
   }
 
-  function setCurrentUserInfo(user) {
+  async function setCurrentUserInfo(user) {
     // console.log("usr",user)
     currentCustomerInfo.value = user;
     //   验证上次联系时间是否超过24小时
     const list = computed(() => useCustomerStore().getContactList);
-    list.value.map(item => {
-      console.log("useUserStore().selectAccount",item.id, )
+    list.value.map(async item => {
       if(item.phoneNumber === user.phoneNumber) {
-        // 时间差值计算（兼容UTC时区）
-        const lastSeenDate = new Date(item.lastSeen);
-        const timeDiff = new Date().getTime() - lastSeenDate.getTime();
-        needSendTempFirst.value = timeDiff > 86400000;
+        await getContactListApi(1, 10, true, { filter: { phoneNumber: item.phoneNumber } }).then(result => {
+          // 更新用户资料
+          let newDate = result.items[0];
+          const lastSeenDate = new Date(item.lastSeen);
+          const timeDiff = new Date().getTime() - lastSeenDate.getTime();
+          // 时间差值计算（兼容UTC时区）
+          needSendTempFirst.value = timeDiff > 86400000;
+          useCustomerStore().updateUser(newDate);
+        })
       }
     })
   }
@@ -131,7 +138,8 @@ export const useChatStore = defineStore('chatStore', () => {
   function $reset() {
     currentChatId.value = 1;
     currentPhone.value = '';
-    chatMessages.value = '449711484896804';
+    chatMessages.value = [];
+    needSendTempFirst.value = false;
     page.value = 1;
   }
 

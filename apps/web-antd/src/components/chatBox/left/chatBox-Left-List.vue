@@ -47,7 +47,7 @@ watch(
       const list = [];
       props.assignedCustomersData.forEach((item) => {
         if (
-          item.name.includes(newValue) ||
+          item.name.toLowerCase().includes(newValue.toLowerCase()) ||
           item.phoneNumber.includes(newValue)
         ) {
           list.push(item);

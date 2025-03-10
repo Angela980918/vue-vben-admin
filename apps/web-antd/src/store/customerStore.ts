@@ -1,7 +1,7 @@
 import type { ContactInfo } from '@vben/types';
 
 import { defineStore } from 'pinia';
-
+import { message } from 'ant-design-vue';
 import { getContactListApi } from '#/api';
 import {reactive, toRaw} from "vue";
 
@@ -50,7 +50,10 @@ export const useCustomerStore = defineStore('customerStore', {
       this.searchWord = word;
     },
 
-    async setContactList(): Promise<void> {
+    async setContactList(msg?: string): Promise<void> {
+      this.page = 1;
+      this.size = 10;
+      this.total = 0;
       const response = await getContactListApi(this.page);
       // eslint-disable-next-line no-console
       if (response) {
@@ -59,6 +62,9 @@ export const useCustomerStore = defineStore('customerStore', {
           ...item,
           key: item.id,
         }));
+        if(msg) {
+          message.success(msg)
+        }
         if(response.total > this.size) {
           this.startBackLoadContact();
         }
@@ -81,18 +87,6 @@ export const useCustomerStore = defineStore('customerStore', {
 
     },
 
-    // async changeContactList(page: number): Promise<void> {
-    //   this.page = page;
-    //   const response = await getContactListApi(page, 10);
-    //   if (response) {
-    //     this.total = response.total;
-    //     this.contactList = response.items.map((item) => ({
-    //       ...item,
-    //       key: item.id,
-    //     }));
-    //   }
-    // },
-
     contactOperate(isCreate: boolean, value: ContactInfo): void {
       if (isCreate) {
         this.contactList.unshift({ ...value, key: value.id });
@@ -103,6 +97,29 @@ export const useCustomerStore = defineStore('customerStore', {
         if (index !== -1) {
           this.contactList.splice(index, 1, value);
         }
+      }
+    },
+
+    // async getNewUser(phone: number) {
+    //   await getContactListApi(1, 10, true, { filter: { phoneNumber: phone } }).then(result => {
+    //     let newUser = result.items;
+    //     this.contactList = [...newUser, ...this.contactList];
+    //   });
+    // },
+    async updateUser(userDate: object) {
+      const reactiveUserDate = reactive(userDate);
+      let add = true;
+
+      for (let i = 0; i < this.contactList.length; i++) {
+        if (this.contactList[i].phoneNumber === reactiveUserDate.phoneNumber) {
+          add = false;
+          this.contactList[i] = reactiveUserDate;
+          break;
+        }
+      }
+
+      if(add) {
+        this.contactList = [reactiveUserDate, ...this.contactList];
       }
     },
 

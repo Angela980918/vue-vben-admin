@@ -31,3 +31,17 @@ export const getMessageList = ({
     `/chat?roomId=${id}&pageIndex=${page}&pageSize=${pageSize}`,
   );
 };
+
+// 查询新客聊天室ID
+export const getNewRoomId = (
+phone: string
+) => {
+  console.log("phonephonephone",phone)
+  let data = {
+    customerId: phone
+  }
+  console.log("datadatadata",data)
+  return wcloudRequestClient.post<any>(
+    `/chat/conversation`, data
+  );
+};

@@ -86,7 +86,7 @@ const checkMsg = (data) => {
   fileContent.value = data.content
   msgName.value = data.title
   checkCos();
-  quickRef.value.setOpen(selectValue.value);
+  quickRef.value.setOpen(selectValue.value, true);
 }
 
 const addQuickMsg = () => {
@@ -94,7 +94,7 @@ const addQuickMsg = () => {
   fileArray.value = [];
   msgName.value = "";
   checkCos();
-  quickRef.value.setOpen(selectValue.value);
+  quickRef.value.setOpen(selectValue.value, false);
 }
 
 // 检索素材库

@@ -150,13 +150,12 @@ const removeItem = async () => {
       // selectList.push(item.id)
       source+=`&materialIds=${item.id}`
   })
-  console.log("source",source);
-  
+
   await deleteMaterial(source).then(result => {
     message.success(result.message);
     checkCos();
   });
-  
+
 }
 
 // 私人和公共素材切换

@@ -96,7 +96,7 @@ function setupAccessGuard(router: Router) {
       password: 'admin168',
       role: 'super'
     }
-    console.log("userStore",userStore.userInfo)
+
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
     const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());

@@ -277,7 +277,8 @@ watch(
                   "
                 >
                   <div v-if="item.type === 'text'">
-                    <span>{{ item.content.body }}</span>
+<!--                    <span>{{ item.content.body }}</span>-->
+                    <span v-html="item.content.body"></span>
                   </div>
 
                   <div v-else-if="item.type === 'image'">
@@ -291,7 +292,7 @@ watch(
                     >
                       <AImage :src="item.content.link" />
                     </div>
-                    <span>{{ item.content.caption }}</span>
+                    <span v-html="item.content.caption"></span>
                   </div>
 
                   <div v-else-if="item.type === 'video'">
@@ -304,7 +305,8 @@ watch(
                       >
                         <source :src="item.content.link" type="video/mp4" />
                       </video>
-                      <span>{{ item.content.caption }}</span>
+<!--                      <span>{{ item.content.caption }}</span>-->
+                      <span v-html="item.content.caption"></span>
                     </div>
                   </div>
 
@@ -352,9 +354,10 @@ watch(
                           style="color: #dcdcdc; cursor: pointer"
                         />
                       </a>
-                      <span style="font-size: 14px; color: #a9a9a9">{{
-                        item.content.caption
-                      }}</span>
+<!--                      <span style="font-size: 14px; color: #a9a9a9">{{-->
+<!--                        item.content.caption-->
+<!--                      }}</span>-->
+                      <span style="font-size: 14px; color: #a9a9a9" v-html="item.content.caption"></span>
                     </div>
                   </div>
 

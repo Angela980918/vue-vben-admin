@@ -124,7 +124,6 @@ const selectOtherFile = async (event: Event) => {
         file_path: result?.file_path || '',
         file_type: props.type,
       };
-      console.log("result",result);
 
       emits('getSelected', newFile);
     });

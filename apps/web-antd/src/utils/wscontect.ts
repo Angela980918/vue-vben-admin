@@ -4,6 +4,7 @@ import {useChatStore, useCustomerStore} from "#/store";
 import { io } from 'socket.io-client';
 // import {handleTemplateMsg} from "@/tools/index.js";
 import {handleTemplateMsg} from "#/utils/common";
+import {getNewRoomId} from "#/api";
 
 const MAX_MISSED_PONGS = 3; // 最大未响应心跳次数
 let wsList = {};
@@ -106,7 +107,6 @@ export const wsconnect = {
       // @ts-ignore
       clearTimeout(resetTimer);
       resetTimer = null;
-      console.log("已经链接")
       // 啟用心跳
       let heart = setInterval(() => {
         // console.log("心跳")
@@ -157,7 +157,7 @@ export const wsconnect = {
     });
 
     // 接收用戶消息
-    connectWS!.on(eventTypes.inbound_message, (value) => {
+    connectWS!.on(eventTypes.inbound_message, async (value) => {
       const customerStore = useCustomerStore();
       const chatStore = useChatStore();
       let newValue = JSON.parse(value);
@@ -169,13 +169,13 @@ export const wsconnect = {
 
       const assignedCustomers = customerStore.getAssignedCustomers;
       // const unAssignedCustomers = customerStore.getUnassignedCustomers;
-
+      // console.log("whatsappMessage", whatsappMessage)
       // 如果拿出的消息是当前沟通用户，添加到当前记录
       if(chatStore.currentPhone === whatsappMessage.from) {
-        console.log("查看来到的消息", whatsappMessage)
         let message = wsconnect.handleMessage(whatsappMessage, 'inbound', jsonData.time)
         // console.log("查看处理的消息", message)
         // 為當前用戶添加未讀
+        // console.log("messagemessage", message)
         assignedCustomers.map(item => {
           if(item.phoneNumber === whatsappMessage.from) {
             if(item.badgeCount === undefined) item.badgeCount = 0;
@@ -225,37 +225,21 @@ export const wsconnect = {
           }
         })
 
-
         if(inserOrNot === 1) {
           customerStore.setAssignedCustomers(assignedCustomers);
           return;
         }
 
-        // 查詢是否是來自未訂閱的用戶信息
-        // if(inserOrNot !== 1) {
-        //     unAssignedCustomers.map(item => {
-        //         if(item.phone === whatsappMessage.from) {
-        //             inserOrNot = 1;
-        //             item.time = whatsappMessage.sendTime;
-        //             // item.message = message;
-        //
-        //             item.message = message;
-        //             if(item.badgeCount === undefined) item.badgeCount = 0;
-        //             item.badgeCount++;
-        //         }
-        //     })
-        // }else {
-        // //     已訂閱更新
-        //
-        // }
-
         // 插入新用戶
         if(inserOrNot !== 1) {
+          const { roomId } = await getNewRoomId(whatsappMessage.from);
           const color = wsconnect.generateRandomColor();
           const userName = whatsappMessage.customerProfile.name;
           // @ts-ignore
           assignedCustomers.push({
-            phone: whatsappMessage.from,
+            id: roomId,
+            key: roomId,
+            phoneNumber: whatsappMessage.from,
             name: userName,
             time: whatsappMessage.sendTime,
             message: message,
@@ -266,8 +250,9 @@ export const wsconnect = {
 
         // 更新未訂閱
         customerStore.setAssignedCustomers(assignedCustomers);
+        // 从ycloud获取新用户的信息
+        // customerStore.getNewUser(whatsappMessage.from);
         // chatStore.addMessage(message);
-
       }
     })
 

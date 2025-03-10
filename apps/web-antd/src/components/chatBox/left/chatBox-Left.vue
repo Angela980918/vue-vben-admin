@@ -33,10 +33,10 @@ const loadCustomerList = async (wabaId: string) => {
   await getAllCustomerApi(wabaId).then((result) => {
     const customer = [];
     result.forEach((item) => {
-      item.key = item._id;
+      item.key = item.id;
       const color = generateRandomColor();
       const newCustomer = {
-        id: item._id,
+        id: item.id,
         key: item.key,
         name: item.customerId,
         time: item.messageList[0].deliverTime,
@@ -123,7 +123,6 @@ onBeforeMount(async () => {
     await loadCustomerList(useUserStore().selectAccount);
   } else {
     chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
-    // chatStore.setCurrentChatId();
     loadChatMessage(
       assignedCustomers.value[0].phoneNumber,
       assignedCustomers.value[0].id,
