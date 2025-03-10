@@ -294,6 +294,9 @@ const updateCreateTempData = async () => {
           }
           break;
         }
+        case 'BODY': {
+          formState.editor = component.text
+        }
         default: {
           // console.warn(`Unhandled component type: ${component.type}`);
           break;
