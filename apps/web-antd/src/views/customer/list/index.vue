@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { ColumnType } from 'ant-design-vue/es/table';
+import type {ColumnType} from 'ant-design-vue/es/table';
 
-import type { ContactInfo } from '@vben/types';
+import type {ContactInfo} from '@vben/types';
 
 import {computed, nextTick, reactive, ref, watch} from 'vue';
-import { SyncOutlined } from "@ant-design/icons-vue";
+import {SyncOutlined} from "@ant-design/icons-vue";
 import {
   Button as AButton, message,
   Modal as AModal,
@@ -13,12 +13,14 @@ import {
   Tooltip as ATooltip,
 } from 'ant-design-vue';
 
-import { createContactApi, deleteContactApi, updateContactApi } from '#/api';
+import {createContactApi, deleteContactApi, updateContactApi} from '#/api';
+import {useRouter} from "vue-router";
 import ContactModal from '#/components/ContactModal.vue';
-import { countryNameMap } from '#/map';
-import { useCustomerStore } from '#/store/customerStore';
-import { formatDate } from '#/tools';
-import { getLabel } from '#/utils/common';
+import {countryNameMap} from '#/map';
+import {useCustomerStore, useChatStore} from '#/store';
+import {formatDate} from '#/tools';
+import {getLabel} from '#/utils/common';
+import TemplateList from "#/components/chatBox/content/message/TemplateList.vue";
 
 // 表格欄位定義
 interface TableItem {
@@ -32,8 +34,12 @@ interface ContactModalInstance {
 type Key = number | string;
 const formData = ref({});
 const customerStore = useCustomerStore();
+const chatStore = useChatStore();
+const router = useRouter();
+const colTemp = ref(null);
 
 const data = computed(() => customerStore.contactList);
+const currentPhone = ref('');
 
 // 選擇item
 const state = reactive<{
@@ -129,16 +135,31 @@ const columns: ColumnType<TableItem>[] = [
   },
 ];
 
-// 更新筛选方法
-// const dataFilter = () => {
-//   filterData.value = data.value.filter((item) => {
-//     return (
-//       // ... 其他筛选条件
-//       selectCountry.value.length === 0 ||
-//       selectCountry.value.some((c) => c.value === item.countryCode)
-//     );
-//   });
-// };
+// 去發送消息
+const goSend = (record: object) => {
+  console.log("record",record);
+
+  if(record.lastSeen === undefined) {
+    currentPhone.value = record.phoneNumber;
+    nextTick(() => {
+      colTemp.value.controlTemp(true);
+    })
+  }else {
+    chatStore.changeChatByPhone(record.phoneNumber);
+
+    router.push({
+      name: 'Chat',
+    });
+  }
+
+  // router.push({
+  //   name: 'Chat',
+  // });
+}
+
+// function handleSubmit() {
+//   colTemp.value.controlTemp();
+// }
 
 // 国家地区
 // const selectCountry = ref([]);
@@ -202,7 +223,7 @@ const deleteContact = () => {
   state.selectedRowKeys.map(async (item: Key) => {
     await deleteContactApi(item).then(() => {
       let index = data.value.findIndex(value => value.id === item);
-      if(index !== -1) {
+      if (index !== -1) {
         data.value = data.value.splice(index, 1);
       }
     });
@@ -218,7 +239,7 @@ const deleteContact = () => {
 // item點擊事件
 const checkInfo = (data: TableItem) => {
   isCreate.value = false;
-  formData.value = { ...data };
+  formData.value = {...data};
   state.loading = true;
   nextTick(() => {
     showContact.value!.showModal();
@@ -241,6 +262,12 @@ watch(
       class="card-box h-full flex-col lg:flex"
       style="width: 100%; overflow-x: auto"
     >
+<!--      模板信息弹窗-->
+      <TemplateList
+        :currentPhone="currentPhone"
+        ref="colTemp"
+      />
+
       <!--   創建/編輯 彈窗   -->
       <ContactModal
         ref="showContact"
@@ -270,9 +297,10 @@ watch(
         </AButton>
 
         <ATooltip title="刷新">
-          <AButton @click="customerStore.setContactList('刷新成功')" type="primary" shape="round" size="middle" style="margin-left: 20px">
+          <AButton @click="customerStore.setContactList('刷新成功')" type="primary" shape="round"
+                   size="middle" style="margin-left: 20px">
             <template #icon>
-              <SyncOutlined />
+              <SyncOutlined/>
             </template>
           </AButton>
         </ATooltip>
@@ -349,13 +377,22 @@ watch(
           </template>
 
           <template v-if="column.key === 'operation'">
-            <AButton
-              size="small"
-              type="primary"
-              @click="checkInfo(record as TableItem)"
-            >
-              編輯
-            </AButton>
+            <div style="display: flex; flex-direction: row; justify-content: space-between">
+              <AButton
+                size="small"
+                type="primary"
+                @click="checkInfo(record as TableItem)"
+              >
+                編輯
+              </AButton>
+              <AButton
+                size="small"
+                type="primary"
+                @click="goSend(record)"
+              >
+                发送
+              </AButton>
+            </div>
           </template>
         </template>
       </ATable>

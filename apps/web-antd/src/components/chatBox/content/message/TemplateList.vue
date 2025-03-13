@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 
 import {
   FileImageOutlined,
@@ -10,7 +10,7 @@ import {
   Button as AButton,
   Divider as ADivider,
   Flex as AFlex,
-  Image as AImage,
+  Image as AImage, message,
   Modal as AModal,
   Table as ATable,
 } from 'ant-design-vue';
@@ -21,17 +21,33 @@ import Confirm from '#/components/chatBox/content/message/Confirm.vue';
 import { useChatStore, useTemplateStore } from '#/store';
 import {useUserStore} from "@vben/stores";
 import { handleTemplateMsg } from '#/utils/common';
+import {useRouter} from "vue-router";
 
+const props = defineProps({
+  currentPhone: {
+    type: String,
+    default: '',
+  },
+})
+console.log("propsprops", props)
 const chatStore = useChatStore();
 const userStore = useUserStore();
 const template = useTemplateStore();
-const currentPhone = computed(() => chatStore.currentPhone);
+// const currentPhone = props.currentPhone === '' ? computed(() => chatStore.currentPhone) : ref(props.currentPhone);
+const currentPhone = ref(props.currentPhone);
 const containerTemp = ref({});
 const selectedRow = ref<null | number>(1);
 const confirmRef = ref(null);
 const selectRecord = ref(null);
 const selectName = ref(null);
 const templateList = computed(() => template.getRawTemplateList);
+const jump = ref(false);
+const router = useRouter();
+
+watch(() => props.currentPhone, (newValue) => {
+  console.log("ewst", newValue)
+  currentPhone.value = newValue;
+})
 
 // 预览模板处理
 const preViewTemp = (data) => {
@@ -127,7 +143,8 @@ const handleSubmit = () => {
 };
 
 defineExpose({
-  controlTemp: () => {
+  controlTemp: (needJump?: boolean) => {
+    if(needJump) jump.value = needJump;
     handleSubmit();
   },
 });
@@ -152,6 +169,7 @@ const sendTemplate = async () => {
     from: userStore.selectPhone,
     to: currentPhone.value.toString(),
   };
+  console.log("sendDatasendData", sendData, currentPhone.value)
   const msgContent = handleTemplateMsg(name, language);
   for (const i in msgContent) {
     const item = msgContent[i];
@@ -176,28 +194,37 @@ const sendTemplate = async () => {
   }
 
   const resultObj = await sendMessageApi(sendData);
+  const contactPhone = chatStore.currentPhone;
 
-  const message = {
-    direction: 'outbound',
-    _id: resultObj.id,
-    status: resultObj.status,
-    type: resultObj.type,
-    deliverTime: resultObj.createTime,
-    content: msgContent,
-  };
+  if(sendData.to === contactPhone) {
+    const message = {
+      direction: 'outbound',
+      _id: resultObj.id,
+      status: resultObj.status,
+      type: resultObj.type,
+      deliverTime: resultObj.createTime,
+      content: msgContent,
+    };
 
-  if (
-    msgContent.header !== undefined &&
-    msgContent.header.format === 'DOCUMENT'
-  ) {
-    const url = msgContent.header.content;
-    const filename = url.split('/').pop();
-    const fileExtension = filename.split('.');
-    message.fileExtension = fileExtension[1];
+    if (
+      msgContent.header !== undefined &&
+      msgContent.header.format === 'DOCUMENT'
+    ) {
+      const url = msgContent.header.content;
+      const filename = url.split('/').pop();
+      const fileExtension = filename.split('.');
+      message.fileExtension = fileExtension[1];
+    }
+
+    chatStore.addMessage(message);
   }
-
-  chatStore.addMessage(message);
+  message.success('发送成功')
   handleSubmit();
+  // if(jump.value) {
+  //   router.push({
+  //     name: 'Chat',
+  //   });
+  // }
 };
 
 onMounted(() => {

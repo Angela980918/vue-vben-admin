@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { ref } from 'vue';
+import {ref, watch} from 'vue';
 
 import {
   Divider as ADivider,

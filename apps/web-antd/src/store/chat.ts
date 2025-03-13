@@ -131,8 +131,18 @@ export const useChatStore = defineStore('chatStore', () => {
   }
 
   function clearChat() {
-    // console.log("123456798")
     chatMessages.value = [];
+  }
+
+  function changeChatByPhone(phone: string) {
+    const assignedCustomers = useCustomerStore().getAssignedCustomers;
+    assignedCustomers.forEach(item => {
+      if(item.phoneNumber === phone) {
+        currentChatId.value = item.id;
+        currentCustomerInfo.value = item;
+        return;
+      }
+    })
   }
 
   function $reset() {
@@ -164,5 +174,6 @@ export const useChatStore = defineStore('chatStore', () => {
     updateMessage,
     setCurrentUserInfo,
     clearChat,
+    changeChatByPhone,
   };
 });

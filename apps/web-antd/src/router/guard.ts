@@ -6,7 +6,7 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import {useAuthStore, useCustomerStore, useTemplateStore} from '#/store';
+import {useAuthStore, useChatStore, useCustomerStore, useTemplateStore} from '#/store';
 
 import { generateAccess } from './access';
 import {wsconnect} from "#/utils/wscontect";
@@ -51,6 +51,16 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
+    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    const tempStore = useTemplateStore();
+    const customerStore = useCustomerStore();
+    // const chatStore = useChatStore();
+    // console.log('state:', to.);
+    // 如果跳轉的是Chat
+    // if(to.name === 'ChatPage' && to.query?.userPhone !== undefined) {
+    //   chatStore.changeChatByPhone(to.query?.userPhone)
+    // }
+
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
@@ -91,15 +101,15 @@ function setupAccessGuard(router: Router) {
       return true;
     }
 
-    let data = {
-      account: 'admin',
-      password: 'admin168',
-      role: 'super'
-    }
+    // let data = {
+    //   account: 'admin',
+    //   password: 'admin168',
+    //   role: 'super'
+    // }
 
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+
     const userRoles = userInfo!.roles ?? [];
 
     // 生成菜单和路由
@@ -111,8 +121,6 @@ function setupAccessGuard(router: Router) {
     });
 
     // 讀取數據
-    const tempStore = useTemplateStore();
-    const customerStore = useCustomerStore();
     await tempStore.loadQuickMsg(userStore.selectAccount);
     await tempStore.loadTemplates();
     await tempStore.setMaterialListData(`queryType=material&wabaId=${userStore.selectAccount}`);

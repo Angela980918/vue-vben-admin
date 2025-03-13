@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 // import {handleTemplateMsg} from "@/tools/index.js";
 import {handleTemplateMsg} from "#/utils/common";
 import {getNewRoomId} from "#/api";
+import {useUserStore} from "@vben/stores";
 
 const MAX_MISSED_PONGS = 3; // 最大未响应心跳次数
 let wsList = {};
@@ -166,7 +167,7 @@ export const wsconnect = {
       const jsonData = newValue.data;
       let whatsappMessage = "";
       whatsappMessage = jsonData.whatsappInboundMessage;
-
+      console.log("whatsappMessagewhatsappMessagewhatsappMessage",whatsappMessage)
       const assignedCustomers = customerStore.getAssignedCustomers;
       // const unAssignedCustomers = customerStore.getUnassignedCustomers;
       // console.log("whatsappMessage", whatsappMessage)
@@ -199,7 +200,6 @@ export const wsconnect = {
       // 如果不是，为那条记录更新最新的消息、未读+1
       else{
         let inserOrNot = 0;
-
         let message = "";
         // console.log("whatsappMessage.type",whatsappMessage.type,whatsappMessage.type==='text');
 
@@ -232,7 +232,12 @@ export const wsconnect = {
 
         // 插入新用戶
         if(inserOrNot !== 1) {
-          const { roomId } = await getNewRoomId(whatsappMessage.from);
+
+          //
+          const sendPhone = useUserStore().selectPhone;
+          let phone = whatsappMessage.from === sendPhone ? whatsappMessage.to : whatsappMessage.from
+
+          const { roomId } = await getNewRoomId(phone);
           const color = wsconnect.generateRandomColor();
           const userName = whatsappMessage.customerProfile.name;
           // @ts-ignore
