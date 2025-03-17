@@ -3,6 +3,8 @@ import type { MessageData } from '@vben/types';
 
 import { computed, nextTick, ref } from 'vue';
 
+import { useUserStore } from '@vben/stores';
+
 import {
   AudioMutedOutlined,
   AudioOutlined,
@@ -27,12 +29,10 @@ import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
 import Recorderx from 'recorderx';
 
 import { sendMessageApi, uploadMaterialApi } from '#/api';
-import TemplateList from '#/components/chatBox/content/message/TemplateList.vue';
 import QuickMsg from '#/components/contact/QuickMsg.vue';
-import { useChatStore, useTemplateStore } from '#/store';
+import { useChatStore } from '#/store';
 
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
-import { useUserStore } from '@vben/stores';
 
 const emit = defineEmits(['openTemp']);
 
@@ -81,7 +81,9 @@ const sendDocMessage = async (event: Event) => {
   }
 
   if (files && files.length > 0) {
-    const response = await uploadMaterialApi(fileContent!, 'room', type!, { roomId: chatStore.currentChatId.toString() }); // 上传文件
+    const response = await uploadMaterialApi(fileContent!, 'room', type!, {
+      roomId: chatStore.currentChatId.toString(),
+    }); // 上传文件
 
     docTxt.value = `https://cos.jackycode.cn/${response.file_path}`;
     messageType.value = type;
@@ -170,14 +172,14 @@ function selectEmoji(emoji) {
 function handleSubmit() {
   // showTemp.value = !showTemp.value
   // colTemp.value.controlTemp();
-  emit('openTemp')
+  emit('openTemp');
 }
 
 const userStore = useUserStore();
 
 const wabaId = ref(userStore.selectAccount);
 function showQuickMsg() {
-  nextTick(() =>  quickRef.value!.setOpen(wabaId.value));
+  nextTick(() => quickRef.value!.setOpen(wabaId.value));
 }
 
 // 发送消息
@@ -300,15 +302,17 @@ const stopRecording = async () => {
     // 将 Float32Array 转换为 WAV 格式或其他格式
     // const FloatToBlob = new Blob([audioBlob], { type: 'audio/wav' }); // 或者根据你的实际格式使用不同的类型
     // 创建 File 对象
-    const audioFile = new File([audioBlob], 'recording.wav', {
+    const audioFile = new File([audioBlob], `${Date.now()}.wav`, {
       type: 'audio/wav',
     });
     const formData = new FormData();
     formData.append('audio', audioFile);
-    await uploadMaterialApi(audioFile, 'room', 'audio', { roomId: chatStore.currentChatId }).then((result) => {
+    await uploadMaterialApi(audioFile, 'room', 'audio', {
+      roomId: chatStore.currentChatId,
+    }).then((result) => {
       docTxt.value = `https://cos.jackycode.cn/${result.file_path}`;
       messageType.value = 'audio';
-    })
+    });
   }
 };
 
@@ -345,14 +349,14 @@ const stopRecording = async () => {
     </div>
 
     <!--        模板消息选择-->
-<!--    <TemplateList-->
-<!--      :current-phone="currentPhone"-->
-<!--      ref="colTemp"-->
-<!--      v-show="showTemp"-->
-<!--    />-->
+    <!--    <TemplateList-->
+    <!--      :current-phone="currentPhone"-->
+    <!--      ref="colTemp"-->
+    <!--      v-show="showTemp"-->
+    <!--    />-->
 
     <!--        快捷回复-->
-    <QuickMsg ref="quickRef" :showQuickList="true" />
+    <QuickMsg ref="quickRef" :show-quick-list="true" />
 
     <!--        输入文本信息-->
     <ATextarea
@@ -361,6 +365,7 @@ const stopRecording = async () => {
       ref="textAreaRef"
       v-model:value="contentTxt"
       placeholder="輸入內容"
+      :disabled="messageType === 'audio'"
       :rows="4"
     />
 
@@ -403,7 +408,7 @@ const stopRecording = async () => {
         />
         <FileTextFilled
           v-else
-          style=" font-size: 40px;color: #dcdcdc; cursor: pointer"
+          style="font-size: 40px; color: #dcdcdc; cursor: pointer"
         />
 
         <!-- 文件名，flex-grow使其占用剩余空间 -->
@@ -421,8 +426,8 @@ const stopRecording = async () => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 10px;
         max-height: 50px;
+        margin-top: 10px;
       "
     >
       <div>
@@ -430,7 +435,7 @@ const stopRecording = async () => {
           <template #title>表情</template>
           <SmileOutlined
             class="inputText"
-            style=" margin: 4px;font-size: 20px"
+            style="margin: 4px; font-size: 20px"
             @click="showSmile"
             ref="smileIcon"
           />
@@ -438,14 +443,14 @@ const stopRecording = async () => {
         <ATooltip>
           <template #title>快捷回復</template>
           <MessageOutlined
-            style=" margin: 4px;font-size: 20px"
+            style="margin: 4px; font-size: 20px"
             @click="showQuickMsg"
           />
         </ATooltip>
         <ATooltip>
           <template #title>上傳文檔</template>
           <PaperClipOutlined
-            style=" margin: 4px;font-size: 20px"
+            style="margin: 4px; font-size: 20px"
             @click="uploadDoc"
           />
           <input
@@ -459,23 +464,23 @@ const stopRecording = async () => {
         </ATooltip>
         <ATooltip>
           <template #title>選擇產品/服務</template>
-          <ContainerOutlined style=" margin: 4px;font-size: 20px" />
+          <ContainerOutlined style="margin: 4px; font-size: 20px" />
         </ATooltip>
         <ATooltip>
           <template #title>地理位置</template>
-          <EnvironmentOutlined style=" margin: 4px;font-size: 20px" />
+          <EnvironmentOutlined style="margin: 4px; font-size: 20px" />
         </ATooltip>
         <ATooltip>
           <template #title>錄音</template>
           <AudioOutlined
-            style=" margin: 4px;font-size: 20px"
+            style="margin: 4px; font-size: 20px"
             @click="audioStart"
           />
         </ATooltip>
         <ATooltip>
           <template #title>訊息模板</template>
           <FileTextOutlined
-            style=" margin: 4px;font-size: 20px"
+            style="margin: 4px; font-size: 20px"
             @click="handleSubmit"
           />
         </ATooltip>

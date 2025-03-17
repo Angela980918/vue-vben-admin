@@ -1,18 +1,11 @@
 <script lang="ts" setup>
 import type { UploadProps } from 'ant-design-vue';
 
-import {
-  computed,
-  nextTick,
-  onBeforeMount,
-  onMounted,
-  ref,
-  shallowRef,
-  watch,
-} from 'vue';
+import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
+
+import { useUserStore } from '@vben/stores';
 
 import { FileTextOutlined, UploadOutlined } from '@ant-design/icons-vue';
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import {
   Button as AButton,
   Flex as AFlex,
@@ -21,6 +14,7 @@ import {
   Modal as AModal,
   Select as ASelect,
   Table as ATable,
+  Textarea as ATextarea,
 } from 'ant-design-vue';
 
 // import {cosApi} from "@/api/whatsapp/index.js";
@@ -30,7 +24,6 @@ import SelectItem from '#/components/contact/SelectItem.vue';
 // import {useTempStore} from "@/store/useTempStore";
 // import {useChatStore} from "@/store/chatStore";
 import { useChatStore, useTemplateStore } from '#/store';
-import {useUserStore} from "@vben/stores";
 
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
@@ -159,15 +152,26 @@ const type = ref('');
 const accountChange = ref('public');
 
 // 編輯器配置
-const editorRef = shallowRef();
-const toolbarConfig = {
-  toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
-};
-const editorConfig = {
-  placeholder: '请输入内容...',
-};
-const handleCreated = (editor) => {
-  editorRef.value = editor;
+// const editorRef = shallowRef();
+// const toolbarConfig = {
+//   toolbarKeys: ['bold', 'italic', 'emotion'], // 仅显示加粗、斜体和表情菜单
+// };
+// const editorConfig = {
+//   placeholder: '请输入内容...',
+// };
+// const handleCreated = (editor) => {
+//   editorRef.value = editor;
+// };
+
+const setOpen = (value?: string) => {
+  open.value = !open.value;
+  if (value) {
+    value1.value = value;
+    // console.log("quickList.value[0]", quickList.value[0], props.showQuickList);
+    templateStore.loadQuickMsg(value);
+    // props.showQuickList && preViewQuick(quickList.value[0]);
+    // props.showQuickList && preViewQuick(quickList.value[0]);
+  }
 };
 
 // 切換公共\個人素材庫
@@ -181,9 +185,9 @@ const changeOptions = () => {
 };
 
 const handleOk = async () => {
-  if(isCheck.value) {
+  if (isCheck.value) {
     open.value = false;
-  }else {
+  } else {
     const list = [];
     selectFileArr.value.forEach((item) => {
       list.push(item.id);
@@ -195,24 +199,16 @@ const handleOk = async () => {
       content: selectContent.value,
     };
 
-    if(value1.value.length > 6) {
-      data.wabaId = value1.value
-    }else {
-      data.userId = value1.value
+    if (value1.value.length > 6) {
+      data.wabaId = value1.value;
+    } else {
+      data.userId = value1.value;
     }
-
-    await uploadQuickMsgApi(data);
-  }
-};
-
-const setOpen = (value?: string) => {
-  open.value = !open.value;
-  if(value) {
-    value1.value = value;
-    // console.log("quickList.value[0]", quickList.value[0], props.showQuickList);
-    templateStore.loadQuickMsg(value);
-    // props.showQuickList && preViewQuick(quickList.value[0]);
-    // props.showQuickList && preViewQuick(quickList.value[0]);
+    // console.log("datadata",data.content)
+    // htmlToText(data,)
+    await uploadQuickMsgApi(data).then(() => {
+      setOpen();
+    });
   }
 };
 
@@ -271,47 +267,53 @@ const setRowClassName = (record: any) => {
   return record._id === selectedRow.value ? 'table-striped' : '';
 };
 
-!props.showQuickList && watch(
-  () => props.fileArray,
-  (newVal) => {
-    selectFileArr.value = newVal;
-    if (newVal.length > 0) {
-      newVal.forEach((item) => {
-        const newFile = {
-          uid: item?.file_id || '1',
-          name: item?.file_name,
-          status: 'done',
-          response: '',
-          url: `https://cos.jackycode.cn/${item?.file_path}`,
-        };
-        fileList.value.push(newFile);
-      });
-    }
-  },
-  { immediate: true },
-);
+!props.showQuickList &&
+  watch(
+    () => props.fileArray,
+    (newVal) => {
+      selectFileArr.value = newVal;
+      if (newVal.length > 0) {
+        newVal.forEach((item) => {
+          const newFile = {
+            uid: item?.file_id || '1',
+            name: item?.file_name,
+            status: 'done',
+            response: '',
+            url: `https://cos.jackycode.cn/${item?.file_path}`,
+          };
+          fileList.value.push(newFile);
+        });
+      }
+    },
+    { immediate: true },
+  );
 
-!props.showQuickList && watch(
-  () => props.fileContent,
-  (newVal) => {
-    selectContent.value = newVal;
-  },
-  { immediate: true },
-);
+!props.showQuickList &&
+  watch(
+    () => props.fileContent,
+    (newVal) => {
+      selectContent.value = newVal;
+    },
+    { immediate: true },
+  );
 
-!props.showQuickList && watch(
-  () => props.msgName,
-  (newVal) => {
-    headerTxt.value = newVal;
-  },
-  { immediate: true },
-);
+!props.showQuickList &&
+  watch(
+    () => props.msgName,
+    (newVal) => {
+      headerTxt.value = newVal;
+    },
+    { immediate: true },
+  );
 
-props.showQuickList && watch(() => templateStore.quickMessage, (newValue) => {
-  quickList.value = newValue;
-  preViewQuick(quickList.value[0]);
-
-})
+props.showQuickList &&
+  watch(
+    () => templateStore.quickMessage,
+    (newValue) => {
+      quickList.value = newValue;
+      preViewQuick(quickList.value[0]);
+    },
+  );
 
 const confirm = (record) => {
   const { title } = record;
@@ -333,7 +335,7 @@ onMounted(() => {
 
 defineExpose({
   setOpen: (value: string, check?: boolean) => {
-    if(check !== undefined) {
+    if (check !== undefined) {
       isCheck.value = check;
     }
     setOpen(value);
@@ -351,17 +353,20 @@ defineExpose({
       :width="1000"
     >
       <!--                   选择公共库还是个人账号 -->
-      <div v-show="showQuickList" style="display: flex; flex-direction: column; padding: 10px;">
-            <span style="font-size: 18px">賬號</span>
-            <div style=" max-width: 400px; margin-top: 10px">
-              <ASelect
-                v-model:value="value1"
-                style="width: 200px"
-                :options="options"
-                @change="loadAccountQuickMsg"
-              />
-            </div>
-          </div>
+      <div
+        v-show="showQuickList"
+        style="display: flex; flex-direction: column; padding: 10px"
+      >
+        <span style="font-size: 18px">賬號</span>
+        <div style="max-width: 400px; margin-top: 10px">
+          <ASelect
+            v-model:value="value1"
+            style="width: 200px"
+            :options="options"
+            @change="loadAccountQuickMsg"
+          />
+        </div>
+      </div>
 
       <div class="flex-container">
         <!--                显示可选快捷信息列表-->
@@ -399,7 +404,7 @@ defineExpose({
           <!--                   快捷回復標題 -->
           <div style="display: flex; flex-direction: column">
             <span style="font-size: 18px">標題</span>
-            <div style=" max-width: 400px;padding: 12px 0; margin-top: 10px">
+            <div style="max-width: 400px; padding: 12px 0; margin-top: 10px">
               <AInput name="headerInput" v-model:value="headerTxt" show-count />
             </div>
           </div>
@@ -407,7 +412,7 @@ defineExpose({
           <!--                   选择公共库还是个人账号 -->
           <div style="display: flex; flex-direction: column">
             <span style="font-size: 18px">賬號</span>
-            <div style=" max-width: 400px;padding: 12px 0; margin-top: 10px">
+            <div style="max-width: 400px; padding: 12px 0; margin-top: 10px">
               <ASelect
                 v-model:value="value1"
                 style="width: 200px"
@@ -443,16 +448,34 @@ defineExpose({
                 box-sizing: border-box;
                 width: 100%;
                 max-width: 100%;
-                border: 1px solid #ccc;
+                height: 300px;
+
+                /* border: 1px solid #ccc; */
               "
             >
-              <Toolbar
-                style="border-bottom: 1px solid #ccc"
-                :editor="editorRef"
-                :default-config="toolbarConfig"
-                mode="default"
-              />
-              <Editor
+              <!--              <Toolbar-->
+              <!--                style="border-bottom: 1px solid #ccc"-->
+              <!--                :editor="editorRef"-->
+              <!--                :default-config="toolbarConfig"-->
+              <!--                mode="default"-->
+              <!--              />-->
+              <!--              <Editor-->
+              <!--                style="-->
+              <!--                  box-sizing: border-box;-->
+              <!--                  width: 100%;-->
+              <!--                  height: 300px;-->
+              <!--                  overflow-y: hidden;-->
+              <!--                  word-break: break-word;-->
+              <!--                  word-wrap: break-word;-->
+              <!--                  overflow-wrap: break-word;-->
+              <!--                  white-space: pre-wrap;-->
+              <!--                "-->
+              <!--                v-model="selectContent"-->
+              <!--                :default-config="editorConfig"-->
+              <!--                mode="default"-->
+              <!--                @on-created="handleCreated"-->
+              <!--              />-->
+              <ATextarea
                 style="
                   box-sizing: border-box;
                   width: 100%;
@@ -463,10 +486,7 @@ defineExpose({
                   overflow-wrap: break-word;
                   white-space: pre-wrap;
                 "
-                v-model="selectContent"
-                :default-config="editorConfig"
-                mode="default"
-                @on-created="handleCreated"
+                v-model:value="selectContent"
               />
             </div>
           </div>
@@ -547,9 +567,7 @@ defineExpose({
                 </div>
               </template>
 
-              <template
-                v-if="selectFileArr?.length === 1"
-              >
+              <template v-if="selectFileArr?.length === 1">
                 <div v-for="(item, index) in selectFileArr" :key="index + 1">
                   <div class="arrow"></div>
                   <div class="content">
@@ -618,7 +636,9 @@ defineExpose({
                 </div>
               </template>
 
-              <div v-else-if="selectContent !== '' && selectFileArr?.length > 1">
+              <div
+                v-else-if="selectContent !== '' && selectFileArr?.length > 1"
+              >
                 <div class="arrow"></div>
                 <div class="content">
                   <div class="mediaCenter">
@@ -653,7 +673,7 @@ defineExpose({
     <SelectItem
       :account="accountChange"
       :type="type"
-      @getSelected="getSelected"
+      @get-selected="getSelected"
       ref="selectItemRef"
     />
   </div>
@@ -690,7 +710,7 @@ defineExpose({
       flex-shrink: 0;
       width: 320px;
       height: 83px;
-      background-image: url("https://app.salesmartly.com/img/phoneheader.4b8c90cf.png");
+      background-image: url('https://app.salesmartly.com/img/phoneheader.4b8c90cf.png');
       background-repeat: no-repeat;
       background-size: contain;
     }
@@ -712,8 +732,7 @@ defineExpose({
         left: 7px;
         width: 0;
         height: 0;
-        border-color: rgb(255 255 255) rgb(255 255 255) transparent
-          transparent;
+        border-color: rgb(255 255 255) rgb(255 255 255) transparent transparent;
         border-style: solid;
         border-width: 3.5px;
         border-image: initial;
@@ -770,7 +789,7 @@ defineExpose({
       flex-shrink: 0;
       width: 320px;
       height: 63px;
-      background-image: url("https://app.salesmartly.com/img/phonebottom.a32a8d85.png");
+      background-image: url('https://app.salesmartly.com/img/phonebottom.a32a8d85.png');
       background-repeat: no-repeat;
       background-size: contain;
     }

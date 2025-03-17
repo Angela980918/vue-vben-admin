@@ -41,7 +41,9 @@ export async function sendMessageApi({
     data[dynamicKey] = template;
   } else if (type !== 'text' && message !== undefined) {
     const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
-    data[dynamicKey] = { link, caption: message }; // 动态赋值
+    type === 'audio'
+      ? (data[dynamicKey] = { link })
+      : (data[dynamicKey] = { link, caption: message }); // 动态赋值
   } else {
     const dynamicKey = `${type}`; // 动态变量名，例如 "text_message"
     data[dynamicKey] = { body: message }; // 动态赋值
