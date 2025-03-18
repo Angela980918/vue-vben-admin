@@ -103,9 +103,9 @@ watch(
   () => formState,
   (newValue, oldValue) => {
     // eslint-disable-next-line no-console
-    // console.log('formState newValue', newValue);
+    console.log('formState newValue', newValue);
     // eslint-disable-next-line no-console
-    // console.log('formState oldValue', oldValue);
+    console.log('formState oldValue', oldValue);
   },
   {
     deep: true,
@@ -279,6 +279,10 @@ const updateCreateTempData = async () => {
     // 處理模板内容部分
     createTempData.components.forEach((component) => {
       switch (component.type) {
+        case 'BODY': {
+          formState.editor = component.text;
+          break;
+        }
         case 'FOOTER': {
           formState.footer = component.text;
           break;
@@ -293,9 +297,6 @@ const updateCreateTempData = async () => {
             formState.selectFile = component.example.header_url[0];
           }
           break;
-        }
-        case 'BODY': {
-          formState.editor = component.text
         }
         default: {
           // console.warn(`Unhandled component type: ${component.type}`);
@@ -427,7 +428,10 @@ onUnmounted(() => {
               </ACol>
             </ACol>
 
-            <ACol span="24" v-if="formState.selectMedia">
+            <ACol
+              span="24"
+              v-if="formState.selectMedia && formState.selectHeader === 'MEDIA'"
+            >
               <AFormItem label="上傳" name="selectFile">
                 <SelectInput
                   :upload-type="formState.selectMedia"
