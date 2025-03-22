@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, h, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
+import { computed, h, nextTick, ref, watch } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
@@ -32,12 +32,11 @@ import {
 // import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 // import ImageView from "@/components/chatBox/content/message/ImageView.vue";
 import ChatMessage from '#/components/chatBox/content/chatMessage.vue';
-import ImageView from '#/components/chatBox/content/message/ImageView.vue';
+import TemplateList from '#/components/chatBox/content/message/TemplateList.vue'; // 引入 css
 import { useChatStore, useCustomerStore } from '#/store';
 import { formatTime } from '#/tools';
 
 import '@wangeditor/editor/dist/css/style.css';
-import TemplateList from "#/components/chatBox/content/message/TemplateList.vue"; // 引入 css
 
 const emits = defineEmits(['setShowRight']);
 const videoPlayer = ref(null);
@@ -46,6 +45,7 @@ const syncLoading = ref(false);
 const customerStore = useCustomerStore();
 const userStore = useUserStore();
 const chatStore = useChatStore();
+const needSendTemp = ref(false);
 
 const currentPhone = computed(() => chatStore.currentPhone);
 const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo);
@@ -71,8 +71,15 @@ watch(
   },
 );
 
-const visiable = ref(false);
-const imgUrl = ref('');
+watch(
+  () => chatStore.needSendTempFirst,
+  (newValue) => {
+    needSendTemp.value = newValue;
+  },
+);
+
+// const visiable = ref(false);
+// const imgUrl = ref('');
 
 const data = computed(() => {
   // console.log("chatStore.chatMessages",chatStore.chatMessages)
@@ -105,17 +112,23 @@ const chatRoom = ref(null);
 const chatRoom26 = ref(null);
 const colTemp = ref(null);
 const scrollToBottom = (prevHeight = null) => {
-    nextTick(() => {
-        const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
-        if (chatRoomElement) {
-            if (prevHeight === null) {
-                chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
-            }else {
-                const firstMessageElement = document.getElementById(prevHeight);
-                if (firstMessageElement) firstMessageElement.scrollIntoView({ behavior: 'auto', block: 'start' });
-            }
-        }
-    });
+  nextTick(() => {
+    const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
+    if (chatRoomElement) {
+      if (prevHeight === null) {
+        chatRoomElement.scrollTop = chatRoomElement.scrollHeight;
+      } else {
+        // eslint-disable-next-line unicorn/prefer-query-selector
+        const firstMessageElement = document.getElementById(prevHeight);
+        if (firstMessageElement)
+          firstMessageElement.scrollIntoView({
+            behavior: 'auto',
+            block: 'start',
+          });
+        chatStore.scrollTo = false;
+      }
+    }
+  });
 };
 // const handleVisiable = (link) => {
 //   if (link !== undefined) {
@@ -168,7 +181,7 @@ watch(
     } else {
       syncLoading.value = false;
       const msgIndex = `${chatStore.page - 1}-0-index`;
-      scrollToBottom(msgIndex);
+      chatStore.scrollTo && scrollToBottom(msgIndex);
     }
   },
   { deep: true },
@@ -179,17 +192,14 @@ watch(
   <div :style="{ width: '100%', height: '100%' }">
     <!-- 聊天框 -->
     <ALayout style="flex-direction: column; height: 100%">
-<!--      <ImageView-->
-<!--        :img-url="imgUrl"-->
-<!--        :visiable="visiable"-->
-<!--        @handle-change="handleVisiable"-->
-<!--      />-->
+      <!--      <ImageView-->
+      <!--        :img-url="imgUrl"-->
+      <!--        :visiable="visiable"-->
+      <!--        @handle-change="handleVisiable"-->
+      <!--      />-->
 
       <!--        模板消息选择-->
-      <TemplateList
-        :current-phone="currentPhone"
-        ref="colTemp"
-      />
+      <TemplateList :current-phone="currentPhone" ref="colTemp" />
 
       <!-- 头部：聊天标题或信息 -->
       <ALayoutHeader :style="headerStyle">
@@ -277,8 +287,9 @@ watch(
                   "
                 >
                   <div v-if="item.type === 'text'">
-<!--                    <span>{{ item.content.body }}</span>-->
-                    <span v-html="item.content.body"></span>
+                    <!--                    <span>{{ item.content.body }}</span>-->
+                    <!--                    <span>{{item.content.body}}</span>-->
+                    <pre style="display: inline">{{ item.content.body }}</pre>
                   </div>
 
                   <div v-else-if="item.type === 'image'">
@@ -292,7 +303,9 @@ watch(
                     >
                       <AImage :src="item.content.link" />
                     </div>
-                    <span v-html="item.content.caption"></span>
+                    <pre style="display: inline">{{
+                      item.content.caption
+                    }}</pre>
                   </div>
 
                   <div v-else-if="item.type === 'video'">
@@ -305,8 +318,11 @@ watch(
                       >
                         <source :src="item.content.link" type="video/mp4" />
                       </video>
-<!--                      <span>{{ item.content.caption }}</span>-->
-                      <span v-html="item.content.caption"></span>
+                      <!--                      <span>{{ item.content.caption }}</span>-->
+                      <!--                      <span >{{item.content.caption}}</span>-->
+                      <pre style="display: inline">{{
+                        item.content.caption
+                      }}</pre>
                     </div>
                   </div>
 
@@ -354,10 +370,11 @@ watch(
                           style="color: #dcdcdc; cursor: pointer"
                         />
                       </a>
-<!--                      <span style="font-size: 14px; color: #a9a9a9">{{-->
-<!--                        item.content.caption-->
-<!--                      }}</span>-->
-                      <span style="font-size: 14px; color: #a9a9a9" v-html="item.content.caption"></span>
+                      <pre
+                        style="display: inline; font-size: 14px; color: #a9a9a9"
+                      >
+                        {{ item.content.caption }}
+                      </pre>
                     </div>
                   </div>
 
@@ -522,14 +539,23 @@ watch(
 
       <!-- 底部输入框 -->
       <ALayoutFooter :style="footerStyle">
-        <div v-if="chatStore.needSendTempFirst" class="flex flex-col flex-center cursor-pointer" @click="handleSubmit">
-          <span class="font-medium" style="font-size: 18px">客戶最近聯繫時間已超過24小時，請先发送模板信息</span>
-          <AButton  type="primary" style="width: 200px; font-size: 16px" shape="round">
-            (立即发送)
+        <div
+          v-if="needSendTemp"
+          class="flex-center flex cursor-pointer flex-col"
+          @click="handleSubmit"
+        >
+          <span class="font-medium" style="font-size: 18px">
+            客戶最近聯繫時間已超過24小時，請先发送模板信息
+          </span>
+          <AButton
+            type="primary"
+            style="width: 200px; font-size: 16px"
+            shape="round"
+          >
+            (立即發送)
           </AButton>
         </div>
-
-        <ChatMessage @openTemp="handleSubmit" v-else />
+        <ChatMessage @open-temp="handleSubmit" v-else />
       </ALayoutFooter>
     </ALayout>
   </div>
@@ -622,9 +648,9 @@ watch(
   border-radius: 8px;
 
   .contentHeader {
-    margin: 0 0 4px;
     max-width: 225px;
     max-height: 225px;
+    margin: 0 0 4px;
     font-family: Roboto, Helvetica, Arial, sans-serif;
     font-size: 16px;
     font-weight: 600;
