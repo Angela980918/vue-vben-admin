@@ -31,8 +31,8 @@ import {
   Tooltip as ATooltip,
   message,
 } from 'ant-design-vue';
+import TurndownService from 'turndown';
 
-import { createTemplateApi, editTemplateApi } from '#/api';
 import SelectInput from '#/components/templates/SelectInput.vue';
 import { categoryMap, headerMap, languageMap, mediaMap } from '#/map';
 import { useTemplateStore } from '#/store';
@@ -206,6 +206,15 @@ const onSubmit = async () => {
     key: submitKey,
     duration: 1,
   }); // 显示加载中的消息
+  const turndownService = new TurndownService();
+  turndownService.addRule('strong', {
+    filter: ['strong', 'b'],
+    replacement: (content) => `*${content}*`, // 改为单星号
+  });
+  turndownService.addRule('em', {
+    filter: ['em', 'i'],
+    replacement: (content) => `_${content}_`, // 改为单下划线
+  });
 
   formRef.value
     .validate()
@@ -218,14 +227,18 @@ const onSubmit = async () => {
       }); // 显示加载中的消息
       // console.log('values', formState, toRaw(formState));
       const rawFormState = toRaw(formState);
-      // console.log('rawFormState', rawFormState);
 
       const reqData = processFormData(rawFormState);
-      // console.log("reqDatareqDatareqData", reqData)
+      reqData.components.forEach((item) => {
+        if (item.type === 'BODY') {
+          item.text = turndownService.turndown(item.text);
+        }
+      });
+
       try {
-        await (isUpdated.value
-          ? editTemplateApi(reqData)
-          : createTemplateApi(reqData));
+        // await (isUpdated.value
+        //   ? editTemplateApi(reqData)
+        //   : createTemplateApi(reqData));
         message.success({
           content: '模板數據提交成功',
           key: submitKey,
@@ -349,7 +362,7 @@ onUnmounted(() => {
             :disabled="isPending"
           >
             <ACol span="10">
-              <AFormItem label="当前公司" name="selectAccount">
+              <AFormItem label="當前公司" name="selectAccount">
                 <SelectInput
                   type="select-common"
                   :select-options="allAccounts"

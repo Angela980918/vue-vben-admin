@@ -10,7 +10,7 @@ export const DEFAULT_HOME_PATH = '/chat';
 
 export interface LanguageOption {
   label: string;
-  value: 'en-US' | 'zh-CN';
+  value: 'en-US' | 'zh-CN' | 'zh-HK';
 }
 
 /**
@@ -24,5 +24,9 @@ export const SUPPORT_LANGUAGES: LanguageOption[] = [
   {
     label: 'English',
     value: 'en-US',
+  },
+  {
+    label: '繁體中文',
+    value: 'zh-HK',
   },
 ];

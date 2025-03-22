@@ -6,10 +6,10 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import {useAuthStore, useChatStore, useCustomerStore, useTemplateStore} from '#/store';
+import { useAuthStore, useCustomerStore, useTemplateStore } from '#/store';
+import { wsconnect } from '#/utils/wscontect';
 
 import { generateAccess } from './access';
-import {wsconnect} from "#/utils/wscontect";
 
 /**
  * 通用守卫配置
@@ -110,7 +110,7 @@ function setupAccessGuard(router: Router) {
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
 
-    const userRoles = userInfo!.roles ?? [];
+    const userRoles = userInfo?.roles ?? [];
 
     // 生成菜单和路由
     const { accessibleMenus, accessibleRoutes } = await generateAccess({
@@ -123,8 +123,11 @@ function setupAccessGuard(router: Router) {
     // 讀取數據
     await tempStore.loadQuickMsg(userStore.selectAccount);
     await tempStore.loadTemplates();
-    await tempStore.setMaterialListData(`queryType=material&wabaId=${userStore.selectAccount}`);
+    await tempStore.setMaterialListData(
+      `queryType=material&wabaId=${userStore.selectAccount}`,
+    );
     await customerStore.setContactList();
+    await customerStore.setAssignedCustomers();
     await wsconnect.createConnect();
 
     // 保存菜单信息和路由信息

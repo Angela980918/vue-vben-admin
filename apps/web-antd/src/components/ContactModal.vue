@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { Rule } from 'ant-design-vue/es/form';
 
-import {nextTick, reactive, ref, toRaw, watch} from 'vue';
+import { nextTick, reactive, ref, toRaw, watch } from 'vue';
 
 import {
   Form as AForm,
@@ -82,7 +82,7 @@ const onSubmit = () => {
 
 const showModal = (create?: boolean) => {
   nextTick(() => {
-    if(create) {
+    if (create) {
       formRef.value.resetFields();
     }
   });
@@ -125,6 +125,7 @@ defineExpose({
     <AModal
       v-model:open="open"
       title="客戶信息"
+      ok-text="確認"
       @ok="onSubmit"
       @cancel="resetForm"
     >

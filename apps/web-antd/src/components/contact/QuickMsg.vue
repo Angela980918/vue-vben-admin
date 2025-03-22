@@ -15,6 +15,7 @@ import {
   Select as ASelect,
   Table as ATable,
   Textarea as ATextarea,
+  message,
 } from 'ant-design-vue';
 
 // import {cosApi} from "@/api/whatsapp/index.js";
@@ -206,8 +207,10 @@ const handleOk = async () => {
     }
     // console.log("datadata",data.content)
     // htmlToText(data,)
-    await uploadQuickMsgApi(data).then(() => {
+    await uploadQuickMsgApi(data).then(async () => {
       setOpen();
+      message.success('上傳成功');
+      await templateStore.loadQuickMsg(value1.value);
     });
   }
 };
@@ -350,6 +353,7 @@ defineExpose({
       :title="props.msgName !== '' ? props.msgName : '快捷回復'"
       style="justify-items: center"
       @ok="handleOk"
+      ok-text="確認"
       :width="1000"
     >
       <!--                   选择公共库还是个人账号 -->
@@ -744,17 +748,6 @@ defineExpose({
         background-color: rgb(255 255 255);
         border-radius: 0 8px 8px;
 
-        .contentHeader {
-          margin: 0 0 4px;
-          font-family: Roboto, Helvetica, Arial, sans-serif;
-          font-size: 16px;
-          font-weight: 600;
-          line-height: 24px;
-          letter-spacing: 0.0094em;
-          word-break: break-word;
-          white-space: break-spaces;
-        }
-
         .contentBody {
           margin: 0;
           font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -764,17 +757,6 @@ defineExpose({
           letter-spacing: 0.0107em;
           word-break: break-word;
           white-space: break-spaces;
-        }
-
-        .contentFooter {
-          margin: 4px 0 0;
-          font-family: Roboto, Helvetica, Arial, sans-serif;
-          font-size: 14px;
-          font-weight: 400;
-          line-height: 22px;
-          color: rgb(162 157 174);
-          letter-spacing: 0.0094em;
-          overflow-wrap: break-word;
         }
       }
     }

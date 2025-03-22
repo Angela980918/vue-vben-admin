@@ -1,11 +1,11 @@
-import {computed, ref, toRaw} from 'vue';
+import { computed, ref, toRaw } from 'vue';
 
-import {useUserStore} from '@vben/stores';
+import { useUserStore } from '@vben/stores';
 
-import {isEqual} from 'lodash';
-import {defineStore} from 'pinia';
+import { message } from 'ant-design-vue';
+import { defineStore } from 'pinia';
 
-import {getTemplateList, libraryFiles, loadQuickList} from '#/api';
+import { getTemplateList, libraryFiles, loadQuickList } from '#/api';
 
 export const useTemplateStore = defineStore('template', () => {
   // const accessStore = useAccessStore();
@@ -31,11 +31,11 @@ export const useTemplateStore = defineStore('template', () => {
   const userInfo = useUserStore().userInfo;
   const list = [];
   const selectOptions = ref([]);
-  const {wabaAccount} = userInfo;
+  const { wabaAccount } = userInfo;
   wabaAccount.forEach((item) => {
-    list.push({value: item.wabaId, label: item.name});
+    list.push({ value: item.wabaId, label: item.name });
   });
-  list.push({value: userInfo?.id, label: userInfo?.username});
+  list.push({ value: userInfo?.id, label: userInfo?.username });
   selectOptions.value = list;
   createTempAccount.value = selectOptions.value[0].value;
 
@@ -65,7 +65,6 @@ export const useTemplateStore = defineStore('template', () => {
 
   const getQuickMsg = computed(() => {
     const list = structuredClone(toRaw(quickMessage.value));
-    // JSON.parse(JSON.stringify(quickMessage.value));
     list.forEach((item) => {
       const time = new Date(item.createTime);
       const formatter = new Intl.DateTimeFormat('zh-CN', {
@@ -84,13 +83,20 @@ export const useTemplateStore = defineStore('template', () => {
     return list;
   });
 
-  async function loadTemplates() {
+  async function loadTemplates(msg?: string) {
+    if (msg) {
+      page.value = 1;
+      size.value = 10;
+    }
 
     await getTemplateList(page.value).then((result) => {
       // if (
       //   result.items.length > 0 &&
       //   !isEqual(rawTempData.value, result.items)
       // ) {
+      if (msg) {
+        message.success(msg);
+      }
       total.value = result.total;
       setRawTempData(result.items);
       setTempData(result.items);
@@ -104,16 +110,20 @@ export const useTemplateStore = defineStore('template', () => {
 
   async function startBackLoadTemplate() {
     page.value = page.value + 1;
-    await getTemplateList(page.value).then(result => {
-      result.items.forEach((item, index) => item.key = index);
-      rawTempData.value = [ ...rawTempData.value.map(item => toRaw(item)), ...result.items ]
-      tempData.value = [ ...rawTempData.value ];
+    await getTemplateList(page.value).then((result) => {
+      result.items.forEach((item, index) => (item.key = index));
+      rawTempData.value = [
+        ...rawTempData.value.map((item) => toRaw(item)),
+        ...result.items,
+      ];
+      tempData.value = [...rawTempData.value];
 
       size.value += result.length;
-      if(result.total > size.value) {
-        'requestIdleCallback' in window && requestIdleCallback(() => startBackLoadTemplate());
+      if (result.total > size.value) {
+        'requestIdleCallback' in window &&
+          requestIdleCallback(() => startBackLoadTemplate());
       }
-    })
+    });
   }
 
   function setRawTempData(data: any) {
@@ -146,7 +156,7 @@ export const useTemplateStore = defineStore('template', () => {
     await libraryFiles(source)
       .then((result) => {
         if (result !== undefined) {
-          const {document, image, video} = result;
+          const { document, image, video } = result;
           imageList.value = image;
           docList.value = document;
           videoList.value = video;
@@ -159,6 +169,9 @@ export const useTemplateStore = defineStore('template', () => {
   }
 
   function $reset() {
+    page.value = 1;
+    size.value = 10;
+    total.value = 0;
     rawTempData.value = [];
     createTempData.value = [];
     tempData.value = [];

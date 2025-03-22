@@ -1,26 +1,28 @@
 <script lang="ts" setup>
-import type {ColumnType} from 'ant-design-vue/es/table';
+import type { ColumnType } from 'ant-design-vue/es/table';
 
-import type {ContactInfo} from '@vben/types';
+import type { ContactInfo } from '@vben/types';
 
-import {computed, nextTick, reactive, ref, watch} from 'vue';
-import {SyncOutlined} from "@ant-design/icons-vue";
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { SyncOutlined } from '@ant-design/icons-vue';
 import {
-  Button as AButton, message,
+  Button as AButton,
   Modal as AModal,
   Table as ATable,
   Tag as ATag,
   Tooltip as ATooltip,
+  message,
 } from 'ant-design-vue';
 
-import {createContactApi, deleteContactApi, updateContactApi} from '#/api';
-import {useRouter} from "vue-router";
+import { createContactApi, deleteContactApi, updateContactApi } from '#/api';
+import TemplateList from '#/components/chatBox/content/message/TemplateList.vue';
 import ContactModal from '#/components/ContactModal.vue';
-import {countryNameMap} from '#/map';
-import {useCustomerStore, useChatStore} from '#/store';
-import {formatDate} from '#/tools';
-import {getLabel} from '#/utils/common';
-import TemplateList from "#/components/chatBox/content/message/TemplateList.vue";
+import { countryNameMap } from '#/map';
+import { useChatStore, useCustomerStore } from '#/store';
+import { formatDate } from '#/tools';
+import { getLabel } from '#/utils/common';
 
 // 表格欄位定義
 interface TableItem {
@@ -137,25 +139,19 @@ const columns: ColumnType<TableItem>[] = [
 
 // 去發送消息
 const goSend = (record: object) => {
-  console.log("record",record);
-
-  if(record.lastSeen === undefined) {
+  if (record.lastSeen === undefined) {
     currentPhone.value = record.phoneNumber;
     nextTick(() => {
       colTemp.value.controlTemp(true);
-    })
-  }else {
+    });
+  } else {
     chatStore.changeChatByPhone(record.phoneNumber);
 
     router.push({
       name: 'Chat',
     });
   }
-
-  // router.push({
-  //   name: 'Chat',
-  // });
-}
+};
 
 // function handleSubmit() {
 //   colTemp.value.controlTemp();
@@ -191,7 +187,7 @@ const createContact = async (value: any) => {
       customerStore.contactOperate(isCreate.value, result);
     }, 1000);
     showContact.value!.showModal();
-    message.success('新增聯繫人成功')
+    message.success('新增聯繫人成功');
   });
 };
 
@@ -200,7 +196,7 @@ const updateContact = async (value: any) => {
     customerStore.contactOperate(isCreate.value, result);
     isCreate.value = false;
     showContact.value!.showModal();
-    message.success('修改聯繫人成功')
+    message.success('修改聯繫人成功');
   });
 };
 
@@ -222,7 +218,7 @@ const setShowDelete = () => {
 const deleteContact = () => {
   state.selectedRowKeys.map(async (item: Key) => {
     await deleteContactApi(item).then(() => {
-      let index = data.value.findIndex(value => value.id === item);
+      const index = data.value.findIndex((value) => value.id === item);
       if (index !== -1) {
         data.value = data.value.splice(index, 1);
       }
@@ -239,7 +235,7 @@ const deleteContact = () => {
 // item點擊事件
 const checkInfo = (data: TableItem) => {
   isCreate.value = false;
-  formData.value = {...data};
+  formData.value = { ...data };
   state.loading = true;
   nextTick(() => {
     showContact.value!.showModal();
@@ -253,7 +249,6 @@ watch(
     isDelete.value = newValue.length > 0;
   },
 );
-
 </script>
 
 <template>
@@ -262,11 +257,8 @@ watch(
       class="card-box h-full flex-col lg:flex"
       style="width: 100%; overflow-x: auto"
     >
-<!--      模板信息弹窗-->
-      <TemplateList
-        :currentPhone="currentPhone"
-        ref="colTemp"
-      />
+      <!--      模板信息弹窗-->
+      <TemplateList :current-phone="currentPhone" ref="colTemp" />
 
       <!--   創建/編輯 彈窗   -->
       <ContactModal
@@ -297,10 +289,15 @@ watch(
         </AButton>
 
         <ATooltip title="刷新">
-          <AButton @click="customerStore.setContactList('刷新成功')" type="primary" shape="round"
-                   size="middle" style="margin-left: 20px">
+          <AButton
+            @click="customerStore.setContactList('刷新成功')"
+            type="primary"
+            shape="round"
+            size="middle"
+            style="margin-left: 20px"
+          >
             <template #icon>
-              <SyncOutlined/>
+              <SyncOutlined />
             </template>
           </AButton>
         </ATooltip>
@@ -377,7 +374,13 @@ watch(
           </template>
 
           <template v-if="column.key === 'operation'">
-            <div style="display: flex; flex-direction: row; justify-content: space-between">
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+              "
+            >
               <AButton
                 size="small"
                 type="primary"
@@ -385,12 +388,8 @@ watch(
               >
                 編輯
               </AButton>
-              <AButton
-                size="small"
-                type="primary"
-                @click="goSend(record)"
-              >
-                发送
+              <AButton size="small" type="primary" @click="goSend(record)">
+                發送
               </AButton>
             </div>
           </template>

@@ -12,6 +12,8 @@ import {
 
 import { UploadOutlined } from '@ant-design/icons-vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
+// import TurndownService from "turndown";
+// let turndownService = new TurndownService()
 import {
   Button as AButton,
   Input as AInput,
@@ -88,7 +90,7 @@ const emits = defineEmits(['update:modelValue']);
 const fileListUrl = ref([]);
 const fileUrl = ref(props.fileUrl); // 上傳文件返回地址
 const key = 'uploadFile';
-const uploadContent = ref('文件上传中');
+const uploadContent = ref('文件上傳中');
 const inputContents = ref(props.inputContents);
 const TempStore = useTemplateStore();
 
@@ -129,7 +131,7 @@ const handleChange = (value) => {
       emits('update:modelValue', fileUrl.value);
     },
     editor: () => {
-      // console.log('handleChange - editor', valueHtml.value)
+      // console.log('handleChange - editor', valueHtml.value
       emits('update:modelValue', valueHtml.value);
     },
   };
@@ -180,13 +182,13 @@ const customUpload = async (options) => {
   // console.log('customUpload', file);
   message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
 
-  await uploadMaterialApi(file, 'material', props.uploadType.toLowerCase(), {
+  await uploadMaterialApi(file, 'temp', props.uploadType.toLowerCase(), {
     wabaId: TempStore.createTempAccount,
   }).then((response) => {
     fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
     onSuccess(file);
     message.success({
-      content: '文件上传成功',
+      content: '文件上傳成功',
       key: 'upload-key',
       duration: 2,
     });

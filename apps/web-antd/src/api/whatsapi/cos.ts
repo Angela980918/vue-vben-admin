@@ -23,10 +23,10 @@ export async function uploadMaterialApi(
   uploadType: string,
   category: string,
   options: {
-    roomId?: string,
-    wabaId?: string,
-    userId?: string
-  }
+    roomId?: string;
+    userId?: string;
+    wabaId?: string;
+  },
 ) {
   const materialFile = new FormData();
   materialFile.append('file', file);
@@ -39,14 +39,14 @@ export async function uploadMaterialApi(
     const hasUserId = userParams[0] !== undefined;
     const hasWabaId = userParams[1] !== undefined;
     if (hasUserId && hasWabaId) {
-      throw new Error('非room上传不能同时包含userId和wabaId');
+      throw new Error('非room上傳不能同時包含userId和wabaId');
     }
     if (!hasUserId && !hasWabaId) {
-      throw new Error('非room上传必须包含userId或wabaId');
+      throw new Error('非room上傳必須包含userId或wabaId');
     }
     // 添加有效参数
     if (hasUserId) materialFile.append('userId', options.userId || 'userId');
-    else materialFile.append('wabaId',options.wabaId || 'wabaId');
+    else materialFile.append('wabaId', options.wabaId || 'wabaId');
   }
   return wcloudRequestClient.post<any>('/materials/upload-file', materialFile);
 }
@@ -77,18 +77,10 @@ export async function libraryFiles(data: object) {
 /**
  * 查詢快捷用語
  */
-export const loadQuickList = (
-  id: string
-) => {
+export const loadQuickList = (id: string) => {
   let source = '';
-  if(id.length > 6) {
-    source = `wabaId=${id}`
-  }else {
-    source = `userId=${id}`
-  }
-  return wcloudRequestClient.get<any>(
-    `/materials/find-quick-reply?${source}`,
-  );
+  source = id.length > 6 ? `wabaId=${id}` : `userId=${id}`;
+  return wcloudRequestClient.get<any>(`/materials/find-quick-reply?${source}`);
 };
 
 /**

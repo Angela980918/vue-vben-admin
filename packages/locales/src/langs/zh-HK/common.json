@@ -1,0 +1,14 @@
+{
+  "back": "返回",
+  "backToHome": "返回首頁",
+  "login": "登錄",
+  "logout": "退出登錄",
+  "prompt": "提示",
+  "cancel": "取消",
+  "confirm": "確認",
+  "noData": "暫無數據",
+  "refresh": "刷新",
+  "loadingMenu": "加載中",
+  "query": "查詢",
+  "search": "搜索"
+}

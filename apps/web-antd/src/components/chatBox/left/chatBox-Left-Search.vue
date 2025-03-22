@@ -8,7 +8,8 @@ import { useCustomerStore } from '#/store';
 const value = ref<string>('');
 const customerStore = useCustomerStore();
 const onSearch = (searchValue: string) => {
-  customerStore.setSearchWord(searchValue);
+  // console.log("searchValue", searchValue.target.value)
+  customerStore.setSearchWord(searchValue.target.value);
 };
 </script>
 
@@ -18,7 +19,7 @@ const onSearch = (searchValue: string) => {
       name="customerPhone"
       v-model:value="value"
       placeholder="客戶名字或手機號碼"
-      @search="onSearch"
+      @change="onSearch"
       :allow-clear="true"
     />
   </ASpace>

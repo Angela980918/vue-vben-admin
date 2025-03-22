@@ -5,7 +5,7 @@ import type { TemplateData } from '@vben/types';
 
 import type { MapValue } from '#/map';
 
-import { computed, onBeforeMount, reactive, ref } from 'vue';
+import { computed, onBeforeMount, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useUserStore } from '@vben/stores';
@@ -23,19 +23,20 @@ import {
   Button as AButton,
   Dropdown as ADropdown,
   Menu as AMenu,
-  MenuItem as AMenuItem, message,
+  MenuItem as AMenuItem,
   Space as ASpace,
   Table as ATable,
   Tag as ATag,
   Tooltip as ATooltip,
+  message,
 } from 'ant-design-vue';
 
+import { deleteTemplateApi } from '#/api';
 import WASelect from '#/components/templates/WASelect.vue';
 import { categoryMap, errorMap, languageMap, statusMap } from '#/map';
 import { useTemplateStore } from '#/store';
 import { formatDate } from '#/tools/time';
 import { getLabel } from '#/utils/common';
-import {deleteTemplateApi} from "#/api";
 
 type Key = number | string;
 
@@ -43,6 +44,24 @@ type Key = number | string;
 type Status = 'APPROVED' | 'IN_PROGRESS' | 'PENDING' | 'REJECTED' | 'WAITING';
 
 const router = useRouter();
+
+// 搜索欄
+const searchContents = ref('');
+
+// 種類
+const selectCategory = ref([]);
+const allCategory = ref<SelectProps['options']>(categoryMap);
+
+// 語言
+const selectLanguage = ref([]);
+const allLanguage = ref<SelectProps['options']>(languageMap);
+
+// 狀態
+const selectStatus = ref([]);
+const tempStatus = ref<SelectProps['options']>(statusMap);
+
+// 表格显示数据
+const filterData = ref<TemplateData[]>([]);
 
 // icon、顔色變化
 const getTagIcon = (status: Status) => {
@@ -105,98 +124,6 @@ const data = computed(() => {
   return TempStore.tempData as TemplateData[];
 });
 
-// 表格显示数据
-const filterData = ref<TemplateData[]>([]);
-
-// 賬號選擇
-const allAccounts = ref(
-  TempStore.selectOptions.filter(
-    (item) => item.value !== UserStore.userInfo.id,
-  ),
-);
-const selectAccount = ref(TempStore.createTempAccount);
-
-// 搜索欄
-const searchContents = ref('');
-
-// 種類
-const selectCategory = ref([]);
-const allCategory = ref<SelectProps['options']>(categoryMap);
-
-// 語言
-const selectLanguage = ref([]);
-const allLanguage = ref<SelectProps['options']>(languageMap);
-
-// 狀態
-const selectStatus = ref([]);
-const tempStatus = ref<SelectProps['options']>(statusMap);
-
-// 新建模板
-const createTemplate = async () => {
-  await TempStore.resetCreateTempData();
-  router.push({
-    name: 'MarketCreateTemplate',
-  });
-};
-
-// 刪除模板
-const deleteTemplate = () => {
-  // console.log("select", state.selectedRowKeys);
-  state.selectedRowKeys.forEach(async item => {
-    let data = filterData.value[item];
-    await deleteTemplateApi({ wabaId: data.wabaId, name: data.name, language: data.language }).then(result => {
-      let index = TempStore.tempData.findIndex(value => value.name === data.name && value.language === data.language);
-      if(index !== -1) {
-        TempStore.tempData.splice(index, 1);
-        dataFilter();
-      }
-    })
-    message.success('刪除成功')
-  })
-
-}
-
-const state = reactive<{
-  loading: boolean;
-  selectedRowKeys: Key[];
-}>({
-  selectedRowKeys: [],
-  loading: false,
-});
-// 按钮可选状态
-const isButtonDisabled = computed(() => state.selectedRowKeys.length > 0);
-
-const onSelectChange = (selectedRowKeys: Key[]) => {
-  state.selectedRowKeys = selectedRowKeys;
-};
-
-// label映射
-const getStatusLabel = (status: MapValue<typeof statusMap>) =>
-  getLabel(statusMap, status);
-const getCategoryLabel = (category: MapValue<typeof categoryMap>) =>
-  getLabel(categoryMap, category);
-const getLangLabel = (lang: MapValue<typeof languageMap>) =>
-  getLabel(languageMap, lang);
-const getErrorLabel = (error: MapValue<typeof errorMap>) =>
-  getLabel(errorMap, error);
-
-// 預覽模板 | 路由跳转
-const onPreview = (index: number) => {
-  TempStore.setTemplateData(data.value[index]);
-  router.push({
-    name: 'MarketCreateTemplate',
-  });
-};
-// 编辑模板 | 路由跳转
-const onEdit = (index: number) => {
-  TempStore.setTemplateData(data.value[index]);
-  router.push({
-    name: 'MarketCreateTemplate',
-  });
-};
-// 删除模板 | 路由跳转
-const onDelete = () => {};
-
 // 数据过滤
 const dataFilter = () => {
   const { value: searchValue } = searchContents;
@@ -215,6 +142,94 @@ const dataFilter = () => {
     );
   });
 };
+
+watch(
+  () => TempStore.tempData,
+  () => {
+    data.value = TempStore.tempData;
+    dataFilter();
+  },
+);
+
+// 賬號選擇
+const allAccounts = ref(
+  TempStore.selectOptions.filter(
+    (item) => item.value !== UserStore.userInfo.id,
+  ),
+);
+const selectAccount = ref(TempStore.createTempAccount);
+
+// 新建模板
+const createTemplate = async () => {
+  await TempStore.resetCreateTempData();
+  router.push({
+    name: 'MarketCreateTemplate',
+  });
+};
+
+const state = reactive<{
+  loading: boolean;
+  selectedRowKeys: Key[];
+}>({
+  selectedRowKeys: [],
+  loading: false,
+});
+
+// 刪除模板
+const deleteTemplate = () => {
+  // console.log("select", state.selectedRowKeys);
+  state.selectedRowKeys.forEach(async (item) => {
+    const data = filterData.value[item];
+    await deleteTemplateApi({
+      wabaId: data.wabaId,
+      name: data.name,
+      language: data.language,
+    }).then(() => {
+      const index = TempStore.tempData.findIndex(
+        (value) => value.name === data.name && value.language === data.language,
+      );
+      if (index !== -1) {
+        TempStore.tempData.splice(index, 1);
+        dataFilter();
+      }
+    });
+    message.success('刪除成功');
+  });
+};
+
+// 按钮可选状态
+const isButtonDisabled = computed(() => state.selectedRowKeys.length > 0);
+
+const onSelectChange = (selectedRowKeys: Key[]) => {
+  state.selectedRowKeys = selectedRowKeys;
+};
+
+// label映射
+const getStatusLabel = (status: MapValue<typeof statusMap>) =>
+  getLabel(statusMap, status);
+const getCategoryLabel = (category: MapValue<typeof categoryMap>) =>
+  getLabel(categoryMap, category);
+const getLangLabel = (lang: MapValue<typeof languageMap>) =>
+  getLabel(languageMap, lang);
+const getErrorLabel = (error: MapValue<typeof errorMap>) =>
+  getLabel(errorMap, error);
+
+// 預覽模板 | 路由跳转
+// const onPreview = (index: number) => {
+//   TempStore.setTemplateData(data.value[index]);
+//   router.push({
+//     name: 'MarketCreateTemplate',
+//   });
+// };
+// 编辑模板 | 路由跳转
+const onEdit = (index: number) => {
+  TempStore.setTemplateData(data.value[index]);
+  router.push({
+    name: 'MarketCreateTemplate',
+  });
+};
+// 删除模板 | 路由跳转
+// const onDelete = () => {};
 
 // 更新筛选
 const updateSelection = (value, allItems, selectArray) => {
@@ -320,6 +335,19 @@ onBeforeMount(async () => {
             <AButton type="primary" danger @click="deleteTemplate">
               刪除
             </AButton>
+
+            <ATooltip title="刷新">
+              <AButton
+                @click="TempStore.loadTemplates('刷新成功')"
+                type="primary"
+                shape="round"
+                size="middle"
+              >
+                <template #icon>
+                  <SyncOutlined />
+                </template>
+              </AButton>
+            </ATooltip>
           </ASpace>
         </div>
         <ATable
@@ -332,6 +360,7 @@ onBeforeMount(async () => {
             }),
           }"
           bordered
+          row-key="key"
           :columns="columns"
           :data-source="filterData"
           class="px-5"
@@ -381,15 +410,15 @@ onBeforeMount(async () => {
                 </AButton>
                 <template #overlay>
                   <AMenu>
-                    <AMenuItem>
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        @click="onPreview(record.key)"
-                      >
-                        預覽
-                      </a>
-                    </AMenuItem>
+                    <!--                    <AMenuItem>-->
+                    <!--                      <a-->
+                    <!--                        target="_blank"-->
+                    <!--                        rel="noopener noreferrer"-->
+                    <!--                        @click="onPreview(record.key)"-->
+                    <!--                      >-->
+                    <!--                        預覽-->
+                    <!--                      </a>-->
+                    <!--                    </AMenuItem>-->
                     <AMenuItem>
                       <a
                         target="_blank"
@@ -399,15 +428,15 @@ onBeforeMount(async () => {
                         編輯
                       </a>
                     </AMenuItem>
-                    <AMenuItem>
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        @click="onDelete(record.key)"
-                      >
-                        刪除
-                      </a>
-                    </AMenuItem>
+                    <!--                    <AMenuItem>-->
+                    <!--                      <a-->
+                    <!--                        target="_blank"-->
+                    <!--                        rel="noopener noreferrer"-->
+                    <!--                        @click="onDelete(record.key)"-->
+                    <!--                      >-->
+                    <!--                        刪除-->
+                    <!--                      </a>-->
+                    <!--                    </AMenuItem>-->
                   </AMenu>
                 </template>
               </ADropdown>

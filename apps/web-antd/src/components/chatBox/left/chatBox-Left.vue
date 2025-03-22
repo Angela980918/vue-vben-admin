@@ -3,14 +3,15 @@ import type { CSSProperties } from 'vue';
 
 import { computed, onBeforeMount } from 'vue';
 
+import { useUserStore } from '@vben/stores';
+
 import { LayoutSider as ALayoutSider } from 'ant-design-vue';
 
-import { getAllCustomerApi, getMessageList } from '#/api';
+import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
-import {useUserStore} from "@vben/stores";
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
@@ -19,50 +20,51 @@ const chatStore = useChatStore();
 const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
 // const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers);
 
-const generateRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+// const generateRandomColor = () => {
+//   const letters = '0123456789ABCDEF';
+//   let color = '#';
+//   for (let i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// };
 
 // 加载用户列表
-const loadCustomerList = async (wabaId: string) => {
-  await getAllCustomerApi(wabaId).then((result) => {
-    const customer = [];
-    result.forEach((item) => {
-      item.key = item.id;
-      const color = generateRandomColor();
-      const newCustomer = {
-        id: item.id,
-        key: item.key,
-        name: item.customerId,
-        time: item.messageList[0].deliverTime,
-        badgeCount: item.messageCount,
-        phoneNumber: item.customerId,
-        color,
-      };
-
-      if (item.customerProfile !== undefined) {
-        newCustomer.name = item.customerProfile.name;
-      }
-
-      newCustomer.message =
-        item.messageList[0].type === 'text'
-          ? item.messageList[0].content.body
-          : `[${item.messageList[0].type} Message]`;
-
-      customer.push(newCustomer);
-    });
-    // console.log("customer",customer)
-    customerStore.setAssignedCustomers(customer);
-    // chatStore.setCurrentPhone(customer[0].phoneNumber);
-    chatStore.setCurrentUserInfo(customer[0]);
-    // chatStore.setCurrentChatId()
-    loadChatMessage(customer[0].phoneNumber, assignedCustomers.value[0].id);
-  });
+const loadCustomerList = async () => {
+  const customer = await customerStore.setAssignedCustomers();
+  // await getAllCustomerApi(wabaId).then((result) => {
+  //   result.forEach((item) => {
+  //     item.key = item.id;
+  //     const color = generateRandomColor();
+  //     const newCustomer = {
+  //       id: item.id,
+  //       key: item.key,
+  //       name: item.customerId,
+  //       time: item.messageList[0].deliverTime,
+  //       badgeCount: item.messageCount,
+  //       phoneNumber: item.customerId,
+  //       color,
+  //     };
+  //
+  //     if (item.customerProfile !== undefined) {
+  //       newCustomer.name = item.customerProfile.name;
+  //     }
+  //
+  //     newCustomer.message =
+  //       item.messageList[0].type === 'text'
+  //         ? item.messageList[0].content.body
+  //         : `[${item.messageList[0].type} Message]`;
+  //
+  //     customer.push(newCustomer);
+  //   });
+  //   // console.log("customer",customer)
+  //   customerStore.setAssignedCustomers(customer);
+  //   // chatStore.setCurrentPhone(customer[0].phoneNumber);
+  //   chatStore.setCurrentUserInfo(customer[0]);
+  //   // chatStore.setCurrentChatId()
+  // });
+  chatStore.setCurrentUserInfo(customer[0]);
+  loadChatMessage(customer[0].phoneNumber, assignedCustomers.value[0].id);
 };
 
 // 加载消息列表
@@ -119,7 +121,6 @@ async function loadChatMessage(guestPhone, id) {
 
 onBeforeMount(async () => {
   if (assignedCustomers.value.length === 0) {
-
     await loadCustomerList(useUserStore().selectAccount);
   } else {
     chatStore.setCurrentUserInfo(assignedCustomers.value[0]);

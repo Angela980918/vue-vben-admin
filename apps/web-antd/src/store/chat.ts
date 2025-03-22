@@ -2,9 +2,9 @@ import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
 
-import {getContactListApi, getMessageList} from '#/api';
+import { getContactListApi, getMessageList } from '#/api';
+import { useCustomerStore } from '#/store/customerStore';
 import { handleTemplateMsg } from '#/utils/common';
-import {useCustomerStore} from "#/store/customerStore";
 
 export const useChatStore = defineStore('chatStore', () => {
   const currentChatId = ref(1); // 当前聊天的 ID
@@ -17,6 +17,7 @@ export const useChatStore = defineStore('chatStore', () => {
   const chatMessages = ref([]);
 
   const page = ref(1);
+  const scrollTo = ref(false);
 
   const getChatMessages = computed(() => chatMessages.value);
   const getCurrentChatId = computed(() => currentChatId.value);
@@ -42,7 +43,10 @@ export const useChatStore = defineStore('chatStore', () => {
       page: page.value,
       pageSize: 20,
     };
-    const res = await getMessageList(data);
+    const res = await getMessageList(data).then((result) => {
+      scrollTo.value = true;
+      return result;
+    });
     const currentCustomer = currentCustomerInfo.value;
     res.messageList.reverse().forEach((item, index) => {
       let fileExtension = '';
@@ -78,7 +82,8 @@ export const useChatStore = defineStore('chatStore', () => {
   }
 
   function addMessage(message) {
-    if(message.direction === 'inbound' && needSendTempFirst.value) {
+    // console.log("messagemessagemessage", message)
+    if (message.direction === 'inbound' && needSendTempFirst.value) {
       needSendTempFirst.value = false;
     }
     chatMessages.value.push(message);
@@ -115,34 +120,37 @@ export const useChatStore = defineStore('chatStore', () => {
     currentCustomerInfo.value = user;
     //   验证上次联系时间是否超过24小时
     const list = computed(() => useCustomerStore().getContactList);
-    list.value.map(async item => {
-      if(item.phoneNumber === user.phoneNumber) {
-        await getContactListApi(1, 10, true, { filter: { phoneNumber: item.phoneNumber } }).then(result => {
+    list.value.map(async (item) => {
+      if (item.phoneNumber === user.phoneNumber) {
+        await getContactListApi(1, 10, true, {
+          phoneNumber: item.phoneNumber,
+        }).then((result) => {
           // 更新用户资料
-          let newDate = result.items[0];
-          const lastSeenDate = new Date(item.lastSeen);
-          const timeDiff = new Date().getTime() - lastSeenDate.getTime();
-          // 时间差值计算（兼容UTC时区）
-          needSendTempFirst.value = timeDiff > 86400000;
+          const newDate = result.items[0];
+          if (item.lastSeen === undefined) {
+            needSendTempFirst.value = true;
+          } else {
+            const lastSeenDate = new Date(item.lastSeen);
+            const timeDiff = Date.now() - lastSeenDate.getTime();
+            needSendTempFirst.value = timeDiff > 86_400_000;
+          }
           useCustomerStore().updateUser(newDate);
-        })
+        });
       }
-    })
+    });
   }
-
   function clearChat() {
     chatMessages.value = [];
   }
 
   function changeChatByPhone(phone: string) {
     const assignedCustomers = useCustomerStore().getAssignedCustomers;
-    assignedCustomers.forEach(item => {
-      if(item.phoneNumber === phone) {
+    assignedCustomers.forEach((item) => {
+      if (item.phoneNumber === phone) {
         currentChatId.value = item.id;
         currentCustomerInfo.value = item;
-        return;
       }
-    })
+    });
   }
 
   function $reset() {
@@ -151,6 +159,7 @@ export const useChatStore = defineStore('chatStore', () => {
     chatMessages.value = [];
     needSendTempFirst.value = false;
     page.value = 1;
+    scrollTo.value = false;
   }
 
   return {
@@ -160,6 +169,7 @@ export const useChatStore = defineStore('chatStore', () => {
     currentCustomerInfo,
     chatMessages,
     page,
+    scrollTo,
     needSendTempFirst,
 
     getChatMessages,

@@ -69,7 +69,7 @@ const sendDocMessage = async (event: Event) => {
   const files = target.files;
   let type = files[0].type.split('/')[0];
   const fileContent = files[0];
-
+  // console.log("fileContent",fileContent)
   if (fileContent.size > 100 * 1024 * 1024) {
     // console.log("fileContent",fileContent)
     message.error('文件大小应小于100mb');
@@ -79,13 +79,17 @@ const sendDocMessage = async (event: Event) => {
   if (type === 'application') {
     type = 'document';
   }
-
+  // console.log("filesfilesfiles",files)
   if (files && files.length > 0) {
     const response = await uploadMaterialApi(fileContent!, 'room', type!, {
       roomId: chatStore.currentChatId.toString(),
     }); // 上传文件
 
-    docTxt.value = `https://cos.jackycode.cn/${response.file_path}`;
+    docTxt.value = {
+      file_path: `https://cos.jackycode.cn/${response.file_path}`,
+      file_name: response.file_name,
+    };
+
     messageType.value = type;
     // sendMessage(type)
   }
@@ -111,13 +115,17 @@ const floatTo16BitPCM = (view, offset, input) => {
   }
 };
 
-function getFileName() {
-  return docTxt.value.split('/').pop();
-}
+// function getFileName() {
+//   return docTxt.value.split('/').pop();
+// }
 
 function clearFile() {
   messageType.value = 'text';
   docTxt.value = null;
+  // 清空 input 的值
+  if (fileInput.value) {
+    fileInput.value.value = ''; // 通过 ref 清空
+  }
 }
 
 // 插入表情到光标位置
@@ -359,8 +367,8 @@ const stopRecording = async () => {
     <QuickMsg ref="quickRef" :show-quick-list="true" />
 
     <!--        输入文本信息-->
+    <!--      @press-enter="sendMessage()"-->
     <ATextarea
-      @press-enter="sendMessage()"
       name="messageContent"
       ref="textAreaRef"
       v-model:value="contentTxt"
@@ -398,7 +406,7 @@ const stopRecording = async () => {
         <!-- 图片或文件图标 -->
         <img
           v-if="messageType === 'image'"
-          :src="docTxt"
+          :src="docTxt.file_path"
           style="
             width: 40px;
             height: 40px;
@@ -413,7 +421,7 @@ const stopRecording = async () => {
 
         <!-- 文件名，flex-grow使其占用剩余空间 -->
         <span style="margin-left: 10px; font-size: 14px">
-          {{ getFileName() }}
+          {{ docTxt.file_name }}
         </span>
 
         <!-- 关闭图标，靠右对齐 -->

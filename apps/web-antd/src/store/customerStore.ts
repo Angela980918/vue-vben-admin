@@ -1,9 +1,13 @@
 import type { ContactInfo } from '@vben/types';
 
-import { defineStore } from 'pinia';
+import { reactive, toRaw } from 'vue';
+
+import { useUserStore } from '@vben/stores';
+
 import { message } from 'ant-design-vue';
-import { getContactListApi } from '#/api';
-import {reactive, toRaw} from "vue";
+import { defineStore } from 'pinia';
+
+import { getAllCustomerApi, getContactListApi } from '#/api';
 
 interface CustomerState {
   // currentUserId: number;
@@ -17,6 +21,7 @@ interface CustomerState {
   size: number;
 }
 
+// @ts-ignore: 客户Store
 export const useCustomerStore = defineStore('customerStore', {
   state: (): CustomerState => ({
     // currentUserId: 1,
@@ -35,11 +40,55 @@ export const useCustomerStore = defineStore('customerStore', {
     //   this.currentUserId = id;
     // },
 
-    setAssignedCustomers(customers: ContactInfo[]): void {
-      this.assignedCustomers = customers.map((customer, index) => ({
-        ...customer,
-        isActive: index === 0,
-      }));
+    generateRandomColor(): string {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    },
+
+    async setAssignedCustomers(): any[] {
+      // this.assignedCustomers = customers.map((customer, index) => ({
+      //   ...customer,
+      //   isActive: index === 0,
+      // }));
+      const customer = [];
+      await getAllCustomerApi(useUserStore().selectAccount).then((result) => {
+        result.forEach((item, index) => {
+          item.key = item.id;
+          const color = this.generateRandomColor();
+          const newCustomer = {
+            id: item.id,
+            key: item.key,
+            name: item.customerId,
+            time: item.messageList[0].deliverTime,
+            badgeCount: item.messageCount,
+            phoneNumber: item.customerId,
+            color,
+            isActive: index === 0,
+          };
+
+          if (item.customerProfile !== undefined) {
+            newCustomer.name = item.customerProfile.name;
+          }
+
+          newCustomer.message =
+            item.messageList[0].type === 'text'
+              ? item.messageList[0].content.body
+              : `[${item.messageList[0].type} Message]`;
+
+          customer.push(newCustomer);
+        });
+        // console.log("customer",customer)
+        // customerStore.setAssignedCustomers(customer);
+        // chatStore.setCurrentPhone(customer[0].phoneNumber);
+
+        // chatStore.setCurrentChatId()
+      });
+      this.assignedCustomers = customer;
+      return customer;
     },
 
     setCurrentUserInfo(user: ContactInfo): void {
@@ -55,17 +104,17 @@ export const useCustomerStore = defineStore('customerStore', {
       this.size = 10;
       this.total = 0;
       const response = await getContactListApi(this.page);
-      // eslint-disable-next-line no-console
+
       if (response) {
         this.total = response.total;
         this.contactList = response.items.map((item) => ({
           ...item,
           key: item.id,
         }));
-        if(msg) {
-          message.success(msg)
+        if (msg) {
+          message.success(msg);
         }
-        if(response.total > this.size) {
+        if (response.total > this.size) {
           this.startBackLoadContact();
         }
       }
@@ -73,18 +122,18 @@ export const useCustomerStore = defineStore('customerStore', {
 
     async startBackLoadContact() {
       ++this.page;
-      await getContactListApi(this.page).then(result => {
-        result.items.forEach((item) => item.key = item.id);
+      await getContactListApi(this.page).then((result) => {
+        result.items.forEach((item) => (item.key = item.id));
         this.contactList = [
-          ...this.contactList.map(item => toRaw(item)), // 转为普通对象
-          ...result.items
+          ...this.contactList.map((item) => toRaw(item)), // 转为普通对象
+          ...result.items,
         ];
         this.size += result.length;
-        if(result.total > this.size) {
-          'requestIdleCallback' in window && requestIdleCallback(() => this.startBackLoadContact());
+        if (result.total > this.size) {
+          'requestIdleCallback' in window &&
+            requestIdleCallback(() => this.startBackLoadContact());
         }
       });
-
     },
 
     contactOperate(isCreate: boolean, value: ContactInfo): void {
@@ -109,7 +158,6 @@ export const useCustomerStore = defineStore('customerStore', {
     async updateUser(userDate: object) {
       const reactiveUserDate = reactive(userDate);
       let add = true;
-
       for (let i = 0; i < this.contactList.length; i++) {
         if (this.contactList[i].phoneNumber === reactiveUserDate.phoneNumber) {
           add = false;
@@ -118,7 +166,7 @@ export const useCustomerStore = defineStore('customerStore', {
         }
       }
 
-      if(add) {
+      if (add) {
         this.contactList = [reactiveUserDate, ...this.contactList];
       }
     },
@@ -132,6 +180,7 @@ export const useCustomerStore = defineStore('customerStore', {
       this.contactList = [];
       this.page = 1;
       this.total = 0;
+      this.size = 10;
     },
   },
 
@@ -146,6 +195,17 @@ export const useCustomerStore = defineStore('customerStore', {
 
     getContactList: (state) => {
       return state.contactList;
-    }
+    },
+
+    getUserByPhone: (state) => (phone: string) => {
+      let haveUser = false;
+      state.assignedCustomers.forEach((item) => {
+        if (item.phoneNumber === phone) {
+          haveUser = true;
+          return haveUser;
+        }
+      });
+      return haveUser;
+    },
   },
 });
