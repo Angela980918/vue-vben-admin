@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumnsType } from 'ant-design-vue';
 
-import { defineEmits, ref, watch } from 'vue';
+import { defineEmits, ref } from 'vue';
 
 import { FileOutlined } from '@ant-design/icons-vue';
 import {
@@ -43,24 +43,24 @@ function getFileName(data) {
 
 function loadNewData() {
   switch (props.type) {
-      case 'document': {
-        fileList.value = tempStore.docList;
-        selectType.value = '.pdf';
-        break;
-      }
-      case 'image': {
-        fileList.value = tempStore.imageList;
-        selectType.value = 'image/*';
-        break;
-      }
-      case 'video': {
-        fileList.value = tempStore.videoList;
-        selectType.value = 'video/*';
-        break;
-      }
+    case 'document': {
+      fileList.value = tempStore.docList;
+      selectType.value = '.pdf';
+      break;
     }
-    // console.log("fileListfileList", fileList.value)
-    type.value = props.type;
+    case 'image': {
+      fileList.value = tempStore.imageList;
+      selectType.value = 'image/*';
+      break;
+    }
+    case 'video': {
+      fileList.value = tempStore.videoList;
+      selectType.value = 'video/*';
+      break;
+    }
+  }
+  // console.log("fileListfileList", fileList.value)
+  type.value = props.type;
 }
 
 const columns: TableColumnsType = [
@@ -96,7 +96,7 @@ const selectOthers = () => {
 
 const showModal = (value?: string) => {
   open.value = !open.value;
-  if(value) {
+  if (value) {
     account.value = value;
     loadNewData();
   }
@@ -116,7 +116,14 @@ const selectOtherFile = async (event: Event) => {
 
   //     上傳到臨時文件夾
   try {
-    await uploadMaterialApi(fileContent!, 'temp', props.type, account.value.length > 6 ? { wabaId: account.value } : { userId: account.value } ).then((result) => {
+    await uploadMaterialApi(
+      fileContent!,
+      'temp',
+      props.type,
+      account.value.length > 6
+        ? { wabaId: account.value }
+        : { userId: account.value },
+    ).then((result) => {
       const newFile = {
         key: result?.id || '1',
         id: result?.id || '1',
@@ -128,7 +135,7 @@ const selectOtherFile = async (event: Event) => {
       emits('getSelected', newFile);
     });
   } catch (error) {
-    console.error('上传过程中发生错误:', error);
+    console.error('上傳過程中發生錯誤:', error);
   }
 };
 
@@ -202,7 +209,7 @@ const handleOk = () => {
           <template v-if="column.key === 'fileName'">
             <!--                        {{ 'https://cos.jackycode.cn/'+ record.file_path}}-->
             <span>
-             {{ getFileName(record) }}
+              {{ getFileName(record) }}
             </span>
           </template>
 

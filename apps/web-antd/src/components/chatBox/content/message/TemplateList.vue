@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+
+import { useUserStore } from '@vben/stores';
 
 import {
   FileImageOutlined,
@@ -10,26 +12,27 @@ import {
   Button as AButton,
   Divider as ADivider,
   Flex as AFlex,
-  Image as AImage, message,
+  Image as AImage,
   Modal as AModal,
   Table as ATable,
+  message,
 } from 'ant-design-vue';
+// import {useRouter} from "vue-router";
+import { marked } from 'marked';
 
 import { sendMessageApi } from '#/api';
 // import Confirm from "@/components/chatBox/content/message/Confirm.vue";
 import Confirm from '#/components/chatBox/content/message/Confirm.vue';
 import { useChatStore, useTemplateStore } from '#/store';
-import {useUserStore} from "@vben/stores";
 import { handleTemplateMsg } from '#/utils/common';
-import {useRouter} from "vue-router";
 
 const props = defineProps({
   currentPhone: {
     type: String,
     default: '',
   },
-})
-console.log("propsprops", props)
+});
+
 const chatStore = useChatStore();
 const userStore = useUserStore();
 const template = useTemplateStore();
@@ -42,12 +45,14 @@ const selectRecord = ref(null);
 const selectName = ref(null);
 const templateList = computed(() => template.getRawTemplateList);
 const jump = ref(false);
-const router = useRouter();
+// const router = useRouter();
 
-watch(() => props.currentPhone, (newValue) => {
-  console.log("ewst", newValue)
-  currentPhone.value = newValue;
-})
+watch(
+  () => props.currentPhone,
+  (newValue) => {
+    currentPhone.value = newValue;
+  },
+);
 
 // 预览模板处理
 const preViewTemp = (data) => {
@@ -144,7 +149,7 @@ const handleSubmit = () => {
 
 defineExpose({
   controlTemp: (needJump?: boolean) => {
-    if(needJump) jump.value = needJump;
+    if (needJump) jump.value = needJump;
     handleSubmit();
   },
 });
@@ -169,7 +174,7 @@ const sendTemplate = async () => {
     from: userStore.selectPhone,
     to: currentPhone.value.toString(),
   };
-  console.log("sendDatasendData", sendData, currentPhone.value)
+
   const msgContent = handleTemplateMsg(name, language);
   for (const i in msgContent) {
     const item = msgContent[i];
@@ -196,7 +201,7 @@ const sendTemplate = async () => {
   const resultObj = await sendMessageApi(sendData);
   const contactPhone = chatStore.currentPhone;
 
-  if(sendData.to === contactPhone) {
+  if (sendData.to === contactPhone) {
     const message = {
       direction: 'outbound',
       _id: resultObj.id,
@@ -218,7 +223,7 @@ const sendTemplate = async () => {
 
     chatStore.addMessage(message);
   }
-  message.success('发送成功')
+  message.success('發送成功');
   handleSubmit();
   // if(jump.value) {
   //   router.push({
@@ -230,6 +235,10 @@ const sendTemplate = async () => {
 onMounted(() => {
   preViewTemp(templateList.value[0]);
 });
+
+function markedToHtml(markedValue) {
+  return marked.parse(markedValue);
+}
 </script>
 
 <template>
@@ -257,7 +266,7 @@ onMounted(() => {
               <a @click="preViewTemp(record)">預覽</a>
               <ADivider type="vertical" />
               <span>
-                <AButton @click="confirm(record)" type="primary">发送</AButton>
+                <AButton @click="confirm(record)" type="primary">發送</AButton>
               </span>
             </template>
           </template>
@@ -299,9 +308,7 @@ onMounted(() => {
                       justify="center"
                       align="center"
                     >
-                      <FileImageOutlined
-                        style="font-size: 50px; color: #fff"
-                      />
+                      <FileImageOutlined style="font-size: 50px; color: #fff" />
                     </AFlex>
                   </div>
                   <div v-else-if="containerTemp.header.format === 'VIDEO'">
@@ -355,14 +362,15 @@ onMounted(() => {
                       justify="center"
                       align="center"
                     >
-                      <FilePdfOutlined
-                        style="font-size: 50px; color: #fff"
-                      />
+                      <FilePdfOutlined style="font-size: 50px; color: #fff" />
                     </AFlex>
                   </div>
                 </div>
                 <!-- eslint-disable-next-line vue/no-v-html -->
-                <p class="contentBody" v-html="containerTemp.body.text"></p>
+                <p
+                  class="contentBody"
+                  v-html="markedToHtml(containerTemp.body.text)"
+                ></p>
                 <p
                   class="contentFooter"
                   v-if="containerTemp.footer !== undefined"
@@ -421,7 +429,7 @@ onMounted(() => {
       flex-shrink: 0;
       width: 320px;
       height: 83px;
-      background-image: url("https://app.salesmartly.com/img/phoneheader.4b8c90cf.png");
+      background-image: url('https://app.salesmartly.com/img/phoneheader.4b8c90cf.png');
       background-repeat: no-repeat;
       background-size: contain;
     }
@@ -443,8 +451,7 @@ onMounted(() => {
         left: 7px;
         width: 0;
         height: 0;
-        border-color: rgb(255 255 255) rgb(255 255 255) transparent
-          transparent;
+        border-color: rgb(255 255 255) rgb(255 255 255) transparent transparent;
         border-style: solid;
         border-width: 3.5px;
         border-image: initial;
@@ -496,7 +503,7 @@ onMounted(() => {
       flex-shrink: 0;
       width: 320px;
       height: 63px;
-      background-image: url("https://app.salesmartly.com/img/phonebottom.a32a8d85.png");
+      background-image: url('https://app.salesmartly.com/img/phonebottom.a32a8d85.png');
       background-repeat: no-repeat;
       background-size: contain;
     }

@@ -389,7 +389,7 @@ defineExpose({
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'operation'">
               <span>
-                <AButton @click="confirm(record)" type="primary">发送</AButton>
+                <AButton @click="confirm(record)" type="primary">發送</AButton>
               </span>
             </template>
           </template>

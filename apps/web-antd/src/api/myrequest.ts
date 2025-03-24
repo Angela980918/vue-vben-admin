@@ -30,7 +30,7 @@ function createRequestClient(
     (err) => {
       // console.log("error", err);
       // 请求发送前出错处理
-      message.error(`请求发送失败`);
+      message.error(`請求發送失敗`);
       return Promise.reject(err);
     },
   );

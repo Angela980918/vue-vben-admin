@@ -15,9 +15,8 @@ import { useAccessStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
 
+import { refreshToken } from '#/api/whatsapi';
 import { useAuthStore } from '#/store';
-
-import {refreshToken} from "#/api/whatsapi";
 
 const { apiURL, wapiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
@@ -71,10 +70,10 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       // 动态设置 Content-Type
       if (config.data instanceof FormData) {
         // 如果是 FormData，设置为 multipart/form-data
-        config.headers['Content-Type'] = 'multipart/form-data';
+        config.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
       } else if (config.data) {
         // 如果有数据且不是 FormData，默认设置为 application/json
-        config.headers['Content-Type'] = 'application/json';
+        config.headers['Content-Type'] = 'application/json;charset=utf-8';
       } else {
         // 如果没有数据，不需要设置 Content-Type
         delete config.headers['Content-Type'];

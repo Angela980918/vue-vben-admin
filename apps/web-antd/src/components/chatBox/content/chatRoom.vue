@@ -28,6 +28,7 @@ import {
   Space as ASpace,
   Tooltip as ATooltip,
 } from 'ant-design-vue';
+import { marked } from 'marked';
 
 // import ChatMessage from "@/components/chatBox/content/chatMessage.vue";
 // import ImageView from "@/components/chatBox/content/message/ImageView.vue";
@@ -186,6 +187,10 @@ watch(
   },
   { deep: true },
 );
+
+function markedToHtml(markedValue) {
+  return marked.parse(markedValue);
+}
 </script>
 
 <template>
@@ -466,7 +471,7 @@ watch(
                       <!-- eslint-disable-next-line vue/no-v-html -->
                       <span
                         class="contentBody"
-                        v-html="item.content.body.content"
+                        v-html="markedToHtml(item.content.body.content)"
                       ></span>
 
                       <span
@@ -545,7 +550,7 @@ watch(
           @click="handleSubmit"
         >
           <span class="font-medium" style="font-size: 18px">
-            客戶最近聯繫時間已超過24小時，請先发送模板信息
+            客戶最近聯繫時間已超過24小時，請先發送模板信息
           </span>
           <AButton
             type="primary"

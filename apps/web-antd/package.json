@@ -49,6 +49,7 @@
     "dayjs": "catalog:",
     "emoji-mart-vue-fast": "^15.0.3",
     "lodash": "^4.17.21",
+    "marked": "^15.0.7",
     "pinia": "catalog:",
     "recorderx": "^2.0.2",
     "socket.io-client": "^4.8.1",

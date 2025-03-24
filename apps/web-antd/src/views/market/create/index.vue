@@ -33,6 +33,7 @@ import {
 } from 'ant-design-vue';
 import TurndownService from 'turndown';
 
+import { createTemplateApi, editTemplateApi } from '#/api';
 import SelectInput from '#/components/templates/SelectInput.vue';
 import { categoryMap, headerMap, languageMap, mediaMap } from '#/map';
 import { useTemplateStore } from '#/store';
@@ -236,9 +237,9 @@ const onSubmit = async () => {
       });
 
       try {
-        // await (isUpdated.value
-        //   ? editTemplateApi(reqData)
-        //   : createTemplateApi(reqData));
+        await (isUpdated.value
+          ? editTemplateApi(reqData)
+          : createTemplateApi(reqData));
         message.success({
           content: '模板數據提交成功',
           key: submitKey,
