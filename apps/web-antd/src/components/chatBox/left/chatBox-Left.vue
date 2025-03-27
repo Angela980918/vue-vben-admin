@@ -64,13 +64,17 @@ const loadCustomerList = async () => {
   //   // chatStore.setCurrentChatId()
   // });
   chatStore.setCurrentUserInfo(customer[0]);
-  loadChatMessage(customer[0].phoneNumber, assignedCustomers.value[0].id);
+  loadChatMessage(customer[0]?.phoneNumber, assignedCustomers?.value[0]?.id);
 };
 
 // 加载消息列表
 const loadMessageList = async () => {
   const currentChatId = chatStore.getCurrentChatId;
   const currentCustomerInfo = chatStore.currentCustomerInfo;
+
+  if (currentChatId === undefined || currentCustomerInfo === undefined) {
+    return;
+  }
   chatStore.setPage();
   const data = {
     id: currentChatId,

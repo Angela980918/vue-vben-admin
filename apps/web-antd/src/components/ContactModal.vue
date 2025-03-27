@@ -69,10 +69,10 @@ const onSubmit = () => {
     .then(() => {
       if (createVal.value) {
         emits('createContact', toRaw(formState));
-        resetForm();
+        // resetForm();
       } else {
         emits('updateContact', toRaw(formState));
-        resetForm();
+        // resetForm();
       }
     })
     .catch((error) => {
@@ -117,6 +117,9 @@ watch(
 defineExpose({
   showModal: (create?: boolean) => {
     showModal(create);
+  },
+  setEmpty: () => {
+    resetForm();
   },
 });
 </script>

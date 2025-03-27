@@ -6,9 +6,11 @@ import {
   onBeforeMount,
   onBeforeUnmount,
   ref,
-  shallowRef,
   watch,
 } from 'vue';
+import { useRoute } from 'vue-router';
+
+import { useTabs } from '@vben/hooks';
 
 import { UploadOutlined } from '@ant-design/icons-vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
@@ -86,6 +88,10 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue']);
 
+const tabs = useTabs();
+
+const editorReady = ref(true);
+
 // 上傳的文件
 const fileListUrl = ref([]);
 const fileUrl = ref(props.fileUrl); // 上傳文件返回地址
@@ -93,7 +99,24 @@ const key = 'uploadFile';
 const uploadContent = ref('文件上傳中');
 const inputContents = ref(props.inputContents);
 const TempStore = useTemplateStore();
+const route = useRoute();
 
+// 富文本编辑器配置
+const editorRef = ref(null);
+const valueHtml =
+  inputContents.value === ''
+    ? ref('<p>請輸入內容</p>')
+    : ref(props.inputContents);
+
+watch(
+  () => route.path,
+  (to, from) => {
+    if (from === '/market/create-template') {
+      // console.log("fromfromfrom",from)
+      tabs.closeTabByKey(from);
+    }
+  },
+);
 watch(
   () => inputContents.value,
   (newValue) => {
@@ -102,12 +125,6 @@ watch(
   },
 );
 
-// 富文本编辑器配置
-const editorRef = shallowRef();
-const valueHtml =
-  inputContents.value === ''
-    ? ref('<p>請輸入內容</p>')
-    : ref(props.inputContents);
 watch(
   () => props.inputContents,
   (newVal) => {
@@ -265,6 +282,7 @@ onBeforeMount(() => {
         mode="default"
       />
       <Editor
+        v-if="editorReady"
         style="
           box-sizing: border-box;
           width: 100%;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, h, nextTick, ref, watch } from 'vue';
+import { computed, defineEmits, h, nextTick, ref, watch } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
@@ -50,8 +50,6 @@ const needSendTemp = ref(false);
 
 const currentPhone = computed(() => chatStore.currentPhone);
 const currentCustomerInfo = computed(() => chatStore.currentCustomerInfo);
-
-// const showTemp = ref(false);
 
 watch(
   () => chatStore.currentChatId,
@@ -209,7 +207,7 @@ function markedToHtml(markedValue) {
       <!-- 头部：聊天标题或信息 -->
       <ALayoutHeader :style="headerStyle">
         <AFlex style="height: 100%" justify="space-between" align="center">
-          <span>{{ currentCustomerInfo.name }}</span>
+          <span>{{ currentCustomerInfo?.name }}</span>
           <ASpace size="middle">
             <ATooltip placement="top">
               <template #title>

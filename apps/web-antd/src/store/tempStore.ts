@@ -83,6 +83,10 @@ export const useTemplateStore = defineStore('template', () => {
     return list;
   });
 
+  // function changeEditRef(value: string) {
+  //   editRef.value = value;
+  // }
+
   async function loadTemplates(msg?: string) {
     if (msg) {
       page.value = 1;
