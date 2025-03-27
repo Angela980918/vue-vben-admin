@@ -16,11 +16,11 @@ const customerInfo = computed(() => chatStore.currentCustomerInfo);
     <div class="container">
       <div class="info">
         <div class="info-item">
-          <span>電話號碼</span>
+          <span>{{ $t('page.chat.tabsdetail.personal.messages.1') }} : </span>
           <span>{{ customerInfo.phoneNumber }}</span>
         </div>
         <div class="info-item">
-          <span>電郵</span>
+          <span>{{ $t('page.chat.tabsdetail.personal.messages.2') }}</span>
           <span>N/A</span>
         </div>
       </div>

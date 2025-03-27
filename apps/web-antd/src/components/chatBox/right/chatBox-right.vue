@@ -44,37 +44,39 @@ const getAvatarText = (name: string) => {
         {{ getAvatarText(currentCustomerInfo.name) }}
       </AAvatar>
       <div class="sampleInfo">
-        <span>關於 {{ currentCustomerInfo.name }}</span>
-        <span>創建時間：2024/12/06</span>
+        <span>{{
+          ` ${$t('page.chat.titles.1')}:${currentCustomerInfo.name}`
+        }}</span>
+        <span>{{ $t('page.chat.titles.2') }}：2024/12/06</span>
       </div>
     </div>
     <div class="remarkCard">
       <div class="rmarkMain">
-        <span>備註</span>
+        <span>{{ $t('page.chat.titles.3') }}</span>
         <ATooltip>
           <PlusCircleOutlined
             class="inputText"
-            style=" margin: 4px;font-size: 16px; color: #535bf2"
+            style="margin: 4px; font-size: 16px; color: #535bf2"
           />
         </ATooltip>
       </div>
-      <span class="tip">您可以為該客戶添加任何備註</span>
+      <span class="tip">{{ $t('page.chat.tips.1') }}</span>
     </div>
 
     <ATabs v-model:active-key="activeKey">
-      <ATabPane key="1" tab="狀態清單">
+      <ATabPane key="1" :tab="$t('page.chat.tabs.1')">
         <ChatBoxRightStatus />
       </ATabPane>
-      <ATabPane key="2" tab="個人資料" force-render>
+      <ATabPane key="2" :tab="$t('page.chat.tabs.2')" force-render>
         <ChatBoxRightPerson />
       </ATabPane>
-      <ATabPane key="3" tab="檔案">
+      <ATabPane key="3" :tab="$t('page.chat.tabs.3')">
         <ChatBoxRightFile />
       </ATabPane>
-      <ATabPane key="4" tab="圖片">
+      <ATabPane key="4" :tab="$t('page.chat.tabs.4')">
         <ChatBoxRightImage />
       </ATabPane>
-      <ATabPane key="5" tab="提醒">
+      <ATabPane key="5" :tab="$t('page.chat.tabs.5')">
         <ChatBoxRightTips />
       </ATabPane>
     </ATabs>

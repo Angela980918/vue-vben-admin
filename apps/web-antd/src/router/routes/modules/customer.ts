@@ -10,7 +10,7 @@ const customerRoutes: RouteRecordRaw[] = [
       icon: 'ant-design:usergroup-add-outlined',
       keepAlive: true,
       order: 200,
-      title: '客戶管理',
+      title: $t('page.routermenu.customer.title'),
     },
     name: 'CustomerManagement',
     path: '/customer',
@@ -20,7 +20,7 @@ const customerRoutes: RouteRecordRaw[] = [
       {
         meta: {
           icon: 'ant-design:team-outlined',
-          title: $t('客戶列表'),
+          title: $t('page.routermenu.customer.customerList.title'),
           keepAlive: true,
         },
         name: 'CustomerList',
@@ -53,7 +53,7 @@ const customerRoutes: RouteRecordRaw[] = [
       {
         meta: {
           icon: 'ant-design:file-text-outlined',
-          title: $t('快捷用語'),
+          title: $t('page.routermenu.customer.customerList.quickwords'),
           keepAlive: true,
         },
         name: 'QuickPhrase',
@@ -64,7 +64,7 @@ const customerRoutes: RouteRecordRaw[] = [
       {
         meta: {
           icon: 'ant-design:file-add-outlined',
-          title: $t('素材管理'),
+          title: $t('page.routermenu.customer.customerList.materialManagement'),
           keepAlive: true,
         },
         name: 'MaterialManagement',

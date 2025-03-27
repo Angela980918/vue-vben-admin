@@ -10,7 +10,7 @@ const marketRoutes: RouteRecordRaw[] = [
       icon: 'ant-design:send-outlined', // 建议使用标准图标名称
       keepAlive: true,
       order: 300, // 根据实际菜单顺序调整
-      title: $t('群發計劃'),
+      title: $t('page.routermenu.massprogram.title'),
     },
     name: 'MarketManagement',
     path: '/market',
@@ -31,7 +31,7 @@ const marketRoutes: RouteRecordRaw[] = [
       {
         meta: {
           icon: 'ant-design:one-to-one-outlined',
-          title: $t('WhatsApp模板'),
+          title: $t('page.routermenu.massprogram.whatsapp.whatsappTemple'),
           keepAlive: true,
         },
         name: 'MarketTemplates',
@@ -42,7 +42,7 @@ const marketRoutes: RouteRecordRaw[] = [
       {
         meta: {
           icon: 'ant-design:file-add-outlined',
-          title: $t('創建模板'),
+          title: $t('page.routermenu.massprogram.whatsapp.create'),
           keepAlive: true,
         },
         name: 'MarketCreateTemplate',

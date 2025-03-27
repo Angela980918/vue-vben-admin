@@ -1,18 +1,79 @@
 {
   "auth": {
-    "login": "登录",
-    "register": "注册",
     "codeLogin": "验证码登录",
+    "forgetPassword": "忘记密码",
+    "login": "登录",
+    "options": {
+      "admin": "管理员",
+      "super": "超级管理员",
+      "user": "用户"
+    },
     "qrcodeLogin": "二维码登录",
-    "forgetPassword": "忘记密码"
+    "register": "注册"
+  },
+  "chat": {
+    "actions": {
+      "1": "结束会话",
+      "2": "展示更多",
+      "3": "添加會話標籤"
+    },
+    "chatTip": "客户名字或手机号码",
+    "customerList": "客户列表",
+    "selecttemplate": "选择模板",
+    "tabs": {
+      "1": "状态清单",
+      "2": "个人资料",
+      "3": "档案",
+      "4": "图片",
+      "5": "提醒"
+    },
+    "tabsdetail": {
+      "personal": {
+        "messages": {
+          "1": "电话号码",
+          "2": "邮箱"
+        }
+      },
+      "status": {
+        "title": "状态清单"
+      }
+    },
+    "tips": {
+      "1": "你可以为该客户添加任何备注"
+    },
+    "titles": {
+      "1": "手机号码",
+      "2": "创建时间",
+      "3": "备注"
+    }
   },
   "dashboard": {
-    "title": "概览",
     "analytics": "分析页",
+    "title": "概览",
     "workspace": "工作台"
   },
   "home": {
-    "title": "测试首页",
-    "index": "第一页"
+    "index": "第一页",
+    "title": "测试首页"
+  },
+  "routermenu": {
+    "chat": {
+      "title": "在线聊天"
+    },
+    "customer": {
+      "customerList": {
+        "materialManagement": "素材管理",
+        "quickwords": "快捷用语",
+        "title": "客戶列表"
+      },
+      "title": "客戶管理"
+    },
+    "massprogram": {
+      "title": "群发计划",
+      "whatsapp": {
+        "create": "创建模板",
+        "whatsappTemple": "WhatsApp模板"
+      }
+    }
   }
 }

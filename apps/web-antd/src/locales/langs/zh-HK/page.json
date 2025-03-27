@@ -1,18 +1,79 @@
 {
   "auth": {
-    "login": "登錄",
-    "register": "註冊",
     "codeLogin": "驗證碼登錄",
+    "forgetPassword": "忘記密碼",
+    "login": "登錄",
+    "options": {
+      "admin": "管理員",
+      "super": "超級管理員",
+      "user": "用戶"
+    },
     "qrcodeLogin": "二維碼登錄",
-    "forgetPassword": "忘記密碼"
+    "register": "註冊"
+  },
+  "chat": {
+    "actions": {
+      "1": "結束會話",
+      "2": "顯示更多",
+      "3": "添加會話標簽"
+    },
+    "chatTip": "客戶名字或手機號碼",
+    "customerList": "客戶列表",
+    "selecttemplate": "選擇模板",
+    "titles": {
+      "1": "手機號碼",
+      "2": "創建時間",
+      "3": "備註"
+    },
+    "tips": {
+      "1": "您可以為該客戶添加任何備註"
+    },
+    "tabs": {
+      "1": "狀態清單",
+      "2": "個人資料",
+      "3": "檔案",
+      "4": "圖片",
+      "5": "提醒"
+    },
+    "tabsdetail": {
+      "status": {
+        "title": "狀態清單"
+      },
+      "personal": {
+        "messages": {
+          "1": "電話號碼",
+          "2": "電郵"
+        }
+      }
+    }
   },
   "dashboard": {
-    "title": "概覽",
     "analytics": "分析頁",
+    "title": "概覽",
     "workspace": "工作台"
   },
   "home": {
-    "title": "測試首頁",
-    "index": "第一頁"
+    "index": "第一頁",
+    "title": "測試首頁"
+  },
+  "routermenu": {
+    "chat": {
+      "title": "在線聊天"
+    },
+    "customer": {
+      "customerList": {
+        "materialManagement": "素材管理",
+        "quickwords": "快捷用語",
+        "title": "客戶管理"
+      },
+      "title": "客戶管理"
+    },
+    "massprogram": {
+      "title": "群發計劃",
+      "whatsapp": {
+        "whatsappTemple": "WhatsApp模板",
+        "create": "創建模板"
+      }
+    }
   }
 }

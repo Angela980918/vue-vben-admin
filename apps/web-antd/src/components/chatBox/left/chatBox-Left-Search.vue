@@ -18,7 +18,7 @@ const onSearch = (searchValue: string) => {
     <AInputSearch
       name="customerPhone"
       v-model:value="value"
-      placeholder="客戶名字或手機號碼"
+      :placeholder="$t('page.chat.chatTip')"
       @change="onSearch"
       :allow-clear="true"
     />

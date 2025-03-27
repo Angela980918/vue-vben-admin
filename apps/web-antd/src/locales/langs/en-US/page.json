@@ -1,14 +1,79 @@
 {
   "auth": {
-    "login": "Login",
-    "register": "Register",
     "codeLogin": "Code Login",
+    "forgetPassword": "Forget Password",
+    "login": "Login",
+    "options": {
+      "admin": "Admin",
+      "super": "Super",
+      "user": "User"
+    },
     "qrcodeLogin": "Qr Code Login",
-    "forgetPassword": "Forget Password"
+    "register": "Register"
+  },
+  "chat": {
+    "actions": {
+      "1": "End of the meeting",
+      "2": "Show more",
+      "3": "Add a meeting tag"
+    },
+    "chatTip": "Customer name or mobile phone number",
+    "customerList": "Customer List",
+    "selecttemplate": "Select a template",
+    "tabs": {
+      "1": "Status list",
+      "2": "Personal Information",
+      "3": "Archives",
+      "4": "Picture",
+      "5": "Remind"
+    },
+    "tabsdetail": {
+      "personal": {
+        "messages": {
+          "1": "Telephone Number",
+          "2": "e-mail"
+        }
+      },
+      "status": {
+        "title": "Status List"
+      }
+    },
+    "tips": {
+      "1": "You can add any reservations for this customer"
+    },
+    "titles": {
+      "1": "Phone Number",
+      "2": "Creation Time",
+      "3": "Remark"
+    }
   },
   "dashboard": {
-    "title": "Dashboard",
     "analytics": "Analytics",
+    "title": "Dashboard",
     "workspace": "Workspace"
+  },
+  "home": {
+    "index": "FIRST PAGE",
+    "title": "TEST HOME"
+  },
+  "routermenu": {
+    "chat": {
+      "title": "Live Chat"
+    },
+    "customer": {
+      "customerList": {
+        "materialManagement": "Material management",
+        "quickwords": "Quick Words",
+        "title": "Customer List"
+      },
+      "title": "Customer Management"
+    },
+    "massprogram": {
+      "title": "Mass Send Plan",
+      "whatsapp": {
+        "create": "Create Template",
+        "whatsappTemple": "WhatsApp Template"
+      }
+    }
   }
 }

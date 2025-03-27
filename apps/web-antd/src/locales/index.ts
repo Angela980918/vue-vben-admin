@@ -15,6 +15,7 @@ import { preferences } from '@vben/preferences';
 
 import antdEnLocale from 'ant-design-vue/es/locale/en_US';
 import antdDefaultLocale from 'ant-design-vue/es/locale/zh_CN';
+import antdZHHKLocale from 'ant-design-vue/es/locale/zh_HK';
 import dayjs from 'dayjs';
 
 const antdLocale = ref<Locale>(antdDefaultLocale);
@@ -89,6 +90,10 @@ async function loadAntdLocale(lang: SupportedLanguagesType) {
     }
     case 'zh-CN': {
       antdLocale.value = antdDefaultLocale;
+      break;
+    }
+    case 'zh-HK': {
+      antdLocale.value = antdZHHKLocale;
       break;
     }
   }

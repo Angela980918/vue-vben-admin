@@ -84,7 +84,7 @@ watch(
   <ASpace direction="vertical" style="width: 100%">
     <div style="width: 100%; padding: 10px 0; font-size: 16px; color: #1a1a1a">
       <UserOutlined />
-      <span>客户列表</span>
+      <span>{{ $t('page.chat.customerList') }}</span>
     </div>
     <!--    客户列表    -->
     <ASpace
