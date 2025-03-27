@@ -51,6 +51,9 @@
     "update:deps": "npx taze -r -w",
     "version": "pnpm exec changeset version && pnpm install --no-frozen-lockfile"
   },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
@@ -109,8 +112,5 @@
       "canvas",
       "node-gyp"
     ]
-  },
-  "dependencies": {
-    "lodash": "^4.17.21"
   }
 }
