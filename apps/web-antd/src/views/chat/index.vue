@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import {ref, watch} from 'vue';
+import { ref } from 'vue';
 
 import {
   Divider as ADivider,
@@ -9,16 +9,24 @@ import {
   LayoutContent as ALayoutContent,
   LayoutSider as ALayoutSider,
   Space as ASpace,
+  message,
 } from 'ant-design-vue';
 
 import ChatRoom from '#/components/chatBox/content/chatRoom.vue';
 import ChatBoxLeft from '#/components/chatBox/left/chatBox-Left.vue';
 import ChatBoxRight from '#/components/chatBox/right/chatBox-right.vue';
+import { useChatStore } from '#/store';
+
+const chatStore = useChatStore();
 
 const showRight = ref(false);
-function setShowRight() {
-  showRight.value = !showRight.value;
-}
+const setShowRight = () => {
+  if (chatStore.getCurrentChatId === undefined) {
+    message.warn('未選中客戶!');
+  } else {
+    showRight.value = !showRight.value;
+  }
+};
 
 const contentStyle: CSSProperties = {
   textAlign: 'center',

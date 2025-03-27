@@ -47,8 +47,8 @@ export const messageType = {
 };
 
 const wsConfigs = {
-  '449711484896804': {
-    id: '449711484896804',
+  '1974246803381729': {
+    id: '1974246803381729',
     url: 'https://whatsapi.jackycode.cn/socket.io',
     isContect: false,
   },

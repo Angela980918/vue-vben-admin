@@ -86,8 +86,8 @@ const removeItem = async () => {
 
   source +=
     selectValue.value.length > 6
-      ? `wabaId=${selectValue.value}&userType=waba`
-      : `userId=${selectValue.value}&userType=user`;
+      ? `id=${selectValue.value}&userType=waba`
+      : `id=${selectValue.value}&userType=user`;
 
   list.forEach((item) => {
     // selectList.push(item.id)
@@ -147,7 +147,7 @@ const uploadFile = async (event: Event) => {
     selectValue.value.length > 6
       ? { wabaId: selectValue.value }
       : { userId: selectValue.value },
-  );
+  ).then(() => message.success('上傳素材成功'));
 
   await checkCos();
 };

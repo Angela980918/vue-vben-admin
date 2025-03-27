@@ -186,6 +186,7 @@ const createContact = async (value: any) => {
     setTimeout(() => {
       customerStore.contactOperate(isCreate.value, result);
     }, 1000);
+    showContact.value!.setEmpty();
     showContact.value!.showModal();
     message.success('新增聯繫人成功');
   });
@@ -325,8 +326,8 @@ watch(
           selectedRowKeys: state.selectedRowKeys,
           onChange: onSelectChange,
           getCheckboxProps: (record) => ({
-            id: `checkbox-${record.key}`,
-            name: `checkbox-${record.key}`,
+            id: `checkbox-${record.id}`,
+            name: `checkbox-${record.id}`,
           }),
         }"
         style="width: 100%"
