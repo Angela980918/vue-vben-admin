@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MessageData } from '@vben/types';
 
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
@@ -9,8 +9,6 @@ import {
   AudioMutedOutlined,
   AudioOutlined,
   CloseCircleFilled,
-  ContainerOutlined,
-  EnvironmentOutlined,
   FileTextFilled,
   FileTextOutlined,
   MessageOutlined,
@@ -26,21 +24,22 @@ import {
 } from 'ant-design-vue';
 import data from 'emoji-mart-vue-fast/data/all.json';
 import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
-import Recorderx from 'recorderx';
+// 全局变量
+import Recorder from 'recorder-core';
 
 import { sendMessageApi, uploadMaterialApi } from '#/api';
 import QuickMsg from '#/components/contact/QuickMsg.vue';
 import { useChatStore } from '#/store';
 
+// 引入mp3格式支持文件；如果需要多个格式支持，把这些格式的编码引擎js文件放到后面统统引入进来即可
+import 'recorder-core/src/engine/mp3';
+import 'recorder-core/src/engine/mp3-engine';
+
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 
 const emit = defineEmits(['openTemp']);
-
-// 语音录制
-const isRecording = ref(false); // 是否正在录音
-const audioUrl = ref(''); // 录音文件的 URL
-let recorder = null; // Recorderx 实例
-let audioBlob = null; // 录音文件的 Blob 对象
+let rec: any;
+const isRecording = ref(false);
 
 const chatStore = useChatStore();
 const currentPhone = computed(() => chatStore.currentPhone);
@@ -95,26 +94,6 @@ const sendDocMessage = async (event: Event) => {
   }
 };
 
-/**
- * 写入字符串到 DataView
- */
-const writeString = (view, offset, string) => {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.codePointAt(i));
-  }
-};
-
-/**
- * 将 Float32Array 转换成 16-bit PCM 数据
- */
-const floatTo16BitPCM = (view, offset, input) => {
-  for (let i = 0; i < input.length; i++, offset += 2) {
-    const s = Math.max(-1, Math.min(1, input[i])); // 限制范围
-    // eslint-disable-next-line unicorn/number-literal-case
-    view.setInt16(offset, s < 0 ? s * 0x80_00 : s * 0x7f_ff, true);
-  }
-};
-
 // function getFileName() {
 //   return docTxt.value.split('/').pop();
 // }
@@ -148,31 +127,6 @@ const insertAtCursor = (text) => {
   });
 };
 
-const encodeWAV = (samples, sampleRate) => {
-  const buffer = new ArrayBuffer(44 + samples.length * 2);
-  const view = new DataView(buffer);
-
-  // WAV 头部
-  writeString(view, 0, 'riff');
-  view.setUint32(4, 36 + samples.length * 2, true);
-  writeString(view, 8, 'wave');
-  writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, 1, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  writeString(view, 36, 'data');
-  view.setUint32(40, samples.length * 2, true);
-
-  // PCM 数据
-  floatTo16BitPCM(view, 44, samples);
-
-  return new Blob([buffer], { type: 'audio/wav' });
-};
-
 function selectEmoji(emoji) {
   insertAtCursor(emoji.native);
 }
@@ -201,7 +155,7 @@ async function sendMessage() {
   };
   if (docTxt.value !== null) {
     data.type = messageType.value;
-    data.link = docTxt.value;
+    data.link = docTxt.value.file_path;
   }
 
   const result = await sendMessageApi(data);
@@ -257,71 +211,73 @@ function showSmile() {
   }
 }
 
-// 语音录制方法
-const getUserMedia = (constraints) => {
-  if (navigator.mediaDevices?.getUserMedia) {
-    return navigator.mediaDevices.getUserMedia(constraints);
-  } else if (navigator.getUserMedia) {
-    return new Promise((resolve, reject) => {
-      navigator.getUserMedia(constraints, resolve, reject);
-    });
-  } else {
-    return Promise.reject(new Error('当前浏览器不支持 getUserMedia'));
-  }
-};
-
-const audioStart = async () => {
+// 修改录音初始化逻辑
+const audioInit = async () => {
   try {
-    // 获取麦克风权限
-    const stream = await getUserMedia({ audio: true });
-
-    // 初始化 Recorderx
-    recorder = new Recorderx({
-      sampleRate: 16_000, // 采样率
-      bufferSize: 4096, // 缓冲区大小
+    // 创建录音对象
+    rec = Recorder({
+      type: 'mp3', // 录音格式，可以换成wav等其他格式
+      sampleRate: 16_000, // 录音的采样率，越大细节越丰富越细腻
+      bitRate: 16, // 录音的比特率，越大音质越好
     });
-
-    // 开始录音
-    recorder.start(stream);
-    isRecording.value = true;
-    audioUrl.value = '';
-    // console.log('录音开始');
+    if (!rec) {
+      message.warn('当前浏览器不支持录音功能！');
+      return;
+    }
+    // 打开录音，获得权限
+    rec.open(
+      () => {},
+      () => {
+        // 用户拒绝了录音权限，或者浏览器不支持录音
+      },
+    );
   } catch (error) {
     console.error('无法访问麦克风:', error);
     message.error('無法連接麥克風');
   }
 };
 
-// 停止录音
-const stopRecording = async () => {
-  if (recorder) {
-    recorder.pause(); // 停止录音
-    isRecording.value = false;
-
-    // 获取录音文件的 Blob 对象
-    audioBlob = recorder.getRecord();
-    // console.log("audioBlob", audioBlob)
-    // 生成录音文件的 URL
-    const wavBlob = encodeWAV(audioBlob, 16_000);
-    // console.log('录音停止wavBlob', wavBlob);
-    audioUrl.value = URL.createObjectURL(wavBlob);
-    // console.log('录音停止', audioUrl.value);
-
-    // 将 Float32Array 转换为 WAV 格式或其他格式
-    // const FloatToBlob = new Blob([audioBlob], { type: 'audio/wav' }); // 或者根据你的实际格式使用不同的类型
-    // 创建 File 对象
-    const audioFile = new File([audioBlob], `${Date.now()}.wav`, {
-      type: 'audio/wav',
-    });
-    const formData = new FormData();
-    formData.append('audio', audioFile);
-    await uploadMaterialApi(audioFile, 'room', 'audio', {
-      roomId: chatStore.currentChatId,
-    }).then((result) => {
-      docTxt.value = `https://cos.jackycode.cn/${result.file_path}`;
-      messageType.value = 'audio';
-    });
+const audioStart = async () => {
+  if (!rec) {
+    console.error('未打开录音');
+    return;
   }
+  isRecording.value = true;
+  rec.start();
+};
+
+// 停止录音
+const stopRecording = () => {
+  if (!rec) {
+    console.error('未打开录音');
+    return;
+  }
+  rec.stop(
+    async (blob: any) => {
+      isRecording.value = false;
+
+      const audioFile = new File([blob], `audio-${Date.now()}.mp3`, {
+        type: 'audio/mpeg', // 显式覆盖 MIME 类型
+      });
+      await uploadMaterialApi(audioFile, 'room', 'audio', {
+        roomId: chatStore.currentChatId.toString(),
+      }).then((result) => {
+        docTxt.value = {
+          file_path: `https://cos.jackycode.cn/${result.file_path}`,
+          file_name: result.file_name,
+        };
+        messageType.value = 'audio';
+      });
+
+      rec.close(); // 关闭录音，释放录音资源，当然可以不释放，后面可以连续调用start
+      rec = null;
+    },
+    (err: any) => {
+      console.error(`结束录音出错：${err}`);
+      rec.close(); // 关闭录音，释放录音资源，当然可以不释放，后面可以连续调用start
+      rec = null;
+    },
+  );
 };
 
 // 播放录音
@@ -345,6 +301,9 @@ const stopRecording = async () => {
 //         console.log('下载录音');
 //     }
 // };
+onBeforeMount(() => {
+  audioInit();
+});
 </script>
 
 <template>
@@ -470,14 +429,14 @@ const stopRecording = async () => {
             @change="sendDocMessage"
           />
         </ATooltip>
-        <ATooltip>
-          <template #title>選擇產品/服務</template>
-          <ContainerOutlined style="margin: 4px; font-size: 20px" />
-        </ATooltip>
-        <ATooltip>
-          <template #title>地理位置</template>
-          <EnvironmentOutlined style="margin: 4px; font-size: 20px" />
-        </ATooltip>
+        <!--        <ATooltip>-->
+        <!--          <template #title>選擇產品/服務</template>-->
+        <!--          <ContainerOutlined style="margin: 4px; font-size: 20px" />-->
+        <!--        </ATooltip>-->
+        <!--        <ATooltip>-->
+        <!--          <template #title>地理位置</template>-->
+        <!--          <EnvironmentOutlined style="margin: 4px; font-size: 20px" />-->
+        <!--        </ATooltip>-->
         <ATooltip>
           <template #title>錄音</template>
           <AudioOutlined

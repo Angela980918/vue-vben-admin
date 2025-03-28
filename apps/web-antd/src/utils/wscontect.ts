@@ -47,8 +47,8 @@ export const messageType = {
 };
 
 const wsConfigs = {
-  '1974246803381729': {
-    id: '1974246803381729',
+  '1351808576147912': {
+    id: '1351808576147912',
     url: 'https://whatsapi.jackycode.cn/socket.io',
     isContect: false,
   },
@@ -184,7 +184,7 @@ export const wsconnect = {
 
       const assignedCustomers = customerStore.getAssignedCustomers;
       // const unAssignedCustomers = customerStore.getUnassignedCustomers;
-      // console.log("whatsappMessage", whatsappMessage)
+      // console.log("111111whatsappMessage", whatsappMessage)
       // 如果拿出的消息是当前沟通用户，添加到当前记录
       if (chatStore.currentPhone === whatsappMessage.from) {
         const message = wsconnect.handleMessage(
@@ -194,7 +194,7 @@ export const wsconnect = {
         );
         // console.log("查看处理的消息", message)
         // 為當前用戶添加未讀
-        // console.log("messagemessage", message)
+
         assignedCustomers.forEach((item) => {
           if (item.phoneNumber === whatsappMessage.from) {
             if (item.badgeCount === undefined) item.badgeCount = 0;
@@ -218,6 +218,7 @@ export const wsconnect = {
         customerStore.setAssignedCustomers(assignedCustomers);
         chatStore.addMessage(message);
       }
+
       // 如果不是，为那条记录更新最新的消息、未读+1
       else {
         let inserOrNot = 0;
@@ -236,7 +237,7 @@ export const wsconnect = {
           whatsappMessage.type === 'text'
             ? whatsappMessage.text.body
             : (message = `[${whatsappMessage.type} message]`);
-
+        // console.log("111111messagemessage", message)
         // 查詢是否是來自已訂閱的用戶信息
         assignedCustomers.forEach((item) => {
           if (item.phoneNumber === whatsappMessage.from) {
@@ -302,9 +303,9 @@ export const wsconnect = {
         jsonData.createTime,
       );
       const type = message.status;
-
+      // console.log("whatsappMessagewhatsappMessagewhatsappMessage", whatsappMessage)
       const findByphone = useCustomerStore().getUserByPhone(whatsappMessage.to);
-
+      // console.log("messagemessagemessagemessage", message)
       if (!findByphone) {
         const assignedCustomers = useCustomerStore().getAssignedCustomers;
         let msgType = '';
