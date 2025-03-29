@@ -49,3 +49,6 @@ vite.config.ts.*
 *.sln
 *.sw?
 .history
+
+# 忽视包管理文件
+pnpm-lock.yaml
