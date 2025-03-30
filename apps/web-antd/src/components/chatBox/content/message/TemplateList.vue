@@ -246,7 +246,7 @@ function markedToHtml(markedValue) {
     <AModal
       :footer="false"
       v-model:open="open"
-      title="選擇模板"
+      :title="$t('page.chat.selecttemplate')"
       @ok="handleSubmit"
       :width="1000"
     >

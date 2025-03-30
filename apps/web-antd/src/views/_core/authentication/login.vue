@@ -15,15 +15,15 @@ const authStore = useAuthStore();
 
 const MOCK_USER_OPTIONS: BasicOption[] = [
   {
-    label: 'Super',
+    label: $t('page.auth.options.super'),
     value: 'super',
   },
   {
-    label: 'Admin',
+    label: $t('page.auth.options.admin'),
     value: 'admin',
   },
   {
-    label: 'User',
+    label: $t('page.auth.options.user'),
     value: 'jack',
   },
 ];

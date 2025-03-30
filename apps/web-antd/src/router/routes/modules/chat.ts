@@ -10,7 +10,7 @@ const chatRoutes: RouteRecordRaw[] = [
       icon: 'ant-design:message-outlined',
       keepAlive: true,
       order: 100,
-      title: '在綫聊天',
+      title: $t('page.routermenu.chat.title'),
     },
     name: 'Chat',
     path: '/chat',
@@ -18,7 +18,7 @@ const chatRoutes: RouteRecordRaw[] = [
     children: [
       {
         meta: {
-          title: $t('在綫聊天'),
+          title: $t('page.routermenu.chat.title'),
           hideInMenu: true,
           hideInBreadcrumb: true,
         },

@@ -211,7 +211,7 @@ function markedToHtml(markedValue) {
           <ASpace size="middle">
             <ATooltip placement="top">
               <template #title>
-                <span>添加會話標簽</span>
+                <span>{{ $t('page.chat.actions.3') }}</span>
               </template>
               <AButton :icon="h(TagOutlined)" />
             </ATooltip>
@@ -223,11 +223,11 @@ function markedToHtml(markedValue) {
               <AButton :icon="h(FileSearchOutlined)" />
             </ATooltip>
 
-            <AButton type="primary">結束會話</AButton>
+            <AButton type="primary">{{ $t('page.chat.actions.1') }}</AButton>
 
             <ATooltip placement="top">
               <template #title>
-                <span>顯示更多</span>
+                <span>{{ $t('page.chat.actions.2') }}</span>
               </template>
               <AButton
                 :icon="h(IdcardOutlined)"
