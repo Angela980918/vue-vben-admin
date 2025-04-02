@@ -6,6 +6,7 @@ import { useUserStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
 import { defineStore } from 'pinia';
+import stringToColor from 'string-to-color';
 
 import { getAllCustomerApi, getContactListApi } from '#/api';
 
@@ -40,15 +41,6 @@ export const useCustomerStore = defineStore('customerStore', {
     //   this.currentUserId = id;
     // },
 
-    generateRandomColor(): string {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    },
-
     async setAssignedCustomers(): any[] {
       // this.assignedCustomers = customers.map((customer, index) => ({
       //   ...customer,
@@ -58,7 +50,7 @@ export const useCustomerStore = defineStore('customerStore', {
       await getAllCustomerApi(useUserStore().selectAccount).then((result) => {
         result.forEach((item, index) => {
           item.key = item.id;
-          const color = this.generateRandomColor();
+          const color = stringToColor(item.customerId);
           const newCustomer = {
             id: item.id,
             key: item.key,
