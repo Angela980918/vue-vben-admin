@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
+import type { WhatsAppInformationInfo } from '#/types';
+
 import { computed, onBeforeMount } from 'vue';
 
 import { useUserStore } from '@vben/stores';
@@ -81,8 +83,7 @@ const loadMessageList = async () => {
     page: 1,
     pageSize: 20,
   };
-  const res = await getMessageList(data);
-
+  const res: WhatsAppInformationInfo = await getMessageList(data);
   res.messageList.reverse().forEach((item, index) => {
     let fileExtension = '';
     item.name = currentCustomerInfo.name;

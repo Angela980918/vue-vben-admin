@@ -1,3 +1,10 @@
+import type {
+  ChatMessage,
+  MessageItem,
+  Status,
+  WhatsAppInformationInfo,
+} from '#/types';
+
 import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
@@ -6,15 +13,27 @@ import { getContactListApi, getMessageList } from '#/api';
 import { useCustomerStore } from '#/store/customerStore';
 import { handleTemplateMsg } from '#/utils/common';
 
+export interface CurrentCustomerInfo {
+  id: string;
+  key: string;
+  name: string;
+  time: Date;
+  badgeCount?: number;
+  phoneNumber: string;
+  color: string;
+  isActive: boolean;
+  message: string;
+}
+
 export const useChatStore = defineStore('chatStore', () => {
-  const currentChatId = ref(1); // 当前聊天的 ID
+  const currentChatId = ref('1'); // 当前聊天的 ID
   // const currentIndex = ref(1);
 
   const currentPhone = ref('');
 
-  const currentCustomerInfo = ref({});
+  const currentCustomerInfo = ref<CurrentCustomerInfo>();
 
-  const chatMessages = ref([]);
+  const chatMessages = ref<ChatMessage[]>([]);
 
   const page = ref(1);
   const scrollTo = ref(false);
@@ -43,45 +62,56 @@ export const useChatStore = defineStore('chatStore', () => {
       page: page.value,
       pageSize: 20,
     };
-    const res = await getMessageList(data).then((result) => {
-      scrollTo.value = true;
-      return result;
-    });
+    const res: WhatsAppInformationInfo = await getMessageList(data).then(
+      (result) => {
+        scrollTo.value = true;
+        return result;
+      },
+    );
     const currentCustomer = currentCustomerInfo.value;
-    res.messageList.reverse().forEach((item, index) => {
-      let fileExtension = '';
-      item.name = currentCustomer.name;
-      item.color = currentCustomer.color;
-      item.msgIndex = `${page.value}-${index}` + `-index`;
-      if (item.type === 'template') {
-        const name = item.content.name;
-        const language = item.content.language.code;
-        item.content = handleTemplateMsg(name, language);
-        if (
-          item.content.header !== undefined &&
-          item.content.header.format === 'DOCUMENT'
-        ) {
-          const url = item.content.header.content;
-          // console.log("url",url)
-          fileExtension = url.split('.').pop();
-          item.fileExtension = fileExtension;
+    const messagesListPro: ChatMessage[] = res.messageList
+      .reverse()
+      .map((item: MessageItem, index) => {
+        let fileExtension: string | undefined = '';
+        if (item.type === 'template') {
+          const name = item.content.name;
+          const language = item?.content?.language?.code;
+          item.content = handleTemplateMsg(name, language);
+          if (
+            item.content.header !== undefined &&
+            item.content.header.format === 'DOCUMENT'
+          ) {
+            const url = item.content.header.content;
+            // console.log("url",url)
+            fileExtension = url && url.split('.').pop();
+          }
+        } else if (item.type === 'document') {
+          const url = item.content.link;
+          const filename = url && url.split('/').pop();
+          const fileExtensions = filename && filename.split('.');
+          item.content.filename = filename;
+          fileExtension = fileExtensions && fileExtensions[1];
         }
-      } else if (item.type === 'document') {
-        const url = item.content.link;
-        const filename = url.split('/').pop();
-        fileExtension = filename.split('.');
-        item.content.filename = filename;
-        item.fileExtension = fileExtension[1];
-      }
-    });
-    chatMessages.value = [...res.messageList, ...chatMessages.value];
+        return {
+          name: currentCustomer?.name || '',
+          color: currentCustomer?.color || '',
+          msgIndex: `${page.value}-${index}` + `-index`,
+          fileExtension,
+          ...item,
+        };
+      });
+
+    chatMessages.value =
+      chatMessages.value === undefined
+        ? [...messagesListPro]
+        : [...messagesListPro, ...chatMessages.value];
   }
 
-  function setMessageList(messageList) {
+  function setMessageList(messageList: ChatMessage[]) {
     chatMessages.value = [...messageList];
   }
 
-  function addMessage(message) {
+  function addMessage(message: ChatMessage) {
     // console.log("messagemessagemessage", message)
     if (message.direction === 'inbound' && needSendTempFirst.value) {
       needSendTempFirst.value = false;
@@ -102,7 +132,7 @@ export const useChatStore = defineStore('chatStore', () => {
   //   contactList.value = response.items;
   // }
 
-  function updateMessage(id, status, message = {}) {
+  function updateMessage(id: string, status: Status, message: ChatMessage) {
     let add = true;
     chatMessages.value.forEach((item) => {
       if (item.direction === 'outbound' && item._id === id) {
@@ -115,8 +145,7 @@ export const useChatStore = defineStore('chatStore', () => {
     }
   }
 
-  async function setCurrentUserInfo(user) {
-    // console.log("usr",user)
+  async function setCurrentUserInfo(user: CurrentCustomerInfo) {
     currentCustomerInfo.value = user;
     //   验证上次联系时间是否超过24小时
     const list = computed(() => useCustomerStore().getContactList);
@@ -126,7 +155,7 @@ export const useChatStore = defineStore('chatStore', () => {
           phoneNumber: item.phoneNumber,
         }).then((result) => {
           // 更新用户资料
-          const newDate = result.items[0];
+          const newData = result.items[0];
           if (item.lastSeen === undefined) {
             needSendTempFirst.value = true;
           } else {
@@ -134,7 +163,7 @@ export const useChatStore = defineStore('chatStore', () => {
             const timeDiff = Date.now() - lastSeenDate.getTime();
             needSendTempFirst.value = timeDiff > 86_400_000;
           }
-          useCustomerStore().updateUser(newDate);
+          newData && useCustomerStore().updateUser(newData);
         });
       }
     });
@@ -154,7 +183,7 @@ export const useChatStore = defineStore('chatStore', () => {
   }
 
   function $reset() {
-    currentChatId.value = 1;
+    currentChatId.value = '1';
     currentPhone.value = '';
     chatMessages.value = [];
     needSendTempFirst.value = false;

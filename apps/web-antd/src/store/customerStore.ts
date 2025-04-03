@@ -1,10 +1,13 @@
-import type { ContactInfo } from '@vben/types';
+import type { ContactInfo, ItemInfo } from '@vben/types';
 
-import { reactive, toRaw } from 'vue';
+import type { AssignedCustomer, ContactInformation } from '#/types';
+
+import { toRaw } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
+import { sortBy } from 'lodash';
 import { defineStore } from 'pinia';
 import stringToColor from 'string-to-color';
 
@@ -14,9 +17,9 @@ interface CustomerState {
   // currentUserId: number;
   // currentIndex: number;
   currentCustomerInfo: Partial<ContactInfo>;
-  assignedCustomers: Array<ContactInfo & { isActive: boolean }>;
+  assignedCustomers: AssignedCustomer[];
   searchWord: string;
-  contactList: ContactInfo[];
+  contactList: ContactInformation[];
   page: number;
   total: number;
   size: number;
@@ -41,46 +44,39 @@ export const useCustomerStore = defineStore('customerStore', {
     //   this.currentUserId = id;
     // },
 
-    async setAssignedCustomers(): any[] {
-      // this.assignedCustomers = customers.map((customer, index) => ({
-      //   ...customer,
-      //   isActive: index === 0,
-      // }));
-      const customer = [];
-      await getAllCustomerApi(useUserStore().selectAccount).then((result) => {
-        result.forEach((item, index) => {
-          item.key = item.id;
-          const color = stringToColor(item.customerId);
-          const newCustomer = {
-            id: item.id,
-            key: item.key,
-            name: item.customerId,
-            time: item.messageList[0].deliverTime,
-            badgeCount: item.messageCount,
-            phoneNumber: item.customerId,
-            color,
-            isActive: index === 0,
-          };
+    async setAssignedCustomers(): Promise<AssignedCustomer[]> {
+      const customers: AssignedCustomer[] = [];
+      const result = await getAllCustomerApi(useUserStore().selectAccount);
 
-          if (item.customerProfile !== undefined) {
-            newCustomer.name = item.customerProfile.name;
-          }
+      result.forEach((item: any, index: number) => {
+        item.key = item.id;
+        const color = stringToColor(item.customerId);
+        const newCustomer = {
+          id: item.id,
+          key: item.key,
+          name: item.customerId,
+          time: item.messageList[0].deliverTime,
+          badgeCount: item.messageCount,
+          phoneNumber: item.customerId,
+          color,
+          isActive: index === 0,
+          message: '',
+        };
 
-          newCustomer.message =
-            item.messageList[0].type === 'text'
-              ? item.messageList[0].content.body
-              : `[${item.messageList[0].type} Message]`;
+        if (item.customerProfile !== undefined) {
+          newCustomer.name = item.customerProfile.name;
+        }
 
-          customer.push(newCustomer);
-        });
-        // console.log("customer",customer)
-        // customerStore.setAssignedCustomers(customer);
-        // chatStore.setCurrentPhone(customer[0].phoneNumber);
+        newCustomer.message =
+          item.messageList[0].type === 'text'
+            ? item.messageList[0].content.body
+            : `[${item.messageList[0].type} Message]`;
 
-        // chatStore.setCurrentChatId()
+        customers.push(newCustomer);
       });
-      this.assignedCustomers = customer;
-      return customer;
+
+      this.assignedCustomers = customers;
+      return customers;
     },
 
     setCurrentUserInfo(user: ContactInfo): void {
@@ -92,23 +88,25 @@ export const useCustomerStore = defineStore('customerStore', {
     },
 
     async setContactList(msg?: string): Promise<void> {
-      this.page = 1;
-      this.size = 10;
-      this.total = 0;
-      const response = await getContactListApi(this.page);
+      try {
+        this.page = 1;
+        this.size = 10;
+        this.total = 0;
 
-      if (response) {
+        const response = await getContactListApi(this.page);
+        if (!response) return;
+
         this.total = response.total;
         this.contactList = response.items.map((item) => ({
           ...item,
           key: item.id,
         }));
-        if (msg) {
-          message.success(msg);
-        }
-        if (response.total > this.size) {
-          this.startBackLoadContact();
-        }
+
+        if (msg) message.success(msg);
+        if (response.total > this.size) this.startBackLoadContact();
+      } catch (error) {
+        console.error('加載聯繫人列表失敗:', error);
+        message.error('加載聯繫人列表失敗');
       }
     },
 
@@ -129,14 +127,15 @@ export const useCustomerStore = defineStore('customerStore', {
     },
 
     contactOperate(isCreate: boolean, value: ContactInfo): void {
+      const contactInfo: ContactInformation = { ...value, key: value.id };
       if (isCreate) {
-        this.contactList.unshift({ ...value, key: value.id });
+        this.contactList.unshift(contactInfo);
       } else {
         const index = this.contactList.findIndex(
           (item) => item.id === value.id,
         );
         if (index !== -1) {
-          this.contactList.splice(index, 1, value);
+          this.contactList.splice(index, 1, contactInfo);
         }
       }
     },
@@ -147,19 +146,24 @@ export const useCustomerStore = defineStore('customerStore', {
     //     this.contactList = [...newUser, ...this.contactList];
     //   });
     // },
-    async updateUser(userDate: object) {
-      const reactiveUserDate = reactive(userDate);
-      let add = true;
-      for (let i = 0; i < this.contactList.length; i++) {
-        if (this.contactList[i].phoneNumber === reactiveUserDate.phoneNumber) {
-          add = false;
-          this.contactList[i] = reactiveUserDate;
-          break;
-        }
-      }
+    async updateUser(userData: ItemInfo): Promise<void> {
+      const index = this.contactList.findIndex(
+        (item) => item.phoneNumber === userData.phoneNumber,
+      );
 
-      if (add) {
-        this.contactList = [reactiveUserDate, ...this.contactList];
+      if (index === -1) {
+        // 不存在 添加新聯繫人
+        this.contactList.unshift({
+          ...userData,
+          key: userData.id,
+        });
+      } else {
+        // 存在 更新現有聯繫人
+        this.contactList.splice(index, 1, {
+          ...this.contactList[index],
+          ...userData,
+          key: userData.id,
+        });
       }
     },
 
@@ -177,7 +181,9 @@ export const useCustomerStore = defineStore('customerStore', {
   },
 
   getters: {
-    getAssignedCustomers: (state) => state.assignedCustomers,
+    getAssignedCustomers: (state) => {
+      return sortBy(state.assignedCustomers, 'time').reverse();
+    },
 
     getAllUnReadNum: (state) => {
       return [...state.assignedCustomers].reduce((count, item) => {
