@@ -330,6 +330,7 @@ watch(
             name: `checkbox-${record.id}`,
           }),
         }"
+        :row-key="(record) => record.id"
         style="width: 100%"
         :columns="columns"
         :data-source="data"
