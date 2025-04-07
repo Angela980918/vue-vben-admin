@@ -54,3 +54,27 @@ export interface WhatsAppInformationInfo {
   id: string;
   roomId: string;
 }
+
+export interface MessageTemplate {
+  name: string;
+  language: Language;
+}
+
+export interface SendMessageResponse {
+  id: string;
+  wamid: string;
+  status: Status;
+  from: string;
+  to: string;
+  wabaId: string;
+  type: Type;
+  text: Content;
+  createTime: Date;
+  updateTime: Date;
+  totalPrice: number;
+  pricingCategory: string;
+  currency: string;
+  regionCode: string;
+  bizType: string;
+  template: MessageTemplate;
+}

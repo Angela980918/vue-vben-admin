@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { MessageData } from '@vben/types';
 
+import type { ChatMessage, SendMessageResponse } from '#/types';
+
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
@@ -29,6 +31,7 @@ import Recorder from 'recorder-core';
 
 import { sendMessageApi, uploadMaterialApi } from '#/api';
 import QuickMsg from '#/components/contact/QuickMsg.vue';
+import { useHandleSendMessage } from '#/hooks/handleSendMessage';
 import { useChatStore } from '#/store';
 
 // 引入mp3格式支持文件；如果需要多个格式支持，把这些格式的编码引擎js文件放到后面统统引入进来即可
@@ -158,23 +161,31 @@ async function sendMessage() {
     data.link = docTxt.value.file_path;
   }
 
-  const result = await sendMessageApi(data);
-  //
-  const message = {
+  const result = (await sendMessageApi(data)) as SendMessageResponse;
+  const message: ChatMessage = {
     direction: 'outbound',
     _id: result.id,
     status: result.status,
     type: result.type,
     deliverTime: result.createTime,
     content: {},
+    from: result.from,
+    wamid: result.wamid,
+    to: result.to,
+    __v: 0,
+    name: '',
+    color: '',
+    msgIndex: '0',
   };
   if (result.type === 'text') {
     message.content.body = result.text.body;
+  } else if (result.type === 'template') {
+    message.name = result.template.name;
   } else {
     message.content.link = result[result.type].link;
     const url = message.content.link;
     // message.content.filename = fileExtension;
-    message.fileExtension = url.split('.').pop();
+    message.fileExtension = url?.split('.').pop();
     message.content.caption = result[result.type].caption;
   }
   //
@@ -182,6 +193,8 @@ async function sendMessage() {
   messageType.value = 'text';
   docTxt.value = null;
   chatStore.addMessage(message);
+  /* 更新用戶消息 */
+  useHandleSendMessage(result);
 }
 
 // 表情模板位置计算

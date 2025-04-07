@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { SendMessageResponse } from '#/types';
+
 import { computed, onMounted, ref, watch } from 'vue';
 
 import { useUserStore } from '@vben/stores';
@@ -23,6 +25,7 @@ import { marked } from 'marked';
 import { sendMessageApi } from '#/api';
 // import Confirm from "@/components/chatBox/content/message/Confirm.vue";
 import Confirm from '#/components/chatBox/content/message/Confirm.vue';
+import { useHandleSendMessage } from '#/hooks/handleSendMessage';
 import { useChatStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
 
@@ -198,7 +201,7 @@ const sendTemplate = async () => {
     }
   }
 
-  const resultObj = await sendMessageApi(sendData);
+  const resultObj = (await sendMessageApi(sendData)) as SendMessageResponse;
   const contactPhone = chatStore.currentPhone;
 
   if (sendData.to === contactPhone) {
@@ -225,6 +228,7 @@ const sendTemplate = async () => {
   }
   message.success('發送成功');
   handleSubmit();
+  useHandleSendMessage(resultObj);
   // if(jump.value) {
   //   router.push({
   //     name: 'Chat',

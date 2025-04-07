@@ -178,6 +178,22 @@ export const useCustomerStore = defineStore('customerStore', {
       this.total = 0;
       this.size = 10;
     },
+    /**
+     * 更新指定客户的新消息信息
+     * @param id 客户ID
+     * @param customerInfo 包含新消息信息的客户对象
+     */
+    updateCustomerNewMessage(
+      toPhoneNumber: string,
+      customerInfo: { message: string; time: Date },
+    ) {
+      this.assignedCustomers.forEach((item) => {
+        if (item.phoneNumber === toPhoneNumber) {
+          item.message = customerInfo.message;
+          item.time = customerInfo.time;
+        }
+      });
+    },
   },
 
   getters: {
