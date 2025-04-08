@@ -60,6 +60,7 @@
     "vue-socket.io": "^3.0.10"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16"
+    "@types/lodash": "^4.17.16",
+    "less": "^4.3.0"
   }
 }
