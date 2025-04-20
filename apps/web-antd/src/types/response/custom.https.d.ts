@@ -1,7 +1,7 @@
 /**
  * HTTP 状态码枚举
  */
-export enum HttpStatusCode {
+const HttpStatusCode = {
   /**
    * 表示请求已被接受处理，但处理尚未完成。
    */
@@ -222,4 +222,7 @@ export enum HttpStatusCode {
    * 表示客户端请求的URI比服务器愿意解释的长度更长。
    */
   URI_TOO_LONG = 414,
-}
+} as const;
+
+export type HttpStatusCode =
+  (typeof HttpStatusCode)[keyof typeof HttpStatusCode];

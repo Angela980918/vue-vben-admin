@@ -74,5 +74,6 @@ const ycloudInstance = createRequestClient(
 // 创建 WhatsApp 实例
 const whatsappInstance = createRequestClient('https://whatsapi.jackycode.cn');
 
+const apiClient = createRequestClient('https://dev.huchenghe.site');
 // 默认导出多个实例
-export { whatsappInstance, ycloudInstance };
+export { apiClient, whatsappInstance, ycloudInstance };

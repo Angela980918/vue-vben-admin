@@ -104,6 +104,11 @@ defineExpose({
               {{ subTitle || $t('authentication.loginSubtitle') }}
             </slot>
           </span>
+          <br />
+          <span>{{ $t('authentication.register.no') }} </span>
+          <router-link to="/auth/register" style="color: #0078d4">
+            &nbsp;{{ $t('authentication.register.go') }}
+          </router-link>
         </template>
       </Title>
     </slot>
