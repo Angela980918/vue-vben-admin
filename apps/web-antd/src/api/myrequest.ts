@@ -1,3 +1,6 @@
+import { preferences } from '@vben/preferences';
+import { useAccessStore } from '@vben/stores';
+
 import { message } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -19,11 +22,14 @@ function createRequestClient(
   // 请求拦截器
   client.interceptors.request.use(
     (config) => {
-      // TODO: 在这里预留 Token 逻辑
-      // const token = localStorage.getItem("accessToken");
-      // if (token) {
-      //   config.headers.Authorization = `Bearer ${token}`;
-      // }
+      // 请求携带访问token
+      const accessStore = useAccessStore();
+      const token = accessStore.accessToken?.trim();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      // 请求携带语言信息
+      config.headers['Accept-Language'] = preferences.app.locale;
 
       return config;
     },
@@ -45,6 +51,12 @@ function createRequestClient(
       const { code, result, message: msg } = response.data;
       if (code === 200) {
         return result; // 成功返回数据
+      } else if (code === 401) {
+        // token 过期处理
+        const accessStore = useAccessStore();
+        if (accessStore.refreshToken) {
+          // 刷新 token
+        }
       }
       // 抛出业务错误
       throw new Error(msg || '未知错误');

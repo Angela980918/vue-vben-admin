@@ -1,4 +1,8 @@
+import type { Permission, Role, UserData } from '../../../types/src/user';
+
 import { acceptHMRUpdate, defineStore } from 'pinia';
+
+import { reqUserProfile } from './../../../../apps/web-antd/src/api/common/user';
 
 interface BasicUserInfo {
   [key: string]: any;
@@ -23,15 +27,19 @@ interface BasicUserInfo {
    */
   username: string;
 }
-
+type StatusType = 'error' | 'idle' | 'loading' | 'success';
 interface AccessState {
   currentApiKey: string;
+  permissions: Permission[];
+  roles: Role[];
   selectAccount: string;
-  selectPhone: string
+  selectPhone: string;
+  status: StatusType;
   /**
    * 用户信息
    */
   userInfo: BasicUserInfo | null;
+  userProfile?: Omit<UserData, 'permissions' | 'roles'>;
   /**
    * 用户角色
    */
@@ -43,6 +51,24 @@ interface AccessState {
  */
 export const useUserStore = defineStore('core-user', {
   actions: {
+    /**
+     * 获取用户资料
+     */
+    async getUserInfo() {
+      try {
+        this.status = 'loading';
+        const { data } = await reqUserProfile();
+
+        this.status = 'success';
+        const { permissions, roles, ...userInfo } = data;
+        this.userProfile = userInfo;
+        this.permissions = permissions;
+        this.roles = roles;
+        return data;
+      } catch {
+        this.status = 'error';
+      }
+    },
     setSelectAccount(wabaId: string) {
       this.selectAccount = wabaId;
     },
@@ -78,10 +104,13 @@ export const useUserStore = defineStore('core-user', {
   },
   state: (): AccessState => ({
     currentApiKey: '',
+    permissions: [],
+    roles: [],
     selectAccount: '',
+    selectPhone: '',
+    status: 'idle', // 默认状态是'idle'
     userInfo: null,
     userRoles: [],
-    selectPhone: ''
   }),
 });
 

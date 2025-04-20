@@ -6,19 +6,12 @@ import { useRouter } from 'vue-router';
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@vben/constants';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
-import { notification } from 'ant-design-vue';
+import { message, notification } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
-import {
-  getAccessCodesApi,
-  getWhatsAppLogin,
-  getWhatsAppUserInfo,
-  getWhatsAppUserToken,
-  loginApi,
-  logoutApi,
-} from '#/api';
+import { getWhatsAppLogin, getWhatsAppUserInfo, reqCommonLogin } from '#/api';
 import { $t } from '#/locales';
-import {wsconnect} from "#/utils/wscontect";
+import { wsconnect } from '#/utils/wscontect';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -26,6 +19,18 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
 
   const loginLoading = ref(false);
+  interface LoginParams extends Recordable<boolean | string> {
+    account: string;
+    password: string;
+    selectAccount: string;
+    captcha: boolean;
+  }
+
+  const MockParams = {
+    account: 'admin',
+    password: 'admin168',
+    role: 'super',
+  };
 
   /**
    * 异步处理登录操作
@@ -34,43 +39,57 @@ export const useAuthStore = defineStore('auth', () => {
    * @param onSuccess
    */
   async function authLogin(
-    params: Recordable<any>,
+    params: LoginParams & Recordable<string>,
     onSuccess?: () => Promise<void> | void,
   ) {
     // 异步处理用户登录操作并获取 accessToken
-    let userInfo: null | UserInfo = null;
+    const userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      let data = {
-        password: params.password,
-        account: params.username,
-        role: params.selectAccount
-      };
 
-      const { token } = await getWhatsAppUserToken(data);
+      // 嘗試登錄
+      const { accessToken, refreshToken } = await reqCommonLogin({
+        account: params.account,
+        password: params.password,
+      });
+
       // console.log("accessTokenaccessTokenaccessToken",accessToken)
 
       // 如果成功获取到 accessToken
-      if (token) {
-        accessStore.setAccessToken(token);
+      if (accessToken && refreshToken) {
+        accessStore.setAccessToken(accessToken);
+        accessStore.setRefreshToken(refreshToken);
 
         // 获取用户信息并存储到 accessStore 中
-        const [fetchUserInfoResult] = await Promise.all([
-          fetchUserInfo(data),
-          // getAccessCodesApi(),
-        ]);
+        const fetchUserInfoResult = await fetchUserInfo(MockParams);
+
         // console.log("fetchUserInfoResultfetchUserInfoResultfetchUserInfoResult",fetchUserInfoResult)
-        userInfo = fetchUserInfoResult;
+        const userInfo = fetchUserInfoResult;
         // console.log("userInfouserInfouserInfo", userInfo)
         userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes( ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010']);
+        void userStore
+          .getUserInfo()
+          .then((data) => {
+            if (data) {
+              const { permissions } = data;
+              accessStore.setAccessCodes(
+                permissions.map((permission) => permission.code),
+              );
+            }
+          })
+          .catch((error) => {
+            message.error('獲取用戶信息失敗');
+            console.error('err', error);
+          });
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
         } else {
           onSuccess
             ? await onSuccess?.()
-            : await router.push(userInfo.homePath || DEFAULT_HOME_PATH);
+            : await router.push(
+                (userInfo && userInfo.homePath) || DEFAULT_HOME_PATH,
+              );
         }
 
         if (userInfo?.realName) {
@@ -115,7 +134,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUserInfo(data?: object) {
     let userInfo: null | UserInfo = null;
-    userInfo = data ? await getWhatsAppLogin(data) : await getWhatsAppUserInfo();
+    userInfo = data
+      ? await getWhatsAppLogin(data)
+      : await getWhatsAppUserInfo();
     // console.log("userInfouserInfouserInfo",userInfo)
     userStore.setUserInfo(userInfo);
     return userInfo;

@@ -10,7 +10,7 @@ import { $t } from '@vben/locales';
 
 import { message as AntDmessage } from 'ant-design-vue';
 
-import { reqCommonResgister } from '#/api/auth/register';
+import { reqCommonResgister } from '#/api';
 
 defineOptions({ name: 'Register' });
 
