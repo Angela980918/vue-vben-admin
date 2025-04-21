@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+
+import { useUserStore } from '@vben/stores';
 
 import {
   Divider as ADivider,
@@ -34,6 +36,13 @@ const contentStyle: CSSProperties = {
   lineHeight: '120px',
   color: '#000',
 };
+
+const userStore = useUserStore();
+onMounted(() => {
+  if (userStore.status === 'idle') {
+    userStore.getUserInfo().then(() => {});
+  }
+});
 </script>
 
 <template>

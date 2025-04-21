@@ -1,8 +1,31 @@
+import type { AxiosError, AxiosRequestConfig } from 'axios';
+
+import type { CustomRespone } from '@vben/types';
+
 import { preferences } from '@vben/preferences';
 import { useAccessStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
 import axios from 'axios';
+
+import { reqRefreshToken } from './auth';
+
+const axiosClientStatus = {
+  isRefreshing: false,
+  refreshSubscribers: [] as ((token: string) => void)[],
+};
+
+/**
+ * 所有等待刷新后执行的请求都会订阅这个方法
+ */
+function onTokenRefreshed(token: string) {
+  axiosClientStatus.refreshSubscribers.forEach((callback) => callback(token));
+  axiosClientStatus.refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(callback: (token: string) => void) {
+  axiosClientStatus.refreshSubscribers.push(callback);
+}
 
 function createRequestClient(
   baseURL: string,
@@ -10,8 +33,8 @@ function createRequestClient(
   isPlainResponse = false,
 ) {
   const client = axios.create({
-    baseURL: baseURL || 'http://localhost:3000', // 默认地址
-    timeout: 10_000, // 超时时间
+    baseURL: baseURL || 'http://localhost:3000',
+    timeout: 10_000,
     headers: {
       'Content-Type': 'application/json',
       accept: 'application/json',
@@ -22,59 +45,113 @@ function createRequestClient(
   // 请求拦截器
   client.interceptors.request.use(
     (config) => {
-      // 请求携带访问token
-      const accessStore = useAccessStore();
-      const token = accessStore.accessToken?.trim();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (!config.headers.Authorization && !isPlainResponse) {
+        const accessStore = useAccessStore();
+        const token = accessStore.accessToken?.trim();
+        config.headers.Authorization = token && `Bearer ${token}`;
       }
-      // 请求携带语言信息
       config.headers['Accept-Language'] = preferences.app.locale;
-
       return config;
     },
     (err) => {
-      // console.log("error", err);
-      // 请求发送前出错处理
       message.error(`請求發送失敗`);
       return Promise.reject(err);
     },
   );
 
+  // 刷新Token逻辑
+  async function refreshToken(): Promise<string> {
+    const accessStore = useAccessStore();
+    const oldRefreshToken = accessStore.refreshToken;
+
+    if (!oldRefreshToken) throw new Error('无有效refreshToken');
+    const { refreshToken, accessToken } = await reqRefreshToken(
+      `Bearer ${oldRefreshToken}`,
+    );
+
+    if (!accessToken || !refreshToken) {
+      throw new Error('刷新token失败');
+    }
+
+    accessStore.setAccessToken(accessToken);
+    accessStore.setRefreshToken(refreshToken);
+    return accessToken;
+  }
+
   // 响应拦截器
   client.interceptors.response.use(
     (response) => {
-      if (isPlainResponse) {
-        // 如果是ycloud，直接返回 response.data
-        return response.data;
-      }
+      if (isPlainResponse) return response.data;
+
       const { code, result, message: msg } = response.data;
       if (code === 200) {
-        return result; // 成功返回数据
-      } else if (code === 401) {
-        // token 过期处理
-        const accessStore = useAccessStore();
-        if (accessStore.refreshToken) {
-          // 刷新 token
-        }
+        return result;
       }
-      // 抛出业务错误
       throw new Error(msg || '未知错误');
     },
-    (err) => {
-      // 网络或服务器错误处理
-      const { response } = err;
+    async (error: AxiosError<CustomRespone<any>>) => {
+      const { response, config } = error;
+      const accessStore = useAccessStore();
+      const originalRequest = config as AxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
       const errorMessage =
         response?.data?.message || '服务器开小差了，请稍后再试';
+      const code = response?.data?.code || 400;
 
-      message.error(errorMessage); // 全局错误提示
-      return Promise.reject(err);
+      if (code === 401 && !originalRequest._retry) {
+        if (!accessStore.refreshToken) {
+          message.error('登录已过期，请重新登录');
+          accessStore.setLoginExpired(true);
+          window.location.href = '/';
+          throw error;
+        }
+
+        // 标记为已重试，防止死循环
+        originalRequest._retry = true;
+
+        if (!axiosClientStatus.isRefreshing) {
+          axiosClientStatus.isRefreshing = true;
+          try {
+            const newToken = await refreshToken();
+            onTokenRefreshed(newToken);
+            originalRequest.headers = {
+              Authorization: `Bearer ${newToken}`,
+            };
+            return client(originalRequest);
+          } catch (refreshError) {
+            console.error(refreshError);
+            message.error('登录已过期，请重新登录');
+            accessStore.setLoginExpired(true);
+            window.location.href = '/';
+            throw refreshError;
+          } finally {
+            axiosClientStatus.isRefreshing = false;
+          }
+        }
+
+        // 正在刷新中，将请求加入等待队列
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken: string) => {
+            originalRequest.headers = {
+              ...originalRequest.headers,
+              Authorization: `Bearer ${newToken}`,
+            };
+            resolve(client(originalRequest));
+          });
+        });
+      }
+
+      message.error(errorMessage);
+      throw error;
     },
   );
 
   return client;
 }
 
+// 实例化
 const ycloudInstance = createRequestClient(
   'https://api.ycloud.com/v2',
   {
@@ -83,9 +160,8 @@ const ycloudInstance = createRequestClient(
   true,
 );
 
-// 创建 WhatsApp 实例
 const whatsappInstance = createRequestClient('https://whatsapi.jackycode.cn');
-
 const apiClient = createRequestClient('https://dev.huchenghe.site');
-// 默认导出多个实例
+
+// 导出实例
 export { apiClient, whatsappInstance, ycloudInstance };

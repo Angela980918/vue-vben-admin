@@ -1,4 +1,4 @@
-import type { UserProFile } from '@vben/types';
+import type { UserCompaniesResponse, UserProFile } from '@vben/types';
 
 import { apiClient } from '../myrequest';
 
@@ -7,4 +7,13 @@ import { apiClient } from '../myrequest';
  */
 export const reqUserProfile = async () => {
   return await apiClient.get<any, UserProFile>('/api/user/self/profile');
+};
+
+/**
+ * 获取用户的公司列表
+ */
+export const reqUserCompanies = async (userId: string) => {
+  return await apiClient.post<any, UserCompaniesResponse>(
+    `/api/user/companys/${userId}`,
+  );
 };

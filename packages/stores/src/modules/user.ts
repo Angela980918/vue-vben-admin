@@ -1,4 +1,5 @@
 import type { Permission, Role, UserData } from '../../../types/src/user';
+import type { UserCompanyResponse } from '../../../types/src/web-antd';
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -28,7 +29,11 @@ interface BasicUserInfo {
   username: string;
 }
 type StatusType = 'error' | 'idle' | 'loading' | 'success';
-interface AccessState {
+interface UserState {
+  /**
+   * 用户公司列表
+   */
+  companies: UserCompanyResponse[];
   currentApiKey: string;
   permissions: Permission[];
   roles: Role[];
@@ -69,6 +74,9 @@ export const useUserStore = defineStore('core-user', {
         this.status = 'error';
       }
     },
+    setCompanies(companies: UserCompanyResponse[]) {
+      this.companies = companies;
+    },
     setSelectAccount(wabaId: string) {
       this.selectAccount = wabaId;
     },
@@ -86,6 +94,7 @@ export const useUserStore = defineStore('core-user', {
       this.selectAccount = wabaAccount[0].wabaId;
       this.selectPhone = wabaAccount[0].phoneNumber;
     },
+
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },
@@ -101,8 +110,15 @@ export const useUserStore = defineStore('core-user', {
       }
       return null;
     },
+    getDefaultCompanyInfo: (state) => {
+      return {
+        companyId: state.userProfile?.company_id,
+        name: state.userProfile?.company_name || '尚未綁定公司',
+      };
+    },
   },
-  state: (): AccessState => ({
+  state: (): UserState => ({
+    companies: [],
     currentApiKey: '',
     permissions: [],
     roles: [],
@@ -110,6 +126,33 @@ export const useUserStore = defineStore('core-user', {
     selectPhone: '',
     status: 'idle', // 默认状态是'idle'
     userInfo: null,
+    userProfile: {
+      account: '',
+      address: null,
+      birthday: null,
+      company_id: '',
+      company_name: '',
+      created: '',
+      creator: null,
+      deleted: 0,
+      edited: '',
+      editor: '',
+      email: null,
+      gender: '',
+      head_img_url: '',
+      id: '',
+      is_locked: 0,
+      is_verified: false,
+      last_login: null,
+      login_count: 0,
+      mobile: null,
+      role: '',
+      role_id: 0,
+      state: null,
+      token: null,
+      updated_at: '',
+      user_name: '',
+    },
     userRoles: [],
   }),
 });
