@@ -3,7 +3,7 @@ import type {
   MessageItem,
   Status,
   WhatsAppInformationInfo,
-} from '#/types';
+} from '@vben/types';
 
 import { computed, ref } from 'vue';
 
@@ -149,7 +149,7 @@ export const useChatStore = defineStore('chatStore', () => {
     currentCustomerInfo.value = user;
     //   验证上次联系时间是否超过24小时
     const list = computed(() => useCustomerStore().getContactList);
-    list.value.map(async (item) => {
+    list.value.map(async (item: any) => {
       if (item.phoneNumber === user.phoneNumber) {
         await getContactListApi(1, 10, true, {
           phoneNumber: item.phoneNumber,

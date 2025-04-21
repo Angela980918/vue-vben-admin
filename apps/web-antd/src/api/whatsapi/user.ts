@@ -5,11 +5,11 @@ import { wcloudRequestClient } from '#/api/wrequest';
 /**
  * 获取用户信息
  */
-export async function getWhatsAppLogin(data) {
+export async function getWhatsAppLogin(data: any) {
   return wcloudRequestClient.post<UserInfo>('/test/login', data);
 }
 
-export async function getWhatsAppUserToken(data) {
+export async function getWhatsAppUserToken(data: any) {
   return wcloudRequestClient.post<any>('/test/token', data);
 }
 

@@ -1,3 +1,3 @@
-export * from './user';
-export * from './cos';
 export * from './chat';
+export * from './cos';
+export * from './user';

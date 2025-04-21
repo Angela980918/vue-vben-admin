@@ -13,7 +13,7 @@ export interface LoginBodyDtoRequest {
   [property: string]: any;
 }
 
-export interface UserInfo {
+export interface UserInfoResponse {
   address: string;
   birthday: string;
   company_id: string;
@@ -48,6 +48,6 @@ export interface UserInfo {
 export interface LoginResponseDto {
   accessToken: string;
   refreshToken: string;
-  userInfo: UserInfo;
+  userInfo: UserInfoResponse;
   [property: string]: any;
 }

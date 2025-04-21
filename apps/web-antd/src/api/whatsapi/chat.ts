@@ -3,7 +3,7 @@ import { wcloudRequestClient } from '#/api/wrequest';
 /**
  * 查詢沟通列表
  */
-export async function getAllCustomerApi(wabaId) {
+export async function getAllCustomerApi(wabaId: string) {
   // return whatsappInstance({
   //   url: '/chat/getAllCustomerLatestChats?wabaId=449711484896804', method: 'GET'
   // })
@@ -33,15 +33,11 @@ export const getMessageList = ({
 };
 
 // 查询新客聊天室ID
-export const getNewRoomId = (
-phone: string
-) => {
-  console.log("phonephonephone",phone)
-  let data = {
-    customerId: phone
-  }
-  console.log("datadatadata",data)
-  return wcloudRequestClient.post<any>(
-    `/chat/conversation`, data
-  );
+export const getNewRoomId = (phone: string) => {
+  console.warn('phonephonephone', phone);
+  const data = {
+    customerId: phone,
+  };
+  console.warn('datadatadata', data);
+  return wcloudRequestClient.post<any>(`/chat/conversation`, data);
 };

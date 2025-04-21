@@ -17,7 +17,7 @@ const customerInfo = computed(() => chatStore.currentCustomerInfo);
       <div class="info">
         <div class="info-item">
           <span>{{ $t('page.chat.tabsdetail.personal.messages.1') }} : </span>
-          <span>{{ customerInfo.phoneNumber }}</span>
+          <span>{{ customerInfo && customerInfo.phoneNumber }}</span>
         </div>
         <div class="info-item">
           <span>{{ $t('page.chat.tabsdetail.personal.messages.2') }}</span>

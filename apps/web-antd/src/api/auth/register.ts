@@ -1,7 +1,4 @@
-import type {
-  RegisterResponseDto,
-  RegisterUserDtoRequest,
-} from '#/types/api/auth/register';
+import type { RegisterResponseDto, RegisterUserDtoRequest } from '@vben/types';
 
 import { apiClient } from '../myrequest';
 /**

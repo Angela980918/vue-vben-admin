@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import type { MessageData } from '@vben/types';
-
-import type { ChatMessage, SendMessageResponse } from '#/types';
+import type {
+  ChatMessage,
+  MessageData,
+  SendMessageResponse,
+} from '@vben/types';
 
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 

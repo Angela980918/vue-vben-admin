@@ -1,6 +1,9 @@
-import type { ContactInfo, ItemInfo } from '@vben/types';
-
-import type { AssignedCustomer, ContactInformation } from '#/types';
+import type {
+  AssignedCustomer,
+  ContactInfo,
+  ContactInformation,
+  ItemInfo,
+} from '@vben/types';
 
 import { toRaw } from 'vue';
 
