@@ -20,14 +20,6 @@
     "chatTip": "客戶名字或手機號碼",
     "customerList": "客戶列表",
     "selecttemplate": "選擇模板",
-    "titles": {
-      "1": "手機號碼",
-      "2": "創建時間",
-      "3": "備註"
-    },
-    "tips": {
-      "1": "您可以為該客戶添加任何備註"
-    },
     "tabs": {
       "1": "狀態清單",
       "2": "個人資料",
@@ -36,15 +28,23 @@
       "5": "提醒"
     },
     "tabsdetail": {
-      "status": {
-        "title": "狀態清單"
-      },
       "personal": {
         "messages": {
           "1": "電話號碼",
           "2": "電郵"
         }
+      },
+      "status": {
+        "title": "狀態清單"
       }
+    },
+    "tips": {
+      "1": "您可以為該客戶添加任何備註"
+    },
+    "titles": {
+      "1": "手機號碼",
+      "2": "創建時間",
+      "3": "備註"
     }
   },
   "dashboard": {
@@ -56,9 +56,17 @@
     "index": "第一頁",
     "title": "測試首頁"
   },
+  "layout": {
+    "person-info": "更多資料",
+    "toggle-company": "切換公司",
+    "unknown-role": "未知角色"
+  },
   "routermenu": {
     "chat": {
       "title": "在線聊天"
+    },
+    "company": {
+      "name": "公司"
     },
     "customer": {
       "customerList": {
@@ -71,8 +79,8 @@
     "massprogram": {
       "title": "群發計劃",
       "whatsapp": {
-        "whatsappTemple": "WhatsApp模板",
-        "create": "創建模板"
+        "create": "創建模板",
+        "whatsappTemple": "WhatsApp模板"
       }
     }
   }

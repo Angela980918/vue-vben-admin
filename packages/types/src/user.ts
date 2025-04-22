@@ -78,4 +78,6 @@ interface UserProFile {
   message: string;
   [property: string]: any;
 }
+
+export type UserPrefileOmitPerAndRole = Omit<UserData, 'permissions' | 'roles'>;
 export type { Permission, Role, UserData, UserInfo, UserProFile };

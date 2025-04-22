@@ -1,16 +1,28 @@
 import { defineConfig } from '@vben/vite-config';
 
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+import Components from 'unplugin-vue-components/vite';
+
 export default defineConfig(async () => {
   return {
     application: {},
     vite: {
+      plugins: [
+        Components({
+          resolvers: [
+            AntDesignVueResolver({
+              importStyle: false,
+            }),
+          ],
+        }),
+      ],
       server: {
         proxy: {
-          '/v2': {
+          '/api': {
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/v2/, ''),
+            rewrite: (path) => path.replace(/^\/api/, ''),
             // mock代理目标地址
-            target: 'https://api.ycloud.com/v2',
+            target: 'http://localhost:5320/api',
             ws: true,
           },
           '/test': {
@@ -20,14 +32,13 @@ export default defineConfig(async () => {
             target: 'https://api.ycloud.com',
             ws: true,
           },
-          '/api': {
+          '/v2': {
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/api/, ''),
+            rewrite: (path) => path.replace(/^\/v2/, ''),
             // mock代理目标地址
-            target: 'http://localhost:5320/api',
+            target: 'https://api.ycloud.com/v2',
             ws: true,
           },
-
         },
       },
     },

@@ -13,3 +13,9 @@ export const MdiGoogle = createIconifyIcon('mdi:google');
 export const MdiQqchat = createIconifyIcon('mdi:qqchat');
 
 export const MidCompanyChat = createIconifyIcon('gg:apple-watch');
+
+export const MidRotateIcon = createIconifyIcon('gravity-ui:arrows-rotate-left');
+export const MidAvatorIcon = createIconifyIcon(
+  'emojione-v1:face-savoring-food',
+);
+export const MdiRoleIcon = createIconifyIcon('emojione-v1:cat');

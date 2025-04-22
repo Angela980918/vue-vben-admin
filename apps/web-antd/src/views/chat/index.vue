@@ -40,7 +40,9 @@ const contentStyle: CSSProperties = {
 const userStore = useUserStore();
 onMounted(() => {
   if (userStore.status === 'idle') {
-    userStore.getUserInfo().then(() => {});
+    userStore.getUserInfo().then(() => {
+      userStore.getUserCompanyies();
+    });
   }
 });
 </script>

@@ -1,4 +1,4 @@
-import type { Recordable, UserInfo } from '@vben/types';
+import type { LoginParams, UserInfo } from '@vben/types';
 
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -19,12 +19,6 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
 
   const loginLoading = ref(false);
-  interface LoginParams extends Recordable<boolean | string> {
-    account: string;
-    password: string;
-    selectAccount: string;
-    captcha: boolean;
-  }
 
   const MockParams = {
     account: 'admin',
@@ -39,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
    * @param onSuccess
    */
   async function authLogin(
-    params: LoginParams & Recordable<string>,
+    params: LoginParams,
     onSuccess?: () => Promise<void> | void,
   ) {
     // 异步处理用户登录操作并获取 accessToken

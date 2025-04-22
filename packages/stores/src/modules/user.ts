@@ -1,9 +1,16 @@
-import type { Permission, Role, UserData } from '../../../types/src/user';
+import type {
+  Permission,
+  Role,
+  UserPrefileOmitPerAndRole,
+} from '../../../types/src/user';
 import type { UserCompanyResponse } from '../../../types/src/web-antd';
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
-import { reqUserProfile } from './../../../../apps/web-antd/src/api/common/user';
+import {
+  reqUserCompanies,
+  reqUserProfile,
+} from './../../../../apps/web-antd/src/api/common/user';
 
 interface BasicUserInfo {
   [key: string]: any;
@@ -44,7 +51,7 @@ interface UserState {
    * 用户信息
    */
   userInfo: BasicUserInfo | null;
-  userProfile?: Omit<UserData, 'permissions' | 'roles'>;
+  userProfile?: UserPrefileOmitPerAndRole;
   /**
    * 用户角色
    */
@@ -56,6 +63,15 @@ interface UserState {
  */
 export const useUserStore = defineStore('core-user', {
   actions: {
+    /**
+     * 获取用户的公司列表
+     */
+    async getUserCompanyies() {
+      if (this.status === 'success' && this.userProfile?.id) {
+        const { companys } = await reqUserCompanies(this.userProfile?.id);
+        this.companies = companys;
+      }
+    },
     /**
      * 获取用户资料
      */
@@ -83,6 +99,7 @@ export const useUserStore = defineStore('core-user', {
     setSelectPhone(phone: string) {
       this.selectPhone = phone;
     },
+
     setUserInfo(userInfo: BasicUserInfo | null) {
       // 设置用户信息
       this.userInfo = userInfo;
@@ -94,7 +111,6 @@ export const useUserStore = defineStore('core-user', {
       this.selectAccount = wabaAccount[0].wabaId;
       this.selectPhone = wabaAccount[0].phoneNumber;
     },
-
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },

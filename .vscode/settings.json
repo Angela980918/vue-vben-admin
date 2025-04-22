@@ -20,7 +20,7 @@
   "editor.guides.bracketPairs": "active",
   "editor.inlineSuggest.enabled": true,
   "editor.suggestSelection": "recentlyUsedByPrefix",
-  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.acceptSuggestionOnEnter": "on",
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.stickyScroll.enabled": true,
   "editor.hover.sticky": true,
@@ -226,5 +226,6 @@
   "oxc.enable": false,
   "eslint.options": {
     "overrideConfigFile": "eslint.config.mjs"
-  }
+  },
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
 }

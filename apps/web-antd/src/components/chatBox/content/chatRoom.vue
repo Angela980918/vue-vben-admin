@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, defineEmits, h, nextTick, ref, watch } from 'vue';
+import { computed, h, nextTick, ref, watch } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 

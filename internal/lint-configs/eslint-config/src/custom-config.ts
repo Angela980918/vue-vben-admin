@@ -11,6 +11,7 @@ const customConfig: Linter.Config[] = [
   {
     files: ['packages/@core/ui-kit/shadcn-ui/**/**'],
     rules: {
+      '@typescript-eslint/no-restricted-imports': 'off',
       'vue/require-default-prop': 'off',
     },
   },
@@ -60,6 +61,7 @@ const customConfig: Linter.Config[] = [
           ],
         },
       ],
+      'perfectionist/sort-imports': 'off',
       'perfectionist/sort-interfaces': 'off',
     },
   },

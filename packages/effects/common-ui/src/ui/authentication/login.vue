@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Recordable } from '@vben/types';
+import type { LoginParams } from '@vben/types';
 
 import type { VbenFormSchema } from '@vben-core/form-ui';
 
@@ -43,7 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [Recordable<any>];
+  submit: [LoginParams];
 }>();
 
 const [Form, formApi] = useVbenForm(
@@ -66,11 +66,11 @@ const rememberMe = ref(!!localUsername);
 
 async function handleSubmit() {
   const { valid } = await formApi.validate();
-  const values = await formApi.getValues();
+  const values: LoginParams = (await formApi.getValues()) as LoginParams;
   if (valid) {
     localStorage.setItem(
       REMEMBER_ME_KEY,
-      rememberMe.value ? values?.username : '',
+      rememberMe.value ? values?.account : '',
     );
     emit('submit', values);
   }

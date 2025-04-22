@@ -10,7 +10,7 @@ const reportRoutes: RouteRecordRaw[] = [
       icon: 'ant-design:rocket-outlined',
       keepAlive: true,
       order: 600,
-      title: '公司',
+      title: $t('page.routermenu.company.name'),
     },
     name: 'Company',
     path: '/company',
@@ -30,4 +30,4 @@ const reportRoutes: RouteRecordRaw[] = [
   },
 ];
 
-// export default reportRoutes;
+export default reportRoutes;

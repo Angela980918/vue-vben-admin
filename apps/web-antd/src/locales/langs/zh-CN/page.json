@@ -56,9 +56,17 @@
     "index": "第一页",
     "title": "测试首页"
   },
+  "layout": {
+    "person-info": "更多资料",
+    "toggle-company": "切换公司",
+    "unknown-role": "未知角色"
+  },
   "routermenu": {
     "chat": {
       "title": "在线聊天"
+    },
+    "company": {
+      "name": "公司"
     },
     "customer": {
       "customerList": {

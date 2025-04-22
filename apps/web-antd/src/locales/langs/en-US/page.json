@@ -56,9 +56,17 @@
     "index": "FIRST PAGE",
     "title": "TEST HOME"
   },
+  "layout": {
+    "person-info": "More information",
+    "toggle-company": "Switch company",
+    "unknown-role": "Unknown role"
+  },
   "routermenu": {
     "chat": {
       "title": "Live Chat"
+    },
+    "company": {
+      "name": "company"
     },
     "customer": {
       "customerList": {

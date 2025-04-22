@@ -1,13 +1,17 @@
 <script lang="ts" setup>
-import { computed, markRaw, watch } from 'vue';
+import type { Component } from 'vue';
+
+import { computed, markRaw, ref, watch } from 'vue';
 
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
 import { useWatermark } from '@vben/hooks';
-import { MidCompanyChat } from '@vben/icons';
+import { MdiRoleIcon, MidAvatorIcon, MidRotateIcon } from '@vben/icons';
 import { BasicLayout, LockScreen, UserDropdown } from '@vben/layouts';
+import { $t } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 import { storeToRefs, useAccessStore, useUserStore } from '@vben/stores';
 
+import ModifyInformation from '#/components/company/ModifyInformation.vue';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
 
@@ -23,7 +27,7 @@ const avatar = computed(() => {
   return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
 });
 
-const { getDefaultCompanyInfo } = storeToRefs(userStore);
+const { getDefaultCompanyInfo, userProfile } = storeToRefs(userStore);
 
 async function handleLogout() {
   await authStore.logout(false);
@@ -44,45 +48,71 @@ watch(
     immediate: true,
   },
 );
-const iconComponent = markRaw(MidCompanyChat);
-const menusList = computed(() => [
+const modifyInformationRef = ref<InstanceType<typeof ModifyInformation> | null>(
+  null,
+);
+
+const profileIcon = markRaw(MidAvatorIcon);
+const refreshCompnayIcon = markRaw(MidRotateIcon);
+interface MenuItem {
+  handler?: () => void;
+  icon?: Component;
+  text: string;
+}
+
+const menusList = computed<MenuItem[]>(() => [
   {
-    handler: () => {},
-    icon: iconComponent,
+    handler: () => {
+      userStore.getUserCompanyies();
+      modifyInformationRef.value?.showModal();
+    },
+    icon: refreshCompnayIcon,
     text: getDefaultCompanyInfo.value.name,
+  },
+  {
+    icon: markRaw(MdiRoleIcon),
+    text: userProfile?.value?.role || $t('page.layout.unknown-role'),
+  },
+  {
+    icon: profileIcon,
+    text: $t('page.layout.person-info'),
+    handler: () => {},
   },
 ]);
 </script>
 
 <template>
-  <BasicLayout @clear-preferences-and-logout="handleLogout">
-    <template #user-dropdown>
-      <UserDropdown
-        :avatar
-        :menus="menusList"
-        :text="userStore.userInfo?.realName"
-        tag-text="Pro"
-        @logout="handleLogout"
-      />
-    </template>
-    <!--    <template #notification>-->
-    <!--      <Notification-->
-    <!--        :dot="showDot"-->
-    <!--        :notifications="notifications"-->
-    <!--        @clear="handleNoticeClear"-->
-    <!--        @make-all="handleMakeAll"-->
-    <!--      />-->
-    <!--    </template>-->
-    <template #extra>
-      <AuthenticationLoginExpiredModal
-        v-model:open="accessStore.loginExpired"
-        :avatar
-      >
-        <LoginForm />
-      </AuthenticationLoginExpiredModal>
-    </template>
-    <template #lock-screen>
-      <LockScreen :avatar @to-login="handleLogout" />
-    </template>
-  </BasicLayout>
+  <div>
+    <BasicLayout @clear-preferences-and-logout="handleLogout">
+      <template #user-dropdown>
+        <UserDropdown
+          :avatar="userProfile?.head_img_url"
+          :menus="menusList"
+          :text="userProfile?.user_name"
+          tag-text="Pro"
+          @logout="handleLogout"
+        />
+      </template>
+      <!--    <template #notification>-->
+      <!--      <Notification-->
+      <!--        :dot="showDot"-->
+      <!--        :notifications="notifications"-->
+      <!--        @clear="handleNoticeClear"-->
+      <!--        @make-all="handleMakeAll"-->
+      <!--      />-->
+      <!--    </template>-->
+      <template #extra>
+        <AuthenticationLoginExpiredModal
+          v-model:open="accessStore.loginExpired"
+          :avatar
+        >
+          <LoginForm />
+        </AuthenticationLoginExpiredModal>
+      </template>
+      <template #lock-screen>
+        <LockScreen :avatar @to-login="handleLogout" />
+      </template>
+    </BasicLayout>
+    <ModifyInformation ref="modifyInformationRef" />
+  </div>
 </template>
