@@ -8,6 +8,8 @@ import { useAccessStore } from '@vben/stores';
 import { message } from 'ant-design-vue';
 import axios from 'axios';
 
+import { useAuthStore } from '#/store';
+
 import { reqRefreshToken } from './auth';
 
 const axiosClientStatus = {
@@ -21,6 +23,16 @@ const axiosClientStatus = {
 function onTokenRefreshed(token: string) {
   axiosClientStatus.refreshSubscribers.forEach((callback) => callback(token));
   axiosClientStatus.refreshSubscribers = [];
+}
+
+/**
+ * 退出登錄
+ */
+
+function logout() {
+  message.error('登錄已過期，需要重新登錄');
+  const authStore = useAuthStore();
+  authStore.logout();
 }
 
 function addRefreshSubscriber(callback: (token: string) => void) {
@@ -96,16 +108,17 @@ function createRequestClient(
         _retry?: boolean;
       };
 
+      if (config?.url && config.url === 'api/auth/refresh-token') {
+        logout();
+        throw error;
+      }
       const errorMessage =
         response?.data?.message || '服务器开小差了，请稍后再试';
       const code = response?.data?.code || 400;
 
       if (code === 401 && !originalRequest._retry) {
         if (!accessStore.refreshToken) {
-          message.error('登录已过期，请重新登录');
-          accessStore.setLoginExpired(true);
-          window.location.href = '/';
-          throw error;
+          logout();
         }
 
         // 标记为已重试，防止死循环
@@ -121,10 +134,7 @@ function createRequestClient(
             };
             return client(originalRequest);
           } catch (refreshError) {
-            console.error(refreshError);
-            message.error('登录已过期，请重新登录');
-            accessStore.setLoginExpired(true);
-            window.location.href = '/';
+            logout();
             throw refreshError;
           } finally {
             axiosClientStatus.isRefreshing = false;
