@@ -18,6 +18,7 @@ import ChatRoom from '#/components/chatBox/content/chatRoom.vue';
 import ChatBoxLeft from '#/components/chatBox/left/chatBox-Left.vue';
 import ChatBoxRight from '#/components/chatBox/right/chatBox-right.vue';
 import { useChatStore } from '#/store';
+import ToggleCompanyCarousel from '#/components/company/ToggleCompanyCarousel.vue';
 
 const chatStore = useChatStore();
 
@@ -37,11 +38,29 @@ const contentStyle: CSSProperties = {
   color: '#000',
 };
 
+type MyToggleCompanyCarouselInstance = InstanceType<
+  typeof ToggleCompanyCarousel
+>;
+
+type CompanieslistProp =
+  MyToggleCompanyCarouselInstance['$props']['companiesList'];
+
+const companiesList = ref<CompanieslistProp>([]);
+
 const userStore = useUserStore();
 onMounted(() => {
   if (userStore.status === 'idle') {
     userStore.getUserInfo().then(() => {
-      userStore.getUserCompanyies();
+      userStore.getUserCompanyies().then((data) => {
+        companiesList.value =
+          data?.map((item) => {
+            return {
+              companyId: item.id,
+              companyName: item.name,
+              companyLogo: item.logo,
+            };
+          }) || [];
+      });
     });
   }
 });
@@ -50,6 +69,8 @@ onMounted(() => {
 <template>
   <div class="px-3; pt-3">
     <div class="card-box h-full flex-col lg:flex">
+      <ToggleCompanyCarousel :companies-list="companiesList" />
+
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>
           <ChatBoxLeft

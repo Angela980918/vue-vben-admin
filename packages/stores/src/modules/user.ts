@@ -70,6 +70,7 @@ export const useUserStore = defineStore('core-user', {
       if (this.status === 'success' && this.userProfile?.id) {
         const { companys } = await reqUserCompanies(this.userProfile?.id);
         this.companies = companys;
+        return companys;
       }
     },
     /**

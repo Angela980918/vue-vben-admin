@@ -1,3 +1,16 @@
+export interface WabaAccount {
+  readonly waba_id: string;
+  readonly name: string;
+  readonly api_key: string;
+  readonly account_review_status: string;
+  readonly business_verification_status: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+  readonly created_by_id: string;
+  readonly updated_by_id: string;
+  readonly company_id: string;
+}
+
 export interface UserCompanyResponse {
   cert_status: boolean | null;
   company_admin: string;
@@ -12,6 +25,9 @@ export interface UserCompanyResponse {
   tax_number: string;
   updated_at: string;
   website: string;
+  waba_id: null | string;
+  waba_accounts: WabaAccount[];
+
   [property: string]: any;
 }
 
@@ -30,7 +46,7 @@ export interface Industries {
   [property: string]: any;
 }
 
-export interface User {
+export interface SwitchUser {
   address: null;
   birthday: null;
   company_id: string;
@@ -55,6 +71,7 @@ export interface User {
   state: null;
   updated_at: string;
   user_name: string;
+  waba_account?: string;
   [property: string]: any;
 }
 
@@ -81,6 +98,6 @@ export interface Company {
 export interface SwitchUserCompanyDto {
   company: Company;
   message: string;
-  user: User;
+  user: SwitchUser;
   [property: string]: any;
 }

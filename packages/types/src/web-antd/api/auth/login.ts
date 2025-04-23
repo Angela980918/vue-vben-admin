@@ -39,6 +39,7 @@ export interface UserInfoResponse {
   token?: string;
   updated_at?: string;
   user_name: string;
+  waba_account?: string;
   [property: string]: any;
 }
 
