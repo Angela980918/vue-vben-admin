@@ -58,7 +58,7 @@
   },
   "layout": {
     "person-info": "More information",
-    "toggle-company": "Switch company",
+    "toggle-company": "Switch default company",
     "unknown-role": "Unknown role"
   },
   "routermenu": {

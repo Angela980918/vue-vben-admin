@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
@@ -45,22 +45,22 @@ type MyToggleCompanyCarouselInstance = InstanceType<
 type CompanieslistProp =
   MyToggleCompanyCarouselInstance['$props']['companiesList'];
 
-const companiesList = ref<CompanieslistProp>([]);
-
 const userStore = useUserStore();
+const companiesList = computed<CompanieslistProp>(() => {
+  return (
+    userStore.companies.map((item) => {
+      return {
+        companyId: item.id,
+        companyName: item.name,
+        companyLogo: item.logo,
+      };
+    }) || []
+  );
+});
 onMounted(() => {
   if (userStore.status === 'idle') {
     userStore.getUserInfo().then(() => {
-      userStore.getUserCompanyies().then((data) => {
-        companiesList.value =
-          data?.map((item) => {
-            return {
-              companyId: item.id,
-              companyName: item.name,
-              companyLogo: item.logo,
-            };
-          }) || [];
-      });
+      userStore.getUserCompanyies().then();
     });
   }
 });

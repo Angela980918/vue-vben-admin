@@ -14,7 +14,7 @@ export async function getWhatsAppUserToken(data: any) {
 }
 
 export async function getWhatsAppUserInfo() {
-  return wcloudRequestClient.get<any>('/test/user-info');
+  return wcloudRequestClient.get<UserInfo>('/test/user-info');
 }
 
 export async function refreshToken() {

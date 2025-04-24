@@ -58,7 +58,7 @@
   },
   "layout": {
     "person-info": "更多资料",
-    "toggle-company": "切换公司",
+    "toggle-company": "切换默认公司",
     "unknown-role": "未知角色"
   },
   "routermenu": {
