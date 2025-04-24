@@ -68,6 +68,7 @@ interface UserData {
   token: null;
   updated_at: string;
   user_name: string;
+  waba_account?: string;
 }
 
 /**
@@ -79,5 +80,8 @@ interface UserProFile {
   [property: string]: any;
 }
 
-export type UserPrefileOmitPerAndRole = Omit<UserData, 'permissions' | 'roles'>;
+export type UserPrefileOmitPerAndRole = Omit<
+  UserData,
+  'permissions' | 'roles'
+> & { homePath?: string };
 export type { Permission, Role, UserData, UserInfo, UserProFile };

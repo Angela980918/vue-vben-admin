@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { SelectProps } from 'ant-design-vue';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 
 import {
   Button as AButton,
@@ -13,6 +13,8 @@ import {
 // import QuickMsg from "@/components/contact/QuickMsg.vue";
 import QuickMsg from '#/components/contact/QuickMsg.vue';
 import { useTemplateStore } from '#/store';
+import { storeToRefs, useUserStore } from '@vben/stores';
+import type { LibraryFilesParams } from '@vben/types';
 
 // 弹窗信息&控制
 const quickRef = ref(null);
@@ -78,17 +80,36 @@ const addQuickMsg = () => {
 
 // 检索素材库
 async function checkCos() {
+  /* 
   let source = '';
   source =
     selectValue.value.length > 6
       ? `queryType=material&wabaId=${selectValue.value}`
-      : `queryType=material&userId=${selectValue.value}`;
-  templateStore.setMaterialListData(source);
+      : `queryType=material&userId=${selectValue.value}`; 
+  */
+
+  const sourceParams: LibraryFilesParams =
+    selectValue.value.length > 6
+      ? {
+          queryType: 'material',
+          wabaId: selectValue.value,
+        }
+      : {
+          queryType: 'material',
+          userId: selectValue.value,
+        };
+  templateStore.setMaterialListData(sourceParams);
 }
 
 async function loadNewQuickMsg(value: string) {
   templateStore.loadQuickMsg(value);
 }
+const { currentWabaId } = storeToRefs(useUserStore());
+watchEffect(() => {
+  if (currentWabaId?.value) {
+    loadNewQuickMsg(currentWabaId.value);
+  }
+});
 
 // onMounted(() => {
 //   data.value = templateStore.getQuickMsg;

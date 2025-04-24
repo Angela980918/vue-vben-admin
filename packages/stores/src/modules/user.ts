@@ -3,7 +3,10 @@ import type {
   Role,
   UserPrefileOmitPerAndRole,
 } from '../../../types/src/user';
-import type { UserCompanyResponse } from '../../../types/src/web-antd';
+import type {
+  UserCompanyResponse,
+  WabaAccount,
+} from '../../../types/src/web-antd';
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -42,6 +45,14 @@ interface UserState {
    */
   companies: UserCompanyResponse[];
   currentApiKey: string;
+  /**
+   * 当前用户选择的公司ID
+   */
+  currentCompanyId?: string;
+  /**
+   * 当前用户选择的waba账户ID
+   */
+  currentWabaId?: string;
   permissions: Permission[];
   roles: Role[];
   selectAccount: string;
@@ -56,6 +67,14 @@ interface UserState {
    * 用户角色
    */
   userRoles: string[];
+  /**
+   * 所有的waba账户
+   */
+  wabaAccounts: WabaAccount[];
+  /**
+   * 用户的yCouldAPIkey
+   */
+  yCloudAPIKey?: string;
 }
 
 /**
@@ -67,11 +86,15 @@ export const useUserStore = defineStore('core-user', {
      * 获取用户的公司列表
      */
     async getUserCompanyies() {
-      if (this.status === 'success' && this.userProfile?.id) {
+      if (this.userProfile?.id) {
         const { companys } = await reqUserCompanies(this.userProfile?.id);
         this.companies = companys;
+        this.wabaAccounts = companys.flatMap(
+          (company) => company.waba_accounts,
+        );
         return companys;
       }
+      return [];
     },
     /**
      * 获取用户资料
@@ -86,6 +109,8 @@ export const useUserStore = defineStore('core-user', {
         this.userProfile = userInfo;
         this.permissions = permissions;
         this.roles = roles;
+        this.currentCompanyId = userInfo.company_id;
+        this.currentWabaId = userInfo.waba_account;
         return data;
       } catch {
         this.status = 'error';
@@ -94,13 +119,16 @@ export const useUserStore = defineStore('core-user', {
     setCompanies(companies: UserCompanyResponse[]) {
       this.companies = companies;
     },
+    setCurrentWabaId(wabaId: string) {
+      this.currentWabaId = wabaId;
+    },
     setSelectAccount(wabaId: string) {
       this.selectAccount = wabaId;
     },
+
     setSelectPhone(phone: string) {
       this.selectPhone = phone;
     },
-
     setUserInfo(userInfo: BasicUserInfo | null) {
       // 设置用户信息
       this.userInfo = userInfo;
@@ -112,21 +140,27 @@ export const useUserStore = defineStore('core-user', {
       this.selectAccount = wabaAccount[0].wabaId;
       this.selectPhone = wabaAccount[0].phoneNumber;
     },
+
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },
+    setYcouldApiKey(apiKey: string) {
+      this.yCloudAPIKey = apiKey;
+    },
   },
   getters: {
-    getApiKey: (state) => {
-      const { wabaAccount } = state.userInfo;
-      const index = wabaAccount.findIndex(
-        (item) => item.wabaId === state.selectAccount,
-      );
-      if (index !== -1) {
-        return wabaAccount[index].apikey;
-      }
-      return null;
+    /**
+     * 获取当前用户选择的waba账户信息
+     */
+    getCurrentWabaInfo: (state) => {
+      const wabaID: string | undefined =
+        state.currentWabaId || state.userProfile?.waba_account;
+
+      const waba = state.wabaAccounts.find((waba) => waba.waba_id === wabaID);
+      state.yCloudAPIKey = waba?.api_key;
+      return waba;
     },
+
     getDefaultCompanyInfo: (state) => {
       return {
         companyId: state.userProfile?.company_id,
@@ -137,6 +171,8 @@ export const useUserStore = defineStore('core-user', {
   state: (): UserState => ({
     companies: [],
     currentApiKey: '',
+    currentCompanyId: '',
+    currentWabaId: '',
     permissions: [],
     roles: [],
     selectAccount: '',
@@ -171,6 +207,8 @@ export const useUserStore = defineStore('core-user', {
       user_name: '',
     },
     userRoles: [],
+    wabaAccounts: [],
+    yCloudAPIKey: '',
   }),
 });
 

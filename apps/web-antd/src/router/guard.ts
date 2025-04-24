@@ -6,10 +6,11 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import { useAuthStore, useCustomerStore, useTemplateStore } from '#/store';
-import { wsconnect } from '#/utils/wscontect';
+import { useAuthStore, useTemplateStore } from '#/store';
 
 import { generateAccess } from './access';
+import { useGetApiKey } from '#/hooks/useGetApiKey';
+import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
 
 /**
  * 通用守卫配置
@@ -51,9 +52,11 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    // 為避免出錯臨時保存之前的用戶信息
+    userStore.userInfo || (await authStore.fetchUserInfo());
+
     const tempStore = useTemplateStore();
-    const customerStore = useCustomerStore();
+    // const customerStore = useCustomerStore();
     // const chatStore = useChatStore();
     // console.log('state:', to.);
     // 如果跳轉的是Chat
@@ -66,7 +69,7 @@ function setupAccessGuard(router: Router) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
         return decodeURIComponent(
           (to.query?.redirect as string) ||
-            userStore.userInfo?.homePath ||
+            userStore.userProfile?.homePath ||
             DEFAULT_HOME_PATH,
         );
       }
@@ -110,25 +113,31 @@ function setupAccessGuard(router: Router) {
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
 
-    const userRoles = userInfo?.roles ?? [];
+    // const userRoles = userInfo?.roles ?? [];
+    if (userStore.status === 'idle') {
+      await userStore.getUserInfo();
+    }
 
     // 生成菜单和路由
     const { accessibleMenus, accessibleRoutes } = await generateAccess({
-      roles: userRoles,
+      // roles: userRoles,
       router,
       // 则会在菜单中显示，但是访问会被重定向到403
       routes: accessRoutes,
     });
 
     // 讀取數據
-    await tempStore.loadQuickMsg(userStore.selectAccount);
-    await tempStore.loadTemplates();
-    await tempStore.setMaterialListData(
-      `queryType=material&wabaId=${userStore.selectAccount}`,
-    );
-    await customerStore.setContactList();
-    await customerStore.setAssignedCustomers();
-    await wsconnect.createConnect();
+    if (userStore.currentWabaId)
+      await tempStore.loadQuickMsg(userStore.currentWabaId);
+
+    if (!userStore.yCloudAPIKey || userStore.yCloudAPIKey === '') {
+      await useGetApiKey(userStore.currentWabaId || '');
+    }
+    // await tempStore.loadTemplates();
+    // await customerStore.setContactList();
+    // await customerStore.setAssignedCustomers();
+    // await wsconnect.createConnect();
+    useInitCommonDataBeforeEnterRoute();
 
     // 保存菜单信息和路由信息
     accessStore.setAccessMenus(accessibleMenus);
@@ -136,7 +145,7 @@ function setupAccessGuard(router: Router) {
     accessStore.setIsAccessChecked(true);
     const redirectPath = (from.query.redirect ??
       (to.path === DEFAULT_HOME_PATH
-        ? userInfo.homePath || DEFAULT_HOME_PATH
+        ? userStore.userProfile?.homePath || DEFAULT_HOME_PATH
         : to.fullPath)) as string;
 
     return {

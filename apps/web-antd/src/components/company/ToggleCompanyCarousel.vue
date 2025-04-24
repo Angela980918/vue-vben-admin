@@ -2,6 +2,8 @@
 import type { ToggleCompanyProps } from '@vben/types';
 import { computed, nextTick, ref, watch } from 'vue';
 import StringToColor from 'string-to-color';
+import { useUserStore } from '@vben/stores';
+import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
 
 interface Props {
   companiesList: ToggleCompanyProps;
@@ -37,6 +39,28 @@ watch(activeIndex, async () => {
     }
   }
 });
+const userStore = useUserStore();
+/**
+ * 點擊事件切換臨時會話的wabaId和apiKey
+ */
+async function changeComapny(event: Event, index: number) {
+  activeIndex.value = index;
+  // 獲取當前選擇公司的id
+  const companyId = coloredCompanies.value[index]?.companyId;
+
+  // 當前的公司詳細信息
+  const comapny = userStore.companies.find((comany) => comany.id === companyId);
+  // 獲取公司的waba賬號優選選擇第一個
+  const wabaInfo = comapny && comapny?.waba_accounts[0];
+  if (wabaInfo) {
+    // 設置新的wabaid和apiKey
+    userStore.setCurrentWabaId(wabaInfo.waba_id);
+    userStore.setYcouldApiKey(wabaInfo.api_key);
+
+    // 重新獲取全部的初始數據
+    await useInitCommonDataBeforeEnterRoute();
+  }
+}
 </script>
 <template>
   <div class="carousel-horizontal">
@@ -46,7 +70,7 @@ watch(activeIndex, async () => {
         :key="item.companyId"
         class="thumbnail"
         :class="{ active: index === activeIndex }"
-        @click="activeIndex = index"
+        @click="changeComapny($event, index)"
       >
         <a-tooltip :color="item.backgroundColor">
           <template #title>
@@ -94,8 +118,7 @@ watch(activeIndex, async () => {
     width: 100%;
     height: 100%;
     pointer-events: none; // 避免阻挡点击
-    background:
-      radial-gradient(
+    background: radial-gradient(
         110.88% 79.69% at 47.77% 151.82%,
         #ffec45 0%,
         rgb(255 236 69 / 30%) 54.92%,

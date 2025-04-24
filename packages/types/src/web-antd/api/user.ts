@@ -1,14 +1,14 @@
 export interface WabaAccount {
-  readonly waba_id: string;
-  readonly name: string;
-  readonly api_key: string;
-  readonly account_review_status: string;
-  readonly business_verification_status: string;
-  readonly created_at: Date;
-  readonly updated_at: Date;
-  readonly created_by_id: string;
-  readonly updated_by_id: string;
-  readonly company_id: string;
+  waba_id: string;
+  name: string;
+  api_key: string;
+  account_review_status: string;
+  business_verification_status: string;
+  created_at: Date;
+  updated_at: Date;
+  created_by_id: string;
+  updated_by_id: string;
+  company_id: string;
 }
 
 export interface UserCompanyResponse {

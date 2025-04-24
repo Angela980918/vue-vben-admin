@@ -1,7 +1,3 @@
-interface AttributesInfo {
-  name: string;
-  value: object;
-}
 interface ItemInfo {
   id: number;
   nickname: string;
@@ -13,8 +9,6 @@ interface ItemInfo {
   lastMessageToPhoneNumber: string;
   tags: Array<string>;
   createTime: string;
-  customAttributes: Array<AttributesInfo>;
-  ownerEmail: string;
 }
 
 interface ContactListInfo {

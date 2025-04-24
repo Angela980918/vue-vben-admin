@@ -74,8 +74,9 @@ export const useChatStore = defineStore('chatStore', () => {
       .map((item: MessageItem, index) => {
         let fileExtension: string | undefined = '';
         if (item.type === 'template') {
-          const name = item.content.name;
-          const language = item?.content?.language?.code;
+          const name = item.content.name || 'template message';
+          const language = item?.content?.language?.code || 'zh-Hk';
+
           item.content = handleTemplateMsg(name, language);
           if (
             item.content.header !== undefined &&

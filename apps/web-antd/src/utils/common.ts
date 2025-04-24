@@ -8,7 +8,7 @@ export const getLabel = (map, value, defaultLabel = '未知') => {
 };
 
 // 处理模板信息
-export const handleTemplateMsg = (name, language) => {
+export const handleTemplateMsg = (name: string, language: string) => {
   // console.log("name, language", name, language)
   const rawTemplate = useTemplateStore().getRawTemplateList;
   const result = rawTemplate.find(

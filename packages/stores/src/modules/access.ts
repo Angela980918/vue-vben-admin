@@ -35,6 +35,10 @@ interface AccessState {
    * 登录 accessToken
    */
   refreshToken: AccessToken;
+  /**
+   * yCould APi Key
+   */
+  ycloudApiKey: string;
 }
 
 /**
@@ -82,10 +86,13 @@ export const useAccessStore = defineStore('core-access', {
     setRefreshToken(token: AccessToken) {
       this.refreshToken = token;
     },
+    setYCloudApiKey(apiKey: string) {
+      this.ycloudApiKey = apiKey;
+    },
   },
   persist: {
     // 持久化
-    pick: ['accessToken', 'refreshToken', 'accessCodes'],
+    pick: ['accessToken', 'refreshToken', 'accessCodes', 'ycloudApiKey'],
   },
   state: (): AccessState => ({
     accessCodes: [],
@@ -95,6 +102,7 @@ export const useAccessStore = defineStore('core-access', {
     isAccessChecked: false,
     loginExpired: false,
     refreshToken: null,
+    ycloudApiKey: '',
   }),
 });
 

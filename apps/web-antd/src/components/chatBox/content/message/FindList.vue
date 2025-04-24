@@ -10,13 +10,12 @@ import {
 
 import { useChatStore } from '#/store';
 import { libraryFiles } from '#/api';
+import type { FileCategory, LibraryFilesParams } from '@vben/types';
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: '',
-  },
-});
+interface Props {
+  type: FileCategory;
+}
+const props = defineProps<Props>();
 const chatStore = useChatStore();
 const data = reactive({
   list: [],
@@ -46,7 +45,7 @@ const loading = ref(false);
 
 watch(
   () => chatStore.currentChatId,
-  (newValue) => {
+  () => {
     data.list = [];
     // let test = "";
     // newValue.forEach((item) => {
@@ -60,11 +59,16 @@ watch(
     //   }
     // });
 
-    let source = `queryType=room&roomId=${chatStore.currentChatId}&fileCategory=${props.type}`;
-    libraryFiles(source).then((res) => {
+    // const source = `queryType=room&roomId=${chatStore.currentChatId}&fileCategory=${props.type}`;
+    const params: LibraryFilesParams = {
+      queryType: 'room',
+      roomId: chatStore.currentChatId,
+      fileCategory: props.type,
+    };
+    libraryFiles(params).then((res) => {
       res.forEach((item) => {
         data.list.push({ link: `https://cos.jackycode.cn/${item.file_path}` });
-      })
+      });
     });
 
     // 更新分页总数

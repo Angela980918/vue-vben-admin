@@ -6,12 +6,13 @@ import { useRouter } from 'vue-router';
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@vben/constants';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
-import { message, notification } from 'ant-design-vue';
+import { notification } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
 import { getWhatsAppLogin, getWhatsAppUserInfo, reqCommonLogin } from '#/api';
 import { $t } from '#/locales';
 import { wsconnect } from '#/utils/wscontect';
+import { useGetApiKey } from '#/hooks/useGetApiKey';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -42,7 +43,11 @@ export const useAuthStore = defineStore('auth', () => {
       loginLoading.value = true;
 
       // 嘗試登錄
-      const { accessToken, refreshToken } = await reqCommonLogin({
+      const {
+        accessToken,
+        refreshToken,
+        userInfo: userPrefile,
+      } = await reqCommonLogin({
         account: params.account,
         password: params.password,
       });
@@ -55,40 +60,37 @@ export const useAuthStore = defineStore('auth', () => {
         accessStore.setRefreshToken(refreshToken);
 
         // 获取用户信息并存储到 accessStore 中
-        const fetchUserInfoResult = await fetchUserInfo(MockParams);
+        await fetchUserInfo(MockParams);
 
-        // console.log("fetchUserInfoResultfetchUserInfoResultfetchUserInfoResult",fetchUserInfoResult)
-        const userInfo = fetchUserInfoResult;
-        // console.log("userInfouserInfouserInfo", userInfo)
-        userStore.setUserInfo(userInfo);
-        void userStore
-          .getUserInfo()
-          .then((data) => {
-            if (data) {
-              const { permissions } = data;
-              accessStore.setAccessCodes(
-                permissions.map((permission) => permission.code),
-              );
-            }
-          })
-          .catch((error) => {
-            message.error('獲取用戶信息失敗');
-            console.error('err', error);
-          });
+        const userData = await userStore.getUserInfo();
+
+        // 當前的wabaID
+        const wabaId = userData?.waba_account;
+
+        /* // 設置當前的apiKey
+        const companyies = await userStore.getUserCompanyies();
+
+        // 找到當前的apiKey
+        const currentApiKey = companyies
+          ?.flatMap((company) => company.waba_accounts)
+          .find((account) => account.waba_id === wabaId)?.api_key;
+
+        // 設置默認的apiKey
+        userStore.setYcouldApiKey(currentApiKey || '');
+        accessStore.setYCloudApiKey(currentApiKey || ''); */
+        await useGetApiKey(wabaId || '');
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
         } else {
           onSuccess
             ? await onSuccess?.()
-            : await router.push(
-                (userInfo && userInfo.homePath) || DEFAULT_HOME_PATH,
-              );
+            : await router.push(DEFAULT_HOME_PATH);
         }
 
-        if (userInfo?.realName) {
+        if (userPrefile.user_name) {
           notification.success({
-            description: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
+            description: `${$t('authentication.loginSuccessDesc')}:${userPrefile.user_name}`,
             duration: 3,
             message: $t('authentication.loginSuccess'),
           });

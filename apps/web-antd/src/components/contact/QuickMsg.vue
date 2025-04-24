@@ -27,6 +27,7 @@ import SelectItem from '#/components/contact/SelectItem.vue';
 import { useChatStore, useTemplateStore } from '#/store';
 
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
+import type { LibraryFilesParams } from '@vben/types';
 
 // const handleRemove: UploadProps['onRemove'] = file => {
 //   const index = fileList.value.indexOf(file);
@@ -177,12 +178,22 @@ const setOpen = (value?: string) => {
 
 // 切換公共\個人素材庫
 const changeOptions = () => {
-  let source = '';
+  /*   let source = '';
   source =
     value1.value.length > 6
       ? `queryType=material&wabaId=${value1.value}`
-      : `queryType=material&userId=${value1.value}`;
-  templateStore.setMaterialListData(source);
+      : `queryType=material&userId=${value1.value}`; */
+  const sourceParams: LibraryFilesParams =
+    value1.value.length > 6
+      ? {
+          queryType: 'material',
+          wabaId: value1.value,
+        }
+      : {
+          queryType: 'material',
+          userId: value1.value,
+        };
+  templateStore.setMaterialListData(sourceParams);
 };
 
 const handleOk = async () => {

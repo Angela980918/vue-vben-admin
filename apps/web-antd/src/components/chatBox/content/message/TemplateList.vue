@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import type { SendMessageResponse } from '#/types';
-
 import { computed, onMounted, ref, watch } from 'vue';
 
 import { useUserStore } from '@vben/stores';
@@ -28,6 +26,7 @@ import Confirm from '#/components/chatBox/content/message/Confirm.vue';
 import { useHandleSendMessage } from '#/hooks/handleSendMessage';
 import { useChatStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
+import type { SendMessageResponse } from '@vben/types';
 
 const props = defineProps({
   currentPhone: {
@@ -44,7 +43,7 @@ const currentPhone = ref(props.currentPhone);
 const containerTemp = ref({});
 const selectedRow = ref<null | number>(1);
 const confirmRef = ref(null);
-const selectRecord = ref(null);
+const selectRecord = ref<null | { language: string; name: string }>(null);
 const selectName = ref(null);
 const templateList = computed(() => template.getRawTemplateList);
 const jump = ref(false);
@@ -237,7 +236,13 @@ const sendTemplate = async () => {
 };
 
 onMounted(() => {
-  preViewTemp(templateList.value[0]);
+  if (templateList.value.length === 0) {
+    template.loadTemplates().then(() => {
+      preViewTemp(templateList.value[0]);
+    });
+  } else {
+    preViewTemp(templateList.value[0]);
+  }
 });
 
 function markedToHtml(markedValue) {

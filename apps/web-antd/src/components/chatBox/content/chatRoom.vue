@@ -109,7 +109,7 @@ const footerStyle = {
 // 滚动到最底部的函数
 const chatRoom = ref(null);
 const chatRoom26 = ref(null);
-const colTemp = ref(null);
+const colTemp = ref<InstanceType<typeof TemplateList> | null>(null);
 const scrollToBottom = (prevHeight = null) => {
   nextTick(() => {
     const chatRoomElement = chatRoom26.value ? chatRoom26.value.$el : null;
@@ -158,7 +158,9 @@ const scrolling = (e) => {
 };
 
 function handleSubmit() {
-  colTemp.value.controlTemp();
+  if (colTemp.value) {
+    colTemp.value.controlTemp();
+  }
 }
 
 // 在数据更新后自动滚动到底部
@@ -264,7 +266,7 @@ function markedToHtml(markedValue) {
                   <AAvatar
                     style="margin-bottom: 10px"
                     size="large"
-                    :src="userStore.userInfo.avatar"
+                    :src="userStore.userProfile?.head_img_url"
                   />
                 </div>
                 <div

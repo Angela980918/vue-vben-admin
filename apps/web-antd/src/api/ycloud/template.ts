@@ -63,16 +63,15 @@ export async function createTemplateApi({
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 
-export async function getTemplateList(
-  page: number = 1,
-  limit: number = 10
-) {
-  const acc: Record<string, any> = {};
+export async function getTemplateList(page: number = 1, limit: number = 10) {
+  // const acc: Record<string, any> = {};
   // for (const key of Object.keys(filter)) {
   //   acc[`filter.${key}`] = filter[key];
   // }
 
-  return await ycloudRequestClient.get<any>(`/whatsapp/templates?page=${page}&limit=${limit}&includeTotal=true`);
+  return await ycloudRequestClient.get<any>(
+    `/whatsapp/templates?page=${page}&limit=${limit}&includeTotal=true`,
+  );
 }
 
 /** 刪除模板

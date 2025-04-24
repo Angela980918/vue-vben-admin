@@ -58,6 +58,7 @@
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
     "@playwright/test": "catalog:",
+    "@types/lodash": "^4.17.16",
     "@types/node": "catalog:",
     "@vben/commitlint-config": "workspace:*",
     "@vben/eslint-config": "workspace:*",

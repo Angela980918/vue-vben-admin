@@ -49,8 +49,9 @@ export const useCustomerStore = defineStore('customerStore', {
 
     async setAssignedCustomers(): Promise<AssignedCustomer[]> {
       const customers: AssignedCustomer[] = [];
-      const result = await getAllCustomerApi(useUserStore().selectAccount);
-
+      const currentWabaId = useUserStore().currentWabaId;
+      if (!currentWabaId) return customers;
+      const result = await getAllCustomerApi(currentWabaId);
       result.forEach((item: any, index: number) => {
         item.key = item.id;
         const color = stringToColor(item.customerId);
@@ -113,13 +114,23 @@ export const useCustomerStore = defineStore('customerStore', {
       }
     },
 
+    /**
+     * 懶加載聯繫人數據
+     */
     async startBackLoadContact() {
       ++this.page;
       await getContactListApi(this.page).then((result) => {
-        result.items.forEach((item) => (item.key = item.id));
+        const newItems = result.items.map((item) => {
+          return {
+            ...item,
+            key: item.id,
+          };
+        });
+        const newResult = { ...result, items: newItems };
+
         this.contactList = [
           ...this.contactList.map((item) => toRaw(item)), // 转为普通对象
-          ...result.items,
+          ...newResult.items,
         ];
         this.size += result.length;
         if (result.total > this.size) {

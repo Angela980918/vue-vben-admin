@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
 
@@ -56,13 +56,6 @@ const companiesList = computed<CompanieslistProp>(() => {
       };
     }) || []
   );
-});
-onMounted(() => {
-  if (userStore.status === 'idle') {
-    userStore.getUserInfo().then(() => {
-      userStore.getUserCompanyies().then();
-    });
-  }
 });
 </script>
 

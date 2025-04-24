@@ -1,4 +1,5 @@
 import { wcloudRequestClient } from '#/api/wrequest';
+import type { WhatsAppInformationInfo } from '@vben/types';
 
 /**
  * 查詢沟通列表
@@ -7,7 +8,7 @@ export async function getAllCustomerApi(wabaId: string) {
   // return whatsappInstance({
   //   url: '/chat/getAllCustomerLatestChats?wabaId=449711484896804', method: 'GET'
   // })
-  return wcloudRequestClient.get<any>(
+  return wcloudRequestClient.get<WhatsAppInformationInfo[]>(
     `/chat/getAllCustomerLatestChats?wabaId=${wabaId}`,
   );
 }

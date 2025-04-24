@@ -1,8 +1,6 @@
 import { wcloudRequestClient } from '#/api/wrequest';
+import type { LibraryFilesParams } from '@vben/types';
 
-/**
- * 上傳文件
- */
 // export async function uploadFile(file: File) {
 //   const uploadData = new FormData();
 //   uploadData.append('file', file);
@@ -67,11 +65,15 @@ export async function deleteMaterial(data: string) {
 /**
  * 查询素材资料
  */
-export async function libraryFiles(data: object) {
+export async function libraryFiles(data: LibraryFilesParams) {
   // return whatsappInstance({
   //   url: `/materials/library-files?${data}`, method: 'GET'
   // })
-  return wcloudRequestClient.get<any>(`/materials/library-files?${data}`);
+  return wcloudRequestClient.get<any>(
+    `/materials/library-files`,
+    {},
+    { params: data },
+  );
 }
 
 /**

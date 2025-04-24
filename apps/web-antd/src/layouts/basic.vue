@@ -24,7 +24,7 @@ const { destroyWatermark, updateWatermark } = useWatermark();
 // );
 
 const avatar = computed(() => {
-  return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
+  return userStore.userProfile?.head_img_url ?? preferences.app.defaultAvatar;
 });
 
 const { getDefaultCompanyInfo, userProfile } = storeToRefs(userStore);
@@ -38,7 +38,7 @@ watch(
   async (enable) => {
     if (enable) {
       await updateWatermark({
-        content: `${userStore.userInfo?.username}`,
+        content: `${userStore.userProfile?.user_name}`,
       });
     } else {
       destroyWatermark();

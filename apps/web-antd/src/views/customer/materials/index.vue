@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MenuProps, SelectProps } from 'ant-design-vue';
 
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 
 import { DownOutlined } from '@ant-design/icons-vue';
 import {
@@ -19,6 +19,9 @@ import { deleteMaterial, uploadMaterialApi } from '#/api';
 // import FileList from "@/components/contact/FileList.vue";
 import FileList from '#/components/contact/FileList.vue';
 import { useTemplateStore } from '#/store';
+import type { LibraryFilesParams } from '@vben/types';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '@vben/stores';
 
 const tempStore = useTemplateStore();
 
@@ -154,13 +157,36 @@ const uploadFile = async (event: Event) => {
 
 // 检索素材库
 async function checkCos() {
+  /* 
   let source = '';
   source =
     selectValue.value.length > 6
       ? `queryType=material&wabaId=${selectValue.value}`
-      : `queryType=material&userId=${selectValue.value}`;
-  tempStore.setMaterialListData(source);
+      : `queryType=material&userId=${selectValue.value}`; 
+  */
+  const sourceParams: LibraryFilesParams =
+    selectValue.value.length > 6
+      ? {
+          queryType: 'material',
+          wabaId: selectValue.value,
+        }
+      : {
+          queryType: 'material',
+          userId: selectValue.value,
+        };
+  tempStore.setMaterialListData(sourceParams);
 }
+
+const { currentWabaId } = storeToRefs(useUserStore());
+
+onBeforeMount(() => {
+  if (currentWabaId?.value) {
+    tempStore.setMaterialListData({
+      queryType: 'material',
+      wabaId: currentWabaId.value,
+    });
+  }
+});
 </script>
 
 <template>
