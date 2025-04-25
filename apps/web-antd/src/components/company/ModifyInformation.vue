@@ -1,7 +1,7 @@
 <script lang="ts" name="ModifyInformation" setup>
 import type { CompanyInfo } from '@vben/types';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
@@ -60,9 +60,6 @@ const defaultCompany = computed<CompanyInfo>(() => {
 function handleChangeCompnayId(value: string) {
   currentSelectCompanyId.value = value;
 }
-onMounted(() => {
-  userStore.getUserCompanyies();
-});
 </script>
 
 <template>

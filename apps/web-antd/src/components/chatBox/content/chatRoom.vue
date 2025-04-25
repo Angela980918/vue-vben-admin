@@ -568,7 +568,7 @@ function markedToHtml(markedValue) {
 
 <style scoped>
 .chatroom22 {
-  flex: 0 0 calc(-383px + 100vh);
+  flex: 0 0 calc(-383px - 50px + 100vh);
   flex-direction: column;
   height: 100%;
   overflow-y: auto;

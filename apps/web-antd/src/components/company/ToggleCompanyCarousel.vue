@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import type { ToggleCompanyProps } from '@vben/types';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
 import StringToColor from 'string-to-color';
 import { useUserStore } from '@vben/stores';
 import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
 
 interface Props {
   companiesList: ToggleCompanyProps;
+  height?: number;
 }
 
-const { companiesList } = defineProps<Props>();
+const { companiesList, height } = defineProps<Props>();
 const activeIndex = ref(0);
 const listRef = ref<HTMLDivElement | null>(null);
 
@@ -19,10 +21,6 @@ const coloredCompanies = computed(() =>
     backgroundColor: StringToColor(company.companyId),
     color: StringToColor(company.companyName),
   })),
-);
-
-const currentCompany = computed(
-  () => coloredCompanies.value[activeIndex.value],
 );
 
 watch(activeIndex, async () => {
@@ -46,12 +44,9 @@ const userStore = useUserStore();
 async function changeComapny(event: Event, index: number) {
   activeIndex.value = index;
   // 獲取當前選擇公司的id
-  const companyId = coloredCompanies.value[index]?.companyId;
+  const wabaInfo = coloredCompanies.value[index]?.companyWabaInfo;
 
-  // 當前的公司詳細信息
-  const comapny = userStore.companies.find((comany) => comany.id === companyId);
   // 獲取公司的waba賬號優選選擇第一個
-  const wabaInfo = comapny && comapny?.waba_accounts[0];
   if (wabaInfo) {
     // 設置新的wabaid和apiKey
     userStore.setCurrentWabaId(wabaInfo.waba_id);
@@ -61,42 +56,76 @@ async function changeComapny(event: Event, index: number) {
     await useInitCommonDataBeforeEnterRoute();
   }
 }
+
+onBeforeMount(() => {
+  // 获取当前仓库选择的公司
+  const currentCompanyId = userStore.currentCompanyId;
+  if (currentCompanyId) {
+    const index = companiesList.findIndex(
+      (company) => company.companyId === currentCompanyId,
+    );
+    if (index !== -1) {
+      activeIndex.value = index;
+    }
+  }
+});
+const elementStyle = ref<CSSProperties>({});
+
+onBeforeMount(() => {
+  elementStyle.value = {
+    height: `${height ?? 30}px`,
+    lineHeight: `${height ?? 30}px`,
+    width: `${height ?? 30}px`,
+  };
+});
 </script>
 <template>
-  <div class="carousel-horizontal">
-    <div class="thumbnail-list" ref="listRef">
+  <div class="carousel-horizontal" :style="{ height: elementStyle.height }">
+    <div
+      class="thumbnail-list"
+      ref="listRef"
+      :style="{ height: elementStyle.height }"
+    >
       <div
         v-for="(item, index) in coloredCompanies"
         :key="item.companyId"
         class="thumbnail"
         :class="{ active: index === activeIndex }"
         @click="changeComapny($event, index)"
+        :style="{
+          height: elementStyle.height,
+          lineHeight: elementStyle.lineHeight,
+        }"
       >
-        <a-tooltip :color="item.backgroundColor">
+        <a-tooltip :color="item.backgroundColor" placement="top">
           <template #title>
-            {{ item.companyName }}
+            <div
+              style="
+                line-height: 1.4;
+                word-break: break-all;
+                white-space: normal;
+              "
+            >
+              waba账号： {{ item.companyWabaInfo?.waba_id }}
+            </div>
           </template>
-          <img :src="item.companyLogo" />
+
+          <div
+            class="tag"
+            :style="{
+              backgroundColor: item?.backgroundColor,
+              color: item?.color,
+            }"
+          >
+            <img class="img" :src="item.companyLogo" :style="elementStyle" />
+            <p>
+              {{ item.companyName }}
+            </p>
+          </div>
         </a-tooltip>
       </div>
     </div>
-
-    <div class="main-image">
-      <a-tooltip>
-        <template #title>
-          {{ currentCompany?.companyName }}
-        </template>
-        <div
-          class="thumbnail"
-          :style="{
-            backgroundColor: currentCompany?.backgroundColor,
-            color: currentCompany?.color,
-          }"
-        >
-          {{ currentCompany?.companyName.split('')[0] }}
-        </div>
-      </a-tooltip>
-    </div>
+    <div class="background-layer"></div>
   </div>
 </template>
 
@@ -105,8 +134,8 @@ async function changeComapny(event: Event, index: number) {
   position: relative;
   display: flex;
   align-items: center;
-  height: 60px;
-  padding: 0 12px;
+  width: 100%;
+  padding: 0 10px;
   overflow: hidden; // 重要：避免背景层溢出
   border-radius: 0;
 
@@ -158,10 +187,7 @@ async function changeComapny(event: Event, index: number) {
     .thumbnail {
       position: relative;
       z-index: 1;
-      width: 50px;
-      height: 50px;
       font-size: 16px;
-      line-height: 50px;
       text-align: center;
       cursor: pointer;
       background-color: #58ccdc;
@@ -174,6 +200,17 @@ async function changeComapny(event: Event, index: number) {
         0 0 24px rgba(88, 204, 220, 0.3); // 更远的外围光晕
 
       transition: box-shadow 0.3s ease;
+
+      .tag {
+        box-sizing: border-box;
+        display: flex;
+        padding: 0 10px;
+
+        .img {
+          margin-right: 5px;
+          border-radius: 50%;
+        }
+      }
     }
   }
 
@@ -181,7 +218,6 @@ async function changeComapny(event: Event, index: number) {
     display: flex;
     flex-direction: row;
     gap: 12px;
-    height: 50px;
     padding: 0 8px;
     overflow-x: auto;
     scroll-behavior: smooth;
@@ -193,8 +229,7 @@ async function changeComapny(event: Event, index: number) {
 
     .thumbnail {
       flex-shrink: 0;
-      width: 50px;
-      height: 50px;
+      height: 30px;
       overflow: hidden;
       cursor: pointer;
       border-radius: 8px;
@@ -206,8 +241,8 @@ async function changeComapny(event: Event, index: number) {
 
       img {
         display: block;
-        width: 100%;
-        height: 100%;
+        width: 30px;
+        height: 30px;
         object-fit: cover;
         border-radius: 8px;
       }
@@ -220,22 +255,6 @@ async function changeComapny(event: Event, index: number) {
         box-shadow: 0 0 0 2px #1890ff;
         opacity: 1;
       }
-    }
-  }
-
-  .main-image {
-    width: 60px;
-    height: 60px;
-    margin-left: auto;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 0 0 2px #e6f7ff;
-
-    img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
     }
   }
 }

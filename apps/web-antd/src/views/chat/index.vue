@@ -6,7 +6,6 @@ import { computed, ref } from 'vue';
 import { useUserStore } from '@vben/stores';
 
 import {
-  Divider as ADivider,
   Layout as ALayout,
   LayoutContent as ALayoutContent,
   LayoutSider as ALayoutSider,
@@ -36,6 +35,7 @@ const contentStyle: CSSProperties = {
   minHeight: 600,
   lineHeight: '120px',
   color: '#000',
+  height: 'calc(100% - 134.1px - 50px )',
 };
 
 type MyToggleCompanyCarouselInstance = InstanceType<
@@ -53,29 +53,31 @@ const companiesList = computed<CompanieslistProp>(() => {
         companyId: item.id,
         companyName: item.name,
         companyLogo: item.logo,
+        companyWabaInfo: item.waba_accounts[0],
       };
     }) || []
   );
 });
+
+const CompanyCarouselHeight = ref(50);
 </script>
 
 <template>
-  <div class="px-3; pt-3">
+  <div class="px-1 py-1">
     <div class="card-box h-full flex-col lg:flex">
-      <ToggleCompanyCarousel :companies-list="companiesList" />
-
+      <ToggleCompanyCarousel
+        :height="CompanyCarouselHeight"
+        :companies-list="companiesList"
+      />
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>
           <ChatBoxLeft
-            style="
-              display: flex;
-              flex-direction: column;
-              height: calc(100vh - 134.1px);
-            "
+            :style="`display: flex; flex-direction: column;
+          height: calc(100vh - 134.1px - ${CompanyCarouselHeight}px);`"
           />
           <ADivider
             type="vertical"
-            style="height: calc(100vh - 134.1px); margin: unset"
+            :style="`height: calc(100vh - 134.1px - ${CompanyCarouselHeight}px); margin: unset`"
           />
           <ALayout>
             <!--            <ALayoutContent style="text-align: center; min-height: 600px; line-height: 120px; color: #000">-->
@@ -85,7 +87,7 @@ const companiesList = computed<CompanieslistProp>(() => {
             <ALayoutSider
               v-if="showRight"
               width="400"
-              style="background: #fff; border-left: 1px solid #f0f0f0"
+              :style="`background: #fff; border-left: 1px solid #f0f0f0; height: calc(100vh - 134.1px - ${CompanyCarouselHeight}px);`"
             >
               <ChatBoxRight />
             </ALayoutSider>

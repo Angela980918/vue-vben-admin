@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/no-unused-vars -->
+<!-- eslint-disable vue/no-unused-vars -->
 <script lang="ts" setup>
 import type { SelectProps } from 'ant-design-vue';
 
@@ -143,6 +145,7 @@ watchEffect(() => {
     />
 
     <ATable bordered :data-source="data" :columns="columns">
+      <!--       eslint-disable-next-line vue/no-unused-vars -->
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a @click="checkMsg(record)">查看</a>
