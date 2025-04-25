@@ -6,45 +6,54 @@ import { message } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
 import { getTemplateList, libraryFiles, loadQuickList } from '#/api';
+import type {
+  DocTemplate,
+  ImageTemplate,
+  LibraryFilesParams,
+  QuickMessage,
+  RawTemplateDataList,
+  RawTemplateList,
+  TemplateOption,
+} from '@vben/types';
 
 export const useTemplateStore = defineStore('template', () => {
-  // const accessStore = useAccessStore();
-  // const userStore = useUserStore();
-  // const router = useRouter();
-  //
-  // const loginLoading = ref(false);
-  const rawTempData = ref([]);
-  const createTempData = ref([]);
+  const rawTempData = ref<RawTemplateDataList>([]);
+
+  const createTempData = ref<RawTemplateDataList>([]);
   const isTemplatesLoaded = ref(false);
-  const tempData = ref([]);
-  const createTempAccount = ref(''); // 当前模板对应的公司账号
+
+  const tempData = ref<RawTemplateDataList>([]);
 
   // 快捷用语
-  const quickMessage = ref([]);
+  const quickMessage = ref<QuickMessage[]>([]);
 
   // 素材库
-  const imageList = ref([]);
-  const docList = ref([]);
+  const imageList = ref<ImageTemplate[]>([]);
+  const docList = ref<DocTemplate[]>([]);
   const videoList = ref([]);
 
   // 選項
-  const userInfo = useUserStore().userInfo;
-  const list = [];
-  const selectOptions = ref([]);
-  const { wabaAccount } = userInfo;
-  wabaAccount.forEach((item) => {
-    list.push({ value: item.wabaId, label: item.name });
+  const userStore = useUserStore();
+
+  const selectOptions = computed<TemplateOption[]>(() => {
+    const list: TemplateOption[] = [];
+    userStore.wabaAccounts.forEach((item) => {
+      list.push({ value: item.waba_id, label: item.name });
+    });
+
+    return list;
   });
-  list.push({ value: userInfo?.id, label: userInfo?.username });
-  selectOptions.value = list;
-  createTempAccount.value = selectOptions.value[0].value;
+
+  const createTempAccount = computed(() => {
+    return userStore.currentWabaId;
+  }); // 当前模板对应的公司账号
 
   const page = ref(1);
   const size = ref(10);
   const total = ref(0);
 
-  const getRawTemplateList = computed(() => {
-    const list = [];
+  const getRawTemplateList = computed<RawTemplateList[]>(() => {
+    const list: RawTemplateList[] = [];
     rawTempData.value.forEach((item) => {
       if (
         item.status === 'APPROVED' &&
@@ -59,7 +68,6 @@ export const useTemplateStore = defineStore('template', () => {
         list.push(cloumn);
       }
     });
-    // console.log("listlistlist",list)
     return list;
   });
 
@@ -113,29 +121,56 @@ export const useTemplateStore = defineStore('template', () => {
   }
 
   async function startBackLoadTemplate() {
-    page.value = page.value + 1;
-    await getTemplateList(page.value).then((result) => {
-      result.items.forEach((item, index) => (item.key = index));
-      rawTempData.value = [
-        ...rawTempData.value.map((item) => toRaw(item)),
-        ...result.items,
-      ];
-      tempData.value = [...rawTempData.value];
+    try {
+      // 简洁地增加页码
+      page.value++;
 
-      size.value += result.length;
-      if (result.total > size.value) {
-        'requestIdleCallback' in window &&
-          requestIdleCallback(() => startBackLoadTemplate());
+      // 发起请求获取模板列表
+      const result = await getTemplateList(page.value);
+
+      // 类型检查，确保 result.items 是数组
+      if (Array.isArray(result.items)) {
+        // 为新数据添加 key 属性，明确类型
+        const newItemsWithKey = result.items.map((item, index) => ({
+          ...item,
+          key: index,
+        }));
+
+        // 合并新旧数据
+        const mergedData = [
+          ...rawTempData.value.map((item) => toRaw(item)),
+          ...newItemsWithKey,
+        ];
+
+        // 更新数据
+        rawTempData.value = mergedData;
+        tempData.value = [...mergedData];
+
+        // 更新已加载数据的数量，使用正确的属性
+        size.value += newItemsWithKey.length;
+
+        // 检查是否还有更多数据需要加载，并在浏览器空闲时继续加载
+        if (
+          result.total > size.value &&
+          typeof window !== 'undefined' &&
+          'requestIdleCallback' in window
+        ) {
+          window.requestIdleCallback(() => startBackLoadTemplate());
+        }
       }
-    });
+    } catch (error) {
+      // 错误处理，打印错误信息
+      console.error('后台加载模板数据时出错:', error);
+      message.error('后台加载模板数据失败，请稍后重试');
+    }
   }
 
   function setRawTempData(data: any) {
     rawTempData.value = data;
   }
 
-  function setTempData(data: any) {
-    data.forEach((item: object, index: number) => {
+  function setTempData(data: RawTemplateDataList) {
+    data.forEach((item: any, index: number) => {
       item.key = index;
     });
     tempData.value = data;
@@ -155,7 +190,7 @@ export const useTemplateStore = defineStore('template', () => {
     quickMessage.value = await loadQuickList(id);
   }
 
-  async function setMaterialListData(source) {
+  async function setMaterialListData(source: LibraryFilesParams) {
     // 素材列表
     await libraryFiles(source)
       .then((result) => {

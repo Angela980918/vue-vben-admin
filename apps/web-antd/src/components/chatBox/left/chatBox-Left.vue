@@ -1,75 +1,39 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import type { WhatsAppInformationInfo } from '#/types';
-
 import { computed, onBeforeMount } from 'vue';
 
-import { useUserStore } from '@vben/stores';
-
-import { LayoutSider as ALayoutSider } from 'ant-design-vue';
+import { LayoutSider as ALayoutSider, message } from 'ant-design-vue';
 
 import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
+import type { WhatsAppInformationInfo } from '@vben/types';
+import { useUserStore } from '@vben/stores';
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 
 const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
-// const unassignedCustomers = computed(() => customerStore.getUnassignedCustomers);
-
-// const generateRandomColor = () => {
-//   const letters = '0123456789ABCDEF';
-//   let color = '#';
-//   for (let i = 0; i < 6; i++) {
-//     color += letters[Math.floor(Math.random() * 16)];
-//   }
-//   return color;
-// };
 
 // 加载用户列表
 const loadCustomerList = async () => {
   const customer = await customerStore.setAssignedCustomers();
-  // await getAllCustomerApi(wabaId).then((result) => {
-  //   result.forEach((item) => {
-  //     item.key = item.id;
-  //     const color = generateRandomColor();
-  //     const newCustomer = {
-  //       id: item.id,
-  //       key: item.key,
-  //       name: item.customerId,
-  //       time: item.messageList[0].deliverTime,
-  //       badgeCount: item.messageCount,
-  //       phoneNumber: item.customerId,
-  //       color,
-  //     };
-  //
-  //     if (item.customerProfile !== undefined) {
-  //       newCustomer.name = item.customerProfile.name;
-  //     }
-  //
-  //     newCustomer.message =
-  //       item.messageList[0].type === 'text'
-  //         ? item.messageList[0].content.body
-  //         : `[${item.messageList[0].type} Message]`;
-  //
-  //     customer.push(newCustomer);
-  //   });
-  //   // console.log("customer",customer)
-  //   customerStore.setAssignedCustomers(customer);
-  //   // chatStore.setCurrentPhone(customer[0].phoneNumber);
-  //   chatStore.setCurrentUserInfo(customer[0]);
-  //   // chatStore.setCurrentChatId()
-  // });
-  chatStore.setCurrentUserInfo(customer[0]);
-  loadChatMessage(customer[0]?.phoneNumber, assignedCustomers?.value[0]?.id);
+  if (customer[0] && assignedCustomers?.value[0]?.id) {
+    chatStore.setCurrentUserInfo(customer[0]);
+    loadChatMessage(customer[0]?.phoneNumber, assignedCustomers?.value[0]?.id);
+  } else {
+    message.warn('暫無聯繫客戶，請添加');
+  }
 };
 
-// 加载消息列表
+/**
+ * 加载聊天消息列表的异步函数
+ * 该函数会从 API 获取指定聊天的消息列表，并对消息数据进行处理后存储到聊天状态中
+ */
 const loadMessageList = async () => {
   const currentChatId = chatStore.getCurrentChatId;
   const currentCustomerInfo = chatStore.currentCustomerInfo;
@@ -112,21 +76,31 @@ const loadMessageList = async () => {
 
   chatStore.setMessageList(res.messageList);
 };
-
+const userStore = useUserStore();
 // 选中的客户
-async function loadChatMessage(guestPhone, id) {
+async function loadChatMessage(guestPhone: string, id: string) {
   if (chatStore.currentPhone !== guestPhone) {
     chatStore.clearChat();
     chatStore.setPage();
     chatStore.setCurrentChatId(id);
     chatStore.setCurrentPhone(guestPhone);
-    loadMessageList();
+    loadMessageList().then(() => {
+      // 设置当前账号下对话对应的电话号码
+      const currentOwnPhoneNumber = chatStore.chatMessages.find(
+        (chatmessage) => {
+          return chatmessage.direction === 'outbound';
+        },
+      )?.from;
+      if (currentOwnPhoneNumber) {
+        userStore.setSelectPhone(currentOwnPhoneNumber);
+      }
+    });
   }
 }
 
 onBeforeMount(async () => {
   if (assignedCustomers.value.length === 0) {
-    await loadCustomerList(useUserStore().selectAccount);
+    await loadCustomerList();
   } else {
     chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
     loadChatMessage(

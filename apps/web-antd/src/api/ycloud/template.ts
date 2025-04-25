@@ -1,4 +1,5 @@
 import { ycloudRequestClient } from '#/api/yrequest';
+import type { YCouldTemplateResponse } from '@vben/types';
 
 interface TemplateInfo {
   wabaId: string;
@@ -69,7 +70,7 @@ export async function getTemplateList(page: number = 1, limit: number = 10) {
   //   acc[`filter.${key}`] = filter[key];
   // }
 
-  return await ycloudRequestClient.get<any>(
+  return await ycloudRequestClient.get<YCouldTemplateResponse>(
     `/whatsapp/templates?page=${page}&limit=${limit}&includeTotal=true`,
   );
 }
