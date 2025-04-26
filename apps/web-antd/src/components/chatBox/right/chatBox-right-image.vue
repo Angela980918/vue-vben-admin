@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import FindList from '#/components/chatBox/content/message/FindList.vue';
 </script>
 

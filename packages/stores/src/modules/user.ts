@@ -4,6 +4,7 @@ import type {
   UserPrefileOmitPerAndRole,
 } from '../../../types/src/user';
 import type {
+  TemUserInfo,
   UserCompanyResponse,
   WabaAccount,
 } from '../../../types/src/web-antd';
@@ -28,15 +29,22 @@ interface BasicUserInfo {
   /**
    * 用户角色
    */
-  roles?: string[];
-  /**
-   * 用户id
-   */
-  userId: string;
+  roles: string[];
   /**
    * 用户名
    */
   username: string;
+  /**
+   * waba賬號
+   */
+  wabaAccount: {
+    account_review_status: string;
+    apikey: string;
+    business_verification_status: string;
+    name: string;
+    phoneNumber: string;
+    wabaId: string;
+  }[];
 }
 type StatusType = 'error' | 'idle' | 'loading' | 'success';
 interface UserState {
@@ -129,7 +137,7 @@ export const useUserStore = defineStore('core-user', {
     setSelectPhone(phone: string) {
       this.selectPhone = phone;
     },
-    setUserInfo(userInfo: BasicUserInfo | null) {
+    setUserInfo(userInfo: TemUserInfo) {
       // 设置用户信息
       this.userInfo = userInfo;
       // 设置角色信息
@@ -137,8 +145,10 @@ export const useUserStore = defineStore('core-user', {
       this.setUserRoles(roles);
       this.currentApiKey = userInfo?.currentApiKey ?? '';
       const { wabaAccount } = userInfo;
-      this.selectAccount = wabaAccount[0].wabaId;
-      this.selectPhone = wabaAccount[0].phoneNumber;
+      if (wabaAccount[0]) {
+        this.selectAccount = wabaAccount[0].wabaId;
+        this.selectPhone = wabaAccount[0].phoneNumber;
+      }
     },
 
     setUserRoles(roles: string[]) {

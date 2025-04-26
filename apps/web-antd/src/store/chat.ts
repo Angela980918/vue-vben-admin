@@ -17,8 +17,8 @@ export interface CurrentCustomerInfo {
   id: string;
   key: string;
   name: string;
-  time: Date;
-  badgeCount?: number;
+  time: string;
+  badgeCount: number;
   phoneNumber: string;
   color: string;
   isActive: boolean;

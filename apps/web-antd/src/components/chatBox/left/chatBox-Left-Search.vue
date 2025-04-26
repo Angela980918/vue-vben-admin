@@ -4,12 +4,14 @@ import { ref } from 'vue';
 import { InputSearch as AInputSearch, Space as ASpace } from 'ant-design-vue';
 
 import { useCustomerStore } from '#/store';
+import type { ChangeEvent } from 'ant-design-vue/es/_util/EventInterface';
 
 const value = ref<string>('');
 const customerStore = useCustomerStore();
-const onSearch = (searchValue: string) => {
-  // console.log("searchValue", searchValue.target.value)
-  customerStore.setSearchWord(searchValue.target.value);
+const onSearch = (searchValue: ChangeEvent) => {
+  if (searchValue.target.value) {
+    customerStore.setSearchWord(searchValue.target.value);
+  }
 };
 </script>
 

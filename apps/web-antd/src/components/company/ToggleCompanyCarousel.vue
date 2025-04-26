@@ -9,9 +9,17 @@ import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
 interface Props {
   companiesList: ToggleCompanyProps;
   height?: number;
+  /**
+   * 是否啟用頂部tag標籤是純白背景，默認為否，默認是根據ID生成特殊的背景顏色
+   */
+  activatePureWhite?: boolean;
 }
 
-const { companiesList, height } = defineProps<Props>();
+const {
+  companiesList,
+  height,
+  activatePureWhite = false,
+} = defineProps<Props>();
 const activeIndex = ref(0);
 const listRef = ref<HTMLDivElement | null>(null);
 
@@ -113,7 +121,9 @@ onBeforeMount(() => {
           <div
             class="tag"
             :style="{
-              backgroundColor: item?.backgroundColor,
+              backgroundColor: activatePureWhite
+                ? '#F4F4F5'
+                : item?.backgroundColor,
               color: item?.color,
             }"
           >

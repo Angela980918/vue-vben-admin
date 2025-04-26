@@ -58,8 +58,11 @@ const companiesList = computed<CompanieslistProp>(() => {
     }) || []
   );
 });
-
-const CompanyCarouselHeight = ref(50);
+/**
+ * 此處調整大小
+ */
+const CompanyCarouselHeight = 30;
+const isActivatePureWhite = true;
 </script>
 
 <template>
@@ -68,6 +71,7 @@ const CompanyCarouselHeight = ref(50);
       <ToggleCompanyCarousel
         :height="CompanyCarouselHeight"
         :companies-list="companiesList"
+        :activate-pure-white="isActivatePureWhite"
       />
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>

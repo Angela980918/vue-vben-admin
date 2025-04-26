@@ -65,11 +65,11 @@ export async function deleteMaterial(data: string) {
 /**
  * 查询素材资料
  */
-export async function libraryFiles(data: LibraryFilesParams) {
+export async function libraryFiles<T = any>(data: LibraryFilesParams) {
   // return whatsappInstance({
   //   url: `/materials/library-files?${data}`, method: 'GET'
   // })
-  return wcloudRequestClient.get<any>(
+  return wcloudRequestClient.get<T>(
     `/materials/library-files`,
     {},
     { params: data },

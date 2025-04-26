@@ -129,22 +129,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUserInfo(data?: object) {
-    let userInfo: null | UserInfo = null;
-    userInfo = data
+    const userInfo = data
       ? await getWhatsAppLogin(data)
       : await getWhatsAppUserInfo();
-    // console.log("userInfouserInfouserInfo",userInfo)
     userStore.setUserInfo(userInfo);
     return userInfo;
   }
-
-  // async function getUserInfo() {
-  //   let userInfo: null | UserInfo = null;
-  //   userInfo =
-  //   // console.log("userInfouserInfouserInfo",userInfo)
-  //   userStore.setUserInfo(userInfo);
-  //   return userInfo;
-  // }
 
   function $reset() {
     loginLoading.value = false;

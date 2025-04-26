@@ -9,22 +9,23 @@ import {
   Tooltip as ATooltip,
 } from 'ant-design-vue';
 
-import ChatBoxRightFile from '#/components/chatBox/right/chatBox-right-file.vue';
-import ChatBoxRightImage from '#/components/chatBox/right/chatBox-right-image.vue';
-import ChatBoxRightPerson from '#/components/chatBox/right/chatBox-right-person.vue';
-import ChatBoxRightStatus from '#/components/chatBox/right/chatBox-right-status.vue';
-import ChatBoxRightTips from '#/components/chatBox/right/chatBox-right-tips.vue';
+import ChatBoxRightImage from './chatBox-right-image.vue';
+import ChatBoxRightPerson from './chatBox-right-person.vue';
+import ChatBoxRightStatus from './chatBox-right-status.vue';
+import ChatBoxRightTips from './chatBox-right-tips.vue';
 import { useChatStore, useCustomerStore } from '#/store';
+import type { CurrentCustomerInfo } from '#/store';
+import ChatBoxRightFile from './chatBox-right-file.vue';
 
 const activeKey = ref('1');
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
-const currentCustomerInfo = computed(() => {
+const currentCustomerInfo = computed<CurrentCustomerInfo | undefined>(() => {
   // 如果 currentCustomerInfo 是空对象，则返回 customers 中的第一个客户信息
   return chatStore.currentCustomerInfo &&
     Object.keys(chatStore.currentCustomerInfo).length > 0
     ? chatStore.currentCustomerInfo
-    : customerStore.assignedCustomers[0] || {};
+    : customerStore.assignedCustomers[0] || undefined;
 });
 const getAvatarText = (name: string) => {
   if (name === undefined) return;
@@ -37,18 +38,20 @@ const getAvatarText = (name: string) => {
 <template>
   <div class="rightTab">
     <div class="headerCard">
-      <AAvatar
-        size="large"
-        :style="{ backgroundColor: currentCustomerInfo.color }"
-      >
-        {{ getAvatarText(currentCustomerInfo.name) }}
-      </AAvatar>
-      <div class="sampleInfo">
-        <span>{{
-          ` ${$t('page.chat.titles.1')}:${currentCustomerInfo.name}`
-        }}</span>
-        <span>{{ $t('page.chat.titles.2') }}：2024/12/06</span>
-      </div>
+      <template v-if="currentCustomerInfo">
+        <AAvatar
+          size="large"
+          :style="{ backgroundColor: currentCustomerInfo.color }"
+        >
+          {{ getAvatarText(currentCustomerInfo.name) }}
+        </AAvatar>
+        <div class="sampleInfo">
+          <span>{{
+            ` ${$t('page.chat.titles.1')}:${currentCustomerInfo.name}`
+          }}</span>
+          <span>{{ $t('page.chat.titles.2') }}：2024/12/06</span>
+        </div>
+      </template>
     </div>
     <div class="remarkCard">
       <div class="rmarkMain">

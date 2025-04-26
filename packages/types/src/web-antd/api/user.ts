@@ -101,3 +101,22 @@ export interface SwitchUserCompanyDto {
   user: SwitchUser;
   [property: string]: any;
 }
+export type TempWabaAccount = {
+  account_review_status: string;
+  apikey: string;
+  business_verification_status: string;
+  name: string;
+  phoneNumber: string;
+  wabaId: string;
+};
+
+export type TemUserInfo = {
+  avatar: string;
+  currentApiKey: string;
+  id: number;
+  password: string;
+  realName: string;
+  roles: string[];
+  username: string;
+  wabaAccount: TempWabaAccount[];
+};

@@ -1,4 +1,4 @@
-import type { UserInfo } from '@vben/types';
+import type { TemUserInfo } from '@vben/types';
 
 import { wcloudRequestClient } from '#/api/wrequest';
 
@@ -6,7 +6,7 @@ import { wcloudRequestClient } from '#/api/wrequest';
  * 获取用户信息
  */
 export async function getWhatsAppLogin(data: any) {
-  return wcloudRequestClient.post<UserInfo>('/test/login', data);
+  return wcloudRequestClient.post<TemUserInfo>('/test/login', data);
 }
 
 export async function getWhatsAppUserToken(data: any) {
@@ -14,7 +14,7 @@ export async function getWhatsAppUserToken(data: any) {
 }
 
 export async function getWhatsAppUserInfo() {
-  return wcloudRequestClient.get<UserInfo>('/test/user-info');
+  return wcloudRequestClient.get<TemUserInfo>('/test/user-info');
 }
 
 export async function refreshToken() {

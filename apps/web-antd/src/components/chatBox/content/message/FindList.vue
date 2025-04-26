@@ -10,14 +10,21 @@ import {
 
 import { useChatStore } from '#/store';
 import { libraryFiles } from '#/api';
-import type { FileCategory, LibraryFilesParams } from '@vben/types';
+import type {
+  FileCategory,
+  FileTemplateInfo,
+  LibraryFilesParams,
+} from '@vben/types';
+import { useAppConfig } from '@vben/hooks';
 
 interface Props {
   type: FileCategory;
 }
 const props = defineProps<Props>();
 const chatStore = useChatStore();
-const data = reactive({
+
+type DataType = { file_name: string; link: string };
+const data = reactive<{ list: DataType[] }>({
   list: [],
 });
 
@@ -28,7 +35,7 @@ const paginationConfig = ref({
   total: data.list.length,
   showSizeChanger: false,
   showQuickJumper: true,
-  onChange: (page) => {
+  onChange: (page: number) => {
     paginationConfig.value.current = page;
   },
 });
@@ -42,32 +49,22 @@ const paginatedData = computed(() => {
   return data.list.slice(start, end);
 });
 const loading = ref(false);
-
+const { cosURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 watch(
   () => chatStore.currentChatId,
   () => {
     data.list = [];
-    // let test = "";
-    // newValue.forEach((item) => {
-    //   if (item.type === props.type) {
-    //     data.list.push({ link: item.content.link });
-    //   } else if (
-    //     item.type === 'template' &&
-    //     item.content.header?.format.toLowerCase() === props.type
-    //   ) {
-    //     data.list.push({ link: item.content.header.content });
-    //   }
-    // });
-
-    // const source = `queryType=room&roomId=${chatStore.currentChatId}&fileCategory=${props.type}`;
     const params: LibraryFilesParams = {
       queryType: 'room',
       roomId: chatStore.currentChatId,
       fileCategory: props.type,
     };
-    libraryFiles(params).then((res) => {
+    libraryFiles<FileTemplateInfo[]>(params).then((res) => {
       res.forEach((item) => {
-        data.list.push({ link: `https://cos.jackycode.cn/${item.file_path}` });
+        data.list.push({
+          link: `${cosURL}${item.file_path}`,
+          file_name: item.file_name,
+        });
       });
     });
 
@@ -77,10 +74,10 @@ watch(
   { immediate: true },
 );
 
-const getFileName = (url) => {
-  const filename = url.split('/').pop();
-  const fileExtension = filename.split('.');
-  return fileExtension[0];
+const getFileName = ({ link, file_name }: DataType) => {
+  const filename = link.split('/').pop();
+  const fileExtension = filename ? filename.split('.') : [file_name];
+  return file_name || fileExtension[0];
 };
 </script>
 
@@ -116,7 +113,7 @@ const getFileName = (url) => {
             <FileOutlined style="color: #dcdcdc; cursor: pointer" />
           </a>
 
-          <span class="item-title">{{ getFileName(item.link) }}</span>
+          <span class="item-title">{{ getFileName(item) }}</span>
         </AListItem>
       </template>
     </AList>

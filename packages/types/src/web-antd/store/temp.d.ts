@@ -1,5 +1,13 @@
+export type FileType =
+  | 'audio'
+  | 'document'
+  | 'image'
+  | 'template'
+  | 'text'
+  | 'video';
+
 export interface RawTemplate {
-  type: string;
+  type: FileType;
   text: string;
 }
 
@@ -37,7 +45,7 @@ export interface Attachment {
   file_id: string;
   file_path: string;
   file_name: string;
-  file_type: string;
+  file_type: FileType;
   file_size: number;
 }
 
@@ -56,11 +64,11 @@ export type TemplateOption = {
 };
 
 export type ImageTemplate = {
-  createTime: Date;
+  createTime: string;
   file_name: string;
   file_path: string;
   file_size: number;
-  file_type: string;
+  file_type: FileType;
   id: string;
   is_deleted: boolean;
   owner_id: string;
@@ -69,14 +77,33 @@ export type ImageTemplate = {
 };
 
 export type DocTemplate = {
-  createTime: Date;
+  createTime: string;
   file_name: string;
   file_path: string;
   file_size: number;
-  file_type: string;
+  file_type: FileType;
   id: string;
   is_deleted: boolean;
   owner_id: string;
   owner_type: string;
   storageType: string;
+};
+export type FileTemplateInfo<T extends FileType = 'document'> = {
+  createTime: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: T;
+  id: string;
+  is_deleted: boolean;
+  owner_id: string;
+  owner_type: string;
+  storageType: string;
+};
+
+export type IbraryFilesResponse = {
+  audio: FileTemplateInfo<'audio'>[];
+  document: FileTemplateInfo<'document'>[];
+  image: FileTemplateInfo<'image'>[];
+  video: FileTemplateInfo<'video'>[];
 };

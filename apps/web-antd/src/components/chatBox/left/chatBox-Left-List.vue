@@ -6,13 +6,13 @@ import { Space as ASpace } from 'ant-design-vue';
 
 import ChatBoxLeftItem from '#/components/chatBox/left/chatBox-Left-Item.vue';
 import { useChatStore, useCustomerStore } from '#/store';
+import type { AssignedCustomer } from '@vben/types';
 
-const props = defineProps({
-  assignedCustomersData: {
-    type: Array,
-    default: () => [],
-  },
-});
+interface Props {
+  assignedCustomersData: AssignedCustomer[];
+}
+
+const props = defineProps<Props>();
 const emits = defineEmits(['loadChatMessage']);
 
 const userData = ref(props.assignedCustomersData);
@@ -28,7 +28,7 @@ const assCount = ref(0);
 // const activeKey = ref('1');
 
 // 处理点击事件
-const handleItemClick = (id: number, phoneNumber: string) => {
+const handleItemClick = (id: string, phoneNumber: string) => {
   props.assignedCustomersData?.forEach((item) => {
     if (item.id === id) {
       chatStore.setCurrentUserInfo(item);
@@ -44,7 +44,7 @@ watch(
     if (newValue === '') {
       userData.value = props.assignedCustomersData;
     } else {
-      const list = [];
+      const list: AssignedCustomer[] = [];
       props.assignedCustomersData.forEach((item) => {
         if (
           item.name.toLowerCase().includes(newValue.toLowerCase()) ||

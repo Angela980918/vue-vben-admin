@@ -102,11 +102,15 @@ onBeforeMount(async () => {
   if (assignedCustomers.value.length === 0) {
     await loadCustomerList();
   } else {
-    chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
-    loadChatMessage(
-      assignedCustomers.value[0].phoneNumber,
-      assignedCustomers.value[0].id,
-    );
+    if (assignedCustomers.value[0]) {
+      chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
+      loadChatMessage(
+        assignedCustomers.value[0].phoneNumber,
+        assignedCustomers.value[0].id,
+      );
+    } else {
+      message.warn('尚未有客戶信息，請添加聯繫的客戶');
+    }
   }
 });
 
