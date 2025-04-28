@@ -17,16 +17,25 @@ import {
   Table as ATable,
   message,
 } from 'ant-design-vue';
-// import {useRouter} from "vue-router";
 import { marked } from 'marked';
-
 import { sendMessageApi } from '#/api';
-// import Confirm from "@/components/chatBox/content/message/Confirm.vue";
 import Confirm from '#/components/chatBox/content/message/Confirm.vue';
 import { useHandleSendMessage } from '#/hooks/handleSendMessage';
 import { useChatStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
-import type { SendMessageResponse } from '@vben/types';
+import type {
+  BodyComponent,
+  ChatMessage,
+  ComponentObject,
+  ComponentType,
+  FooterComponent,
+  HeaderComponent,
+  LowercaseComponentType,
+  MessageData,
+  Parameter,
+  RawTemplateList,
+  SendMessageResponse,
+} from '@vben/types';
 
 const props = defineProps({
   currentPhone: {
@@ -40,11 +49,18 @@ const userStore = useUserStore();
 const template = useTemplateStore();
 // const currentPhone = props.currentPhone === '' ? computed(() => chatStore.currentPhone) : ref(props.currentPhone);
 const currentPhone = ref(props.currentPhone);
-const containerTemp = ref({});
+
+type ContainerTempProps = {
+  body: BodyComponent;
+  footer: FooterComponent;
+  header: HeaderComponent;
+  template: {};
+};
+const containerTemp = ref<ContainerTempProps>();
 const selectedRow = ref<null | number>(1);
-const confirmRef = ref(null);
-const selectRecord = ref<null | { language: string; name: string }>(null);
-const selectName = ref(null);
+const confirmRef = ref<InstanceType<typeof Confirm> | null>(null);
+const selectRecord = ref<null | RawTemplateList>(null);
+const selectName = ref<string>('');
 const templateList = computed(() => template.getRawTemplateList);
 const jump = ref(false);
 // const router = useRouter();
@@ -57,13 +73,27 @@ watch(
 );
 
 // 预览模板处理
-const preViewTemp = (data) => {
+const preViewTemp = (data: RawTemplateList) => {
   if (!data || data.components === undefined) return;
   const components = data.components;
-  const template = {
-    body: undefined,
-    footer: undefined,
-    header: {},
+  const template: ContainerTempProps = {
+    body: {
+      type: 'BODY',
+      text: '',
+    },
+    header: {
+      type: 'HEADER',
+      format: 'TEXT',
+      text: '',
+      example: {
+        header_url: '',
+      },
+    },
+    footer: {
+      type: 'FOOTER',
+      text: '',
+    },
+    template: {},
   };
   components.forEach((item) => {
     switch (item.type) {
@@ -78,14 +108,21 @@ const preViewTemp = (data) => {
         break;
       }
       case 'HEADER': {
-        if (item.format === 'TEXT') {
+        if (
+          typeof item === 'object' &&
+          'format' in item &&
+          item.format === 'TEXT'
+        ) {
           template.header = item;
         } else {
-          let obj = {};
-          obj = {
+          const obj: HeaderComponent = {
             url: item.example.header_url[0],
             format: item.format,
             type: item.type,
+            example: {
+              header_url: '',
+            },
+            text: '',
           };
           template.header = obj;
         }
@@ -111,11 +148,15 @@ const setRowClassName = (record: any) => {
   return record.key === selectedRow.value ? 'table-striped' : '';
 };
 
-const confirm = (record) => {
+const confirm = (record: RawTemplateList) => {
   const { name } = record;
   selectName.value = name;
   selectRecord.value = record;
-  confirmRef.value.showModal();
+  if (confirmRef.value) {
+    confirmRef.value.showModal();
+  } else {
+    message.error('發送模板消息出錯');
+  }
 };
 
 // 分页配置
@@ -158,44 +199,65 @@ defineExpose({
 
 // 发送模板信息处理
 const sendTemplate = async () => {
+  if (!selectRecord.value) return message.warn('請選擇模板消息');
   const { name, language } = selectRecord.value;
-  //
-  const sendData: {
-    from: string;
-    template: { language: { code: any }; name: any };
-    to: string;
-    type: string;
-  } = {
+  if (!userStore.selectPhone)
+    return message.error('請選擇發送消息的商業手機號');
+
+  const sendData: MessageData = {
     type: 'template',
     template: {
       name,
       language: {
         code: language,
       },
+      components: [],
     },
     from: userStore.selectPhone,
     to: currentPhone.value.toString(),
+    parameters: [],
   };
 
   const msgContent = handleTemplateMsg(name, language);
-  for (const i in msgContent) {
+  for (const key in msgContent) {
+    const i = key as keyof typeof msgContent;
     const item = msgContent[i];
-    const obj = {};
-    obj.type = i;
+    if (!item) return message.error('請選擇模板消息');
+    const obj: ComponentObject = {
+      type: i as LowercaseComponentType,
+      parameters: [],
+    };
+    if (!item) return message.error('請選擇模板消息');
     if (i === 'header') {
-      if (item.format === 'TEXT') {
+      const headerItem = item as {
+        content?: string;
+        format?: ComponentType;
+      };
+      if ('format' in headerItem && headerItem.format === 'TEXT') {
         obj.parameters = [
-          { type: item.format.toLowerCase(), text: item.content },
+          {
+            type: headerItem.format.toLowerCase() as 'text',
+            text: headerItem.content || '',
+          },
         ];
       } else {
-        sendData.template.components = [];
-        obj.parameters = [{ type: item.format.toLowerCase() }];
-        const dynamicKey = `${obj.parameters[0].type}`;
-        const typeIndex = obj.parameters[0];
-        typeIndex[dynamicKey] = {
-          link: item.content,
-        };
-        sendData.template.components.push(obj);
+        obj.parameters = [
+          {
+            type:
+              headerItem.format &&
+              (headerItem.format.toLowerCase() as LowercaseComponentType),
+          },
+        ];
+        const dynamicKey: LowercaseComponentType = (obj.parameters[0] &&
+          `${obj.parameters[0].type}`) as LowercaseComponentType;
+        const typeIndex = obj.parameters[0] as Parameter | undefined;
+        if (typeIndex && dynamicKey in typeIndex) {
+          (typeIndex as Record<string, any>)[dynamicKey] = {
+            link: headerItem.content,
+          };
+        }
+        sendData?.template?.components &&
+          sendData.template.components.push(obj);
       }
     }
   }
@@ -204,13 +266,20 @@ const sendTemplate = async () => {
   const contactPhone = chatStore.currentPhone;
 
   if (sendData.to === contactPhone) {
-    const message = {
+    const message: ChatMessage = {
       direction: 'outbound',
       _id: resultObj.id,
       status: resultObj.status,
       type: resultObj.type,
       deliverTime: resultObj.createTime,
       content: msgContent,
+      from: userStore.selectPhone || '',
+      to: sendData.to,
+      wamid: resultObj.wamid || '',
+      __v: 0,
+      name: '',
+      color: '',
+      msgIndex: '',
     };
 
     if (
@@ -218,7 +287,7 @@ const sendTemplate = async () => {
       msgContent.header.format === 'DOCUMENT'
     ) {
       const url = msgContent.header.content;
-      const filename = url.split('/').pop();
+      const filename = (url && url.split('/').pop()) || 'file';
       const fileExtension = filename.split('.');
       message.fileExtension = fileExtension[1];
     }
@@ -228,24 +297,22 @@ const sendTemplate = async () => {
   message.success('發送成功');
   handleSubmit();
   useHandleSendMessage(resultObj);
-  // if(jump.value) {
-  //   router.push({
-  //     name: 'Chat',
-  //   });
-  // }
 };
 
 onMounted(() => {
-  if (templateList.value.length === 0) {
-    template.loadTemplates().then(() => {
-      preViewTemp(templateList.value[0]);
-    });
-  } else {
+  if (templateList.value.length > 0 && templateList.value[0]) {
     preViewTemp(templateList.value[0]);
+  } else {
+    // 沒有需要加載模板文件列表
+    template.loadTemplates().then(() => {
+      if (templateList.value.length > 0 && templateList.value[0]) {
+        preViewTemp(templateList.value[0]);
+      }
+    });
   }
 });
 
-function markedToHtml(markedValue) {
+function markedToHtml(markedValue: string) {
   return marked.parse(markedValue);
 }
 </script>
@@ -272,11 +339,14 @@ function markedToHtml(markedValue) {
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'action'">
-              <a @click="preViewTemp(record)">預覽</a>
+              <a @click="preViewTemp(record as RawTemplateList)">預覽</a>
               <ADivider type="vertical" />
-              <span>
-                <AButton @click="confirm(record)" type="primary">發送</AButton>
-              </span>
+              <AButton
+                @click="confirm(record as RawTemplateList)"
+                type="primary"
+              >
+                發送
+              </AButton>
             </template>
           </template>
         </ATable>
@@ -287,105 +357,109 @@ function markedToHtml(markedValue) {
             <div class="phoneCenter">
               <div class="arrow"></div>
               <div class="content">
-                <h6
-                  class="contentHeader"
-                  v-if="containerTemp.header.format === 'TEXT'"
-                >
-                  {{ containerTemp.header.text }}
-                </h6>
-                <div class="mediaCenter" v-else>
-                  <div v-if="containerTemp.header.format === 'IMAGE'">
-                    <AFlex
-                      v-if="containerTemp.header.url !== ''"
-                      justify="center"
-                      align="center"
-                      style="width: 100%; height: 130px"
-                    >
-                      <AImage
-                        height="100%"
-                        width="100%"
-                        :src="containerTemp.header.url"
-                      />
-                    </AFlex>
-                    <AFlex
-                      style="
-                        width: 100%;
-                        height: 130px;
-                        background: rgb(215 213 223);
-                      "
-                      v-else
-                      justify="center"
-                      align="center"
-                    >
-                      <FileImageOutlined style="font-size: 50px; color: #fff" />
-                    </AFlex>
-                  </div>
-                  <div v-else-if="containerTemp.header.format === 'VIDEO'">
-                    <AFlex
-                      v-if="containerTemp.header.url !== ''"
-                      justify="center"
-                      align="center"
-                      style="width: 100%; height: 130px"
-                    >
-                      <iframe
-                        :src="containerTemp.header.url"
-                        style="width: 100%; height: 100%"
-                      >
-                      </iframe>
-                    </AFlex>
-                    <AFlex
-                      style="
-                        width: 100%;
-                        height: 130px;
-                        background: rgb(215 213 223);
-                      "
-                      v-else
-                      justify="center"
-                      align="center"
-                    >
-                      <VideoCameraOutlined
-                        style="font-size: 50px; color: #fff"
-                      />
-                    </AFlex>
-                  </div>
-                  <div v-else-if="containerTemp.header.format === 'DOCUMENT'">
-                    <AFlex
-                      v-if="containerTemp.header.url !== ''"
-                      justify="center"
-                      align="center"
-                      style="width: 100%; height: 130px"
-                    >
-                      <iframe
-                        :src="containerTemp.header.url"
+                <template v-if="containerTemp">
+                  <h6
+                    class="contentHeader"
+                    v-if="containerTemp.header.format === 'TEXT'"
+                  >
+                    {{ containerTemp.header.text }}
+                  </h6>
+                  <div class="mediaCenter" v-else>
+                    <div v-if="containerTemp.header.format === 'IMAGE'">
+                      <AFlex
+                        v-if="containerTemp.header.url !== ''"
+                        justify="center"
+                        align="center"
                         style="width: 100%; height: 130px"
                       >
-                      </iframe>
-                    </AFlex>
-                    <AFlex
-                      style="
-                        width: 100%;
-                        height: 130px;
-                        background: rgb(215 213 223);
-                      "
-                      v-else
-                      justify="center"
-                      align="center"
-                    >
-                      <FilePdfOutlined style="font-size: 50px; color: #fff" />
-                    </AFlex>
+                        <AImage
+                          height="100%"
+                          width="100%"
+                          :src="containerTemp.header.url"
+                        />
+                      </AFlex>
+                      <AFlex
+                        style="
+                          width: 100%;
+                          height: 130px;
+                          background: rgb(215 213 223);
+                        "
+                        v-else
+                        justify="center"
+                        align="center"
+                      >
+                        <FileImageOutlined
+                          style="font-size: 50px; color: #fff"
+                        />
+                      </AFlex>
+                    </div>
+                    <div v-else-if="containerTemp.header.format === 'VIDEO'">
+                      <AFlex
+                        v-if="containerTemp.header.url !== ''"
+                        justify="center"
+                        align="center"
+                        style="width: 100%; height: 130px"
+                      >
+                        <iframe
+                          :src="containerTemp.header.url"
+                          style="width: 100%; height: 100%"
+                        >
+                        </iframe>
+                      </AFlex>
+                      <AFlex
+                        style="
+                          width: 100%;
+                          height: 130px;
+                          background: rgb(215 213 223);
+                        "
+                        v-else
+                        justify="center"
+                        align="center"
+                      >
+                        <VideoCameraOutlined
+                          style="font-size: 50px; color: #fff"
+                        />
+                      </AFlex>
+                    </div>
+                    <div v-else-if="containerTemp.header.format === 'DOCUMENT'">
+                      <AFlex
+                        v-if="containerTemp.header.url !== ''"
+                        justify="center"
+                        align="center"
+                        style="width: 100%; height: 130px"
+                      >
+                        <iframe
+                          :src="containerTemp.header.url"
+                          style="width: 100%; height: 130px"
+                        >
+                        </iframe>
+                      </AFlex>
+                      <AFlex
+                        style="
+                          width: 100%;
+                          height: 130px;
+                          background: rgb(215 213 223);
+                        "
+                        v-else
+                        justify="center"
+                        align="center"
+                      >
+                        <FilePdfOutlined style="font-size: 50px; color: #fff" />
+                      </AFlex>
+                    </div>
                   </div>
-                </div>
-                <!-- eslint-disable-next-line vue/no-v-html -->
-                <p
-                  class="contentBody"
-                  v-html="markedToHtml(containerTemp.body.text)"
-                ></p>
-                <p
-                  class="contentFooter"
-                  v-if="containerTemp.footer !== undefined"
-                >
-                  {{ containerTemp.footer.text }}
-                </p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <p
+                    class="contentBody"
+                    v-html="markedToHtml(containerTemp.body.text)"
+                  ></p>
+                  <p
+                    class="contentFooter"
+                    v-if="containerTemp.footer !== undefined"
+                  >
+                    {{ containerTemp.footer.text }}
+                  </p>
+                </template>
               </div>
             </div>
             <div class="phoneBottom"></div>

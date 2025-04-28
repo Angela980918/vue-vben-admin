@@ -8,10 +8,9 @@ import { LayoutSider as ALayoutSider, message } from 'ant-design-vue';
 import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
-import { useChatStore, useCustomerStore } from '#/store';
+import { useChatStore, useCustomerStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
 import type { WhatsAppInformationInfo } from '@vben/types';
-import { useUserStore } from '@vben/stores';
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
@@ -76,7 +75,6 @@ const loadMessageList = async () => {
 
   chatStore.setMessageList(res.messageList);
 };
-const userStore = useUserStore();
 // 选中的客户
 async function loadChatMessage(guestPhone: string, id: string) {
   if (chatStore.currentPhone !== guestPhone) {
@@ -84,20 +82,10 @@ async function loadChatMessage(guestPhone: string, id: string) {
     chatStore.setPage();
     chatStore.setCurrentChatId(id);
     chatStore.setCurrentPhone(guestPhone);
-    loadMessageList().then(() => {
-      // 设置当前账号下对话对应的电话号码
-      const currentOwnPhoneNumber = chatStore.chatMessages.find(
-        (chatmessage) => {
-          return chatmessage.direction === 'outbound';
-        },
-      )?.from;
-      if (currentOwnPhoneNumber) {
-        userStore.setSelectPhone(currentOwnPhoneNumber);
-      }
-    });
+    loadMessageList().then(() => {});
   }
 }
-
+const { getRawTemplateList, loadTemplates } = useTemplateStore();
 onBeforeMount(async () => {
   if (assignedCustomers.value.length === 0) {
     await loadCustomerList();
@@ -111,6 +99,9 @@ onBeforeMount(async () => {
     } else {
       message.warn('尚未有客戶信息，請添加聯繫的客戶');
     }
+  }
+  if (getRawTemplateList.length === 0) {
+    loadTemplates();
   }
 });
 

@@ -64,7 +64,6 @@ interface UserState {
   permissions: Permission[];
   roles: Role[];
   selectAccount: string;
-  selectPhone: string;
   status: StatusType;
   /**
    * 用户信息
@@ -134,9 +133,6 @@ export const useUserStore = defineStore('core-user', {
       this.selectAccount = wabaId;
     },
 
-    setSelectPhone(phone: string) {
-      this.selectPhone = phone;
-    },
     setUserInfo(userInfo: TemUserInfo) {
       // 设置用户信息
       this.userInfo = userInfo;
@@ -147,7 +143,6 @@ export const useUserStore = defineStore('core-user', {
       const { wabaAccount } = userInfo;
       if (wabaAccount[0]) {
         this.selectAccount = wabaAccount[0].wabaId;
-        this.selectPhone = wabaAccount[0].phoneNumber;
       }
     },
 
@@ -177,6 +172,14 @@ export const useUserStore = defineStore('core-user', {
         name: state.userProfile?.company_name || '尚未綁定公司',
       };
     },
+    selectPhone: (state) => {
+      // 获取当前用户选择的电话号码
+      const wabaId = state.currentWabaId || state.userProfile?.waba_account;
+      const phoneNumber = state.wabaAccounts.find(
+        (waba) => waba.waba_id === wabaId,
+      )?.phone_number;
+      return phoneNumber;
+    },
   },
   state: (): UserState => ({
     companies: [],
@@ -186,7 +189,6 @@ export const useUserStore = defineStore('core-user', {
     permissions: [],
     roles: [],
     selectAccount: '',
-    selectPhone: '',
     status: 'idle', // 默认状态是'idle'
     userInfo: null,
     userProfile: {

@@ -8,6 +8,7 @@ interface Props {
   userId?: string;
   companiesList?: Array<CompanyInfo>;
   defaultComapny: CompanyInfo;
+  phoneNumber?: string;
 }
 
 const { companiesList, defaultComapny } = defineProps<Props>();

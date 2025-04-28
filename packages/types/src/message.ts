@@ -1,10 +1,20 @@
+import type { LowercaseComponentType } from './web-antd';
+
+export type Parameter = {
+  text?: string;
+  type?: LowercaseComponentType;
+};
+export type ComponentObject = {
+  parameters: Parameter[];
+  type: LowercaseComponentType;
+};
 interface Template {
   name: string;
   language: {
     code: string;
   };
+  components?: ComponentObject[];
 }
-
 interface MessageData {
   from: string;
   to: string;
@@ -17,6 +27,7 @@ interface MessageData {
   filterBlocked?: boolean;
   enqueue?: boolean;
   template?: Template; // 使用具体的 Template 类型
+  parameters?: Parameter[];
 }
 
 export type { MessageData };

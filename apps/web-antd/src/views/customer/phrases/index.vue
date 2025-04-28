@@ -28,7 +28,7 @@ const templateStore = useTemplateStore();
 
 const size = ref<SelectProps['size']>('middle');
 const options = computed(() => templateStore.selectOptions);
-const selectValue = ref(options.value[0].value);
+const selectValue = ref(options.value[0] && options.value[0].value);
 
 // table
 interface DataItem {

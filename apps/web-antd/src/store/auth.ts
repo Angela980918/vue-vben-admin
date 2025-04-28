@@ -111,21 +111,22 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // await logoutApi();
       wsconnect.allDisContect();
-    } catch {
+      resetAllStores();
+      accessStore.setLoginExpired(false);
+      // 回登录页带上当前路由地址
+      await router.replace({
+        path: LOGIN_PATH,
+        query: redirect
+          ? {
+              redirect: encodeURIComponent(router.currentRoute.value.fullPath),
+            }
+          : undefined,
+      });
+    } catch (error) {
       // 不做任何处理
+      console.error('logout error', error);
+      window.location.href = LOGIN_PATH;
     }
-    resetAllStores();
-    accessStore.setLoginExpired(false);
-
-    // 回登录页带上当前路由地址
-    await router.replace({
-      path: LOGIN_PATH,
-      query: redirect
-        ? {
-            redirect: encodeURIComponent(router.currentRoute.value.fullPath),
-          }
-        : {},
-    });
   }
 
   async function fetchUserInfo(data?: object) {

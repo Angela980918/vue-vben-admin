@@ -3,7 +3,7 @@ import type { UploadFile } from 'ant-design-vue';
 
 import type { PropType } from 'vue';
 
-import { defineProps, nextTick, onBeforeUnmount, ref, shallowRef } from 'vue';
+import { nextTick, onBeforeUnmount, ref, shallowRef } from 'vue';
 
 import { SearchOutlined, UploadOutlined } from '@ant-design/icons-vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';

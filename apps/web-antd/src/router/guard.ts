@@ -52,8 +52,10 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
-    // 為避免出錯臨時保存之前的用戶信息
-    userStore.userInfo || (await authStore.fetchUserInfo());
+    // 為避免出錯臨時保存之前的用戶信息 (排除掉登錄的路由)
+    if (to.fullPath !== LOGIN_PATH) {
+      userStore.userInfo || (await authStore.fetchUserInfo());
+    }
 
     const tempStore = useTemplateStore();
     // const customerStore = useCustomerStore();

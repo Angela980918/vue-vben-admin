@@ -1,3 +1,5 @@
+import type { ComponentType } from '../store';
+
 import type MessageItem from '#/components/chatBox/content/message/MessageItem.vue';
 
 export interface Language {
@@ -8,10 +10,17 @@ export type Status = 'failed' | 'read' | 'sent';
 
 export type Type = 'audio' | 'document' | 'template' | 'text' | 'video';
 export interface Content {
-  body?: string;
+  body?: {
+    content?: string;
+    format?: BODY;
+  };
+  footer?: {
+    content?: string;
+    format?: ComponentType;
+  };
   header?: {
     content?: string;
-    format?: string;
+    format: ComponentType;
   };
   name?: string;
   language?: Language;
@@ -21,6 +30,7 @@ export interface Content {
   mime_type?: string;
   caption?: string;
   filename?: string;
+  text?: string;
 }
 
 export interface MessageItem {
@@ -31,7 +41,7 @@ export interface MessageItem {
   type: Type;
   content: Content;
   direction: Direction;
-  deliverTime: Date;
+  deliverTime: string;
   status: Status;
   __v: number;
 }
@@ -69,8 +79,8 @@ export interface SendMessageResponse {
   wabaId: string;
   type: Type;
   text: Content;
-  createTime: Date;
-  updateTime: Date;
+  createTime: string;
+  updateTime: string;
   totalPrice: number;
   pricingCategory: string;
   currency: string;

@@ -6,29 +6,55 @@ export type FileType =
   | 'text'
   | 'video';
 
-export interface RawTemplate {
-  type: FileType;
+// 组件类型枚举
+export type ComponentType = 'BODY' | 'DOCUMENT' | 'FOOTER' | 'HEADER' | 'TEXT';
+export type LowercaseComponentType = Lowercase<ComponentType>;
+
+// HEADER 格式
+export interface HeaderComponent {
+  type: 'HEADER';
+  format: 'TEXT'; // 如果未来有其他格式可以用联合类型扩展
+  text: string;
+  example: {
+    header_url: string | string[];
+  };
+  url?: string;
+}
+
+// FOOTER 组件
+export interface FooterComponent {
+  type: 'FOOTER';
   text: string;
 }
+
+// BODY 组件
+export interface BodyComponent {
+  type: 'BODY';
+  text: string; // 可包含 HTML 标签
+}
+
+// 所有组件的联合类型
+export type Component = BodyComponent | FooterComponent | HeaderComponent;
+export type LowercaseComponent = {
+  [T in Component['type']]: T extends Component['type']
+    ? Omit<Extract<Component, { type: T }>, 'type'> & { type: Lowercase<T> }
+    : never;
+}[Component['type']];
 
 export interface RawTemplateList {
   key: number;
   name: string;
   language: string;
-  components: RawTemplate[];
+  components: Component[];
 }
 
-export interface CustomRawTemplateComponent {
-  type: string;
-  text: string;
-}
 export interface RawTemplateData {
   officialTemplateId: string;
   wabaId: string;
   name: string;
   language: string;
   messageSendTtlSeconds: number;
-  components: CustomRawTemplateComponent[];
+  components: Component[];
   category: string;
   status: string;
   qualityRating: string;

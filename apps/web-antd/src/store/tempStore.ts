@@ -102,10 +102,6 @@ export const useTemplateStore = defineStore('template', () => {
     }
 
     await getTemplateList(page.value).then((result) => {
-      // if (
-      //   result.items.length > 0 &&
-      //   !isEqual(rawTempData.value, result.items)
-      // ) {
       if (msg) {
         message.success(msg);
       }

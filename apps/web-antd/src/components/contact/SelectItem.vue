@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumnsType } from 'ant-design-vue';
 
-import { defineEmits, ref } from 'vue';
+import { ref } from 'vue';
 
 import { FileOutlined } from '@ant-design/icons-vue';
 import {

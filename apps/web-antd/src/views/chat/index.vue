@@ -59,7 +59,7 @@ const companiesList = computed<CompanieslistProp>(() => {
   );
 });
 /**
- * 此處調整大小
+ * 此處調整大小,是否啟用存在白色
  */
 const CompanyCarouselHeight = 30;
 const isActivatePureWhite = true;

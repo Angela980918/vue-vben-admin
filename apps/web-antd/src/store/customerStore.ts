@@ -199,7 +199,7 @@ export const useCustomerStore = defineStore('customerStore', {
      */
     updateCustomerNewMessage(
       toPhoneNumber: string,
-      customerInfo: { message: string; time: Date },
+      customerInfo: { message: string; time: string },
     ) {
       this.assignedCustomers.forEach((item) => {
         if (item.phoneNumber === toPhoneNumber) {

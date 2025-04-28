@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, defineEmits, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { UserOutlined } from '@ant-design/icons-vue';
 import { Space as ASpace } from 'ant-design-vue';

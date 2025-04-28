@@ -10,7 +10,7 @@ export interface ChatMessage {
   type: Type;
   content: Content;
   direction: Direction;
-  deliverTime: Date;
+  deliverTime: string;
   status: Status;
   __v: number;
   name: string;

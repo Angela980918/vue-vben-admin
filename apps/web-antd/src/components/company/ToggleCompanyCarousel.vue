@@ -114,7 +114,7 @@ onBeforeMount(() => {
                 white-space: normal;
               "
             >
-              waba账号： {{ item.companyWabaInfo?.waba_id }}
+              手機號碼： {{ item.companyWabaInfo?.phone_number }}
             </div>
           </template>
 

@@ -9,6 +9,7 @@ export interface WabaAccount {
   created_by_id: string;
   updated_by_id: string;
   company_id: string;
+  phone_number: string;
 }
 
 export interface UserCompanyResponse {

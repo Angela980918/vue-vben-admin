@@ -146,7 +146,7 @@ const fileList = ref<UploadProps['fileList']>([]);
 const selectItemRef = ref(null);
 
 const options = computed(() => templateStore.selectOptions);
-const value1 = ref(options.value[0].value);
+const value1 = ref(options.value[0] && options.value[0].value);
 const isCheck = ref(false);
 
 // 上傳modal

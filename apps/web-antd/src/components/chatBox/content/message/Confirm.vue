@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { defineEmits, ref } from 'vue';
-
 import { Modal as AModal } from 'ant-design-vue';
+import { ref } from 'vue';
 
 const props = defineProps({
   msgName: {
