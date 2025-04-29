@@ -35,7 +35,7 @@ export const handleTemplateMsg = (name: string, language: string): Content => {
     (item) => item.name === name && item.language === language,
   );
   if (!result) {
-    message.warn('模板消息尚未加載');
+    message.loading('模板消息加載中...');
     throw new Error('模板消息尚未加載');
   }
   const { components } = result;

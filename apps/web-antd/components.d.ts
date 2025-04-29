@@ -8,15 +8,10 @@ export {};
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AButton: typeof import('ant-design-vue/es')['Button']
-    ACarousel: typeof import('ant-design-vue/es')['Carousel']
     ADivider: typeof import('ant-design-vue/es')['Divider']
-    ALayoutHeader: typeof import('ant-design-vue/es')['LayoutHeader']
     AModal: typeof import('ant-design-vue/es')['Modal']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASpace: typeof import('ant-design-vue/es')['Space']
-    ATabPane: typeof import('ant-design-vue/es')['TabPane']
-    ATabs: typeof import('ant-design-vue/es')['Tabs']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     ChatBoxLeft: typeof import('./src/components/chatBox/left/chatBox-Left.vue')['default']
     ChatBoxLeftItem: typeof import('./src/components/chatBox/left/chatBox-Left-Item.vue')['default']
@@ -43,8 +38,6 @@ declare module 'vue' {
     SelectInput: typeof import('./src/components/templates/SelectInput.vue')['default']
     SelectItem: typeof import('./src/components/contact/SelectItem.vue')['default']
     TemplateList: typeof import('./src/components/chatBox/content/message/TemplateList.vue')['default']
-    ToggleComapny: typeof import('./src/components/company/ToggleComapny.vue')['default']
-    ToggleComapnyCarousel: typeof import('./src/components/company/ToggleComapnyCarousel.vue')['default']
     ToggleCompanyCarousel: typeof import('./src/components/company/ToggleCompanyCarousel.vue')['default']
     ToggleUserCompany: typeof import('./src/components/company/ToggleUserCompany.vue')['default']
     WASelect: typeof import('./src/components/templates/WASelect.vue')['default']
