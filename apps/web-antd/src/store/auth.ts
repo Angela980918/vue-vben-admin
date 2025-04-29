@@ -125,7 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       // 不做任何处理
       console.error('logout error', error);
-      window.location.href = LOGIN_PATH;
+      // window.location.href = LOGIN_PATH;
     }
   }
 
