@@ -45,20 +45,24 @@ export const messageType = {
   arrow: 'delivered',
   accept: 'accepted',
 };
+export interface WSConfigItem {
+  id: string;
+  url: string;
+  isContect: boolean;
+}
 
-const wsConfigs = {
-  '1351808576147912': {
-    id: '1351808576147912',
-    url: 'https://whatsapi.jackycode.cn/socket.io',
-    isContect: false,
-  },
-};
+export type WSConfigMap = Record<string, WSConfigItem>;
+const wsConfigs: WSConfigMap = {};
 
 // @ts-ignore: ws链接
 export const wsconnect = {
-  createConnect: () => {
+  createConnect: (wabaId: string) => {
     // ws = await new WebSocket('ws://ws.jackycode.cn:4000', {});
-
+    wsConfigs[wabaId] = {
+      id: wabaId,
+      url: 'https://whatsapi.jackycode.cn/socket.io',
+      isContect: false,
+    };
     // wsconnect.resConnect('449711484896804');
     // 遍历配置并建立 WebSocket 连接
     Object.values(wsConfigs).forEach((config) => {

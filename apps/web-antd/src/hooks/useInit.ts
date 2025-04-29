@@ -4,6 +4,8 @@
 
 import { useCustomerStore, useTemplateStore } from '#/store';
 import { wsconnect } from '#/utils/wscontect';
+import { useUserStore } from '@vben/stores';
+import { message } from 'ant-design-vue';
 
 export async function useInitCommonDataBeforeEnterRoute() {
   const tempStore = useTemplateStore();
@@ -11,5 +13,11 @@ export async function useInitCommonDataBeforeEnterRoute() {
   await tempStore.loadTemplates();
   await customerStore.setContactList();
   await customerStore.setAssignedCustomers();
-  await wsconnect.createConnect();
+  const userStore = useUserStore();
+  const currentWabaId = userStore.currentWabaId;
+  if (currentWabaId) {
+    await wsconnect.createConnect(currentWabaId);
+  } else {
+    message.warning('请先选择一个waba账户');
+  }
 }
