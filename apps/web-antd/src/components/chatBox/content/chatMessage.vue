@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type {
   ChatMessage,
+  FileType,
   MessageData,
   SendMessageResponse,
 } from '@vben/types';
@@ -51,7 +52,7 @@ const currentPhone = computed(() => chatStore.currentPhone);
 
 const size = ref('large');
 const contentTxt = ref('');
-const docTxt = ref(null);
+const docTxt = ref<null | { file_name: string; file_path: string }>(null);
 const messageType = ref('text');
 
 const quickRef = ref(null);
@@ -71,32 +72,59 @@ const uploadDoc = () => {
 const sendDocMessage = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = target.files;
-  let type = files[0].type.split('/')[0];
+  if (!files || files.length === 0) {
+    message.error('請選擇文件');
+    return;
+  }
+  let type: FileType;
+  const fileType = files[0] && files[0].type.split('/')[0];
+  switch (fileType) {
+    case 'application': {
+      type = 'document';
+      break;
+    }
+    case 'audio': {
+      type = 'audio';
+      break;
+    }
+    case 'document': {
+      type = 'document';
+      break;
+    }
+    case 'image': {
+      type = 'image';
+      break;
+    }
+    case 'video': {
+      type = 'video';
+      break;
+    }
+    default: {
+      message.error('不支持的文件类型');
+      return;
+    }
+  }
   const fileContent = files[0];
-  // console.log("fileContent",fileContent)
+  if (!fileContent) {
+    message.error('文件内容为空');
+    return;
+  }
   if (fileContent.size > 100 * 1024 * 1024) {
-    // console.log("fileContent",fileContent)
     message.error('文件大小应小于100mb');
     return;
   }
 
-  if (type === 'application') {
-    type = 'document';
-  }
-  // console.log("filesfilesfiles",files)
-  if (files && files.length > 0) {
-    const response = await uploadMaterialApi(fileContent!, 'room', type!, {
-      roomId: chatStore.currentChatId.toString(),
-    }); // 上传文件
+  const response = await uploadMaterialApi(fileContent, 'room', type, {
+    roomId: chatStore.currentChatId.toString(),
+  }); // 上传文件
 
-    docTxt.value = {
-      file_path: `https://cos.jackycode.cn/${response.file_path}`,
-      file_name: response.file_name,
-    };
+  docTxt.value = {
+    file_path: `https://cos.jackycode.cn/${response.file_path}`,
+    file_name: response.file_name,
+  };
 
-    messageType.value = type;
-    // sendMessage(type)
-  }
+  messageType.value = type;
+  // sendMessage(type)
 };
 
 // function getFileName() {

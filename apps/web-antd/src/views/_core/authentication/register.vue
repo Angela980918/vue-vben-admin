@@ -54,7 +54,10 @@ const formSchema = computed((): VbenFormSchema[] => {
           strengthText: () => $t('authentication.passwordStrength'),
         };
       },
-      rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
+      rules: z
+        .string()
+        .min(10, { message: $t('authentication.passwordTip') })
+        .max(20, { message: $t('authentication.passwordTip') }),
     },
     {
       component: 'VbenInputPassword',
@@ -66,7 +69,8 @@ const formSchema = computed((): VbenFormSchema[] => {
           const { password } = values;
           return z
             .string({ required_error: $t('authentication.passwordTip') })
-            .min(1, { message: $t('authentication.passwordTip') })
+            .min(10, { message: $t('authentication.passwordTip') })
+            .max(20, { message: $t('authentication.passwordTip') })
             .refine((value) => value === password, {
               message: $t('authentication.confirmPasswordTip'),
             });

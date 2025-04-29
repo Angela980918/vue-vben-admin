@@ -1,5 +1,5 @@
 import { wcloudRequestClient } from '#/api/wrequest';
-import type { LibraryFilesParams } from '@vben/types';
+import type { FileCategory, LibraryFilesParams, UploadType } from '@vben/types';
 
 // export async function uploadFile(file: File) {
 //   const uploadData = new FormData();
@@ -18,8 +18,8 @@ import type { LibraryFilesParams } from '@vben/types';
  */
 export async function uploadMaterialApi(
   file: File,
-  uploadType: string,
-  category: string,
+  uploadType: UploadType,
+  category: FileCategory,
   options: {
     roomId?: string;
     userId?: string;

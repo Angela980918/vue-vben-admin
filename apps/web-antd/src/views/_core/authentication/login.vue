@@ -30,7 +30,10 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'password',
       label: $t('authentication.password'),
-      rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
+      rules: z
+        .string()
+        .min(10, { message: $t('authentication.passwordTip') })
+        .max(20, { message: $t('authentication.passwordTip') }),
     },
     {
       component: markRaw(SliderCaptcha),
