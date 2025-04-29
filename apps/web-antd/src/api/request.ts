@@ -66,7 +66,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       const accessStore = useAccessStore();
       const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
-      config.headers['X-API-Key'] = userStore.currentApiKey; // 从 store 获取动态 key
+      config.headers['X-API-Key'] = userStore.yCloudAPIKey; // 从 store 获取动态 key
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
     },

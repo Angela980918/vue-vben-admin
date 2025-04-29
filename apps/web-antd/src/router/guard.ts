@@ -6,7 +6,7 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import { useAuthStore, useTemplateStore } from '#/store';
+import { useTemplateStore } from '#/store';
 
 import { generateAccess } from './access';
 import { useGetApiKey } from '#/hooks/useGetApiKey';
@@ -50,21 +50,8 @@ function setupAccessGuard(router: Router) {
   router.beforeEach(async (to, from) => {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
-    const authStore = useAuthStore();
-
-    // 為避免出錯臨時保存之前的用戶信息 (排除掉登錄的路由)
-    if (to.fullPath !== LOGIN_PATH) {
-      userStore.userInfo || (await authStore.fetchUserInfo());
-    }
 
     const tempStore = useTemplateStore();
-    // const customerStore = useCustomerStore();
-    // const chatStore = useChatStore();
-    // console.log('state:', to.);
-    // 如果跳轉的是Chat
-    // if(to.name === 'ChatPage' && to.query?.userPhone !== undefined) {
-    //   chatStore.changeChatByPhone(to.query?.userPhone)
-    // }
 
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {
@@ -133,7 +120,9 @@ function setupAccessGuard(router: Router) {
       await tempStore.loadQuickMsg(userStore.currentWabaId);
 
     if (!userStore.yCloudAPIKey || userStore.yCloudAPIKey === '') {
-      await useGetApiKey(userStore.currentWabaId || '');
+      await useGetApiKey(
+        userStore.currentWabaId || userStore.userProfile?.waba_account,
+      );
     }
     // await tempStore.loadTemplates();
     // await customerStore.setContactList();

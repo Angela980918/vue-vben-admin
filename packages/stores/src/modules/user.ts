@@ -99,6 +99,11 @@ export const useUserStore = defineStore('core-user', {
         this.wabaAccounts = companys.flatMap(
           (company) => company.waba_accounts,
         );
+
+        // 如果當前沒有默認的wabaid 則設置為第一個
+        if (!this.currentWabaId && this.wabaAccounts[0]) {
+          this.currentWabaId = this.wabaAccounts[0].waba_id;
+        }
         return companys;
       }
       return [];

@@ -154,7 +154,7 @@ watch(
 // 賬號選擇
 const allAccounts = ref(
   TempStore.selectOptions.filter(
-    (item) => item.value !== UserStore.userInfo.id,
+    (item) => item.value !== UserStore.userProfile?.waba_account,
   ),
 );
 const selectAccount = ref(TempStore.createTempAccount);

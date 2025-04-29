@@ -76,7 +76,7 @@ const UserStore = useUserStore();
 // 所有賬號
 const allAccounts = ref(
   TempStore.selectOptions.filter(
-    (item) => item.value !== UserStore.userInfo.id,
+    (item) => item.value !== UserStore.userProfile?.waba_account,
   ),
 );
 

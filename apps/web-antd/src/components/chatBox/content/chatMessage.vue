@@ -172,7 +172,7 @@ function handleSubmit() {
 
 const userStore = useUserStore();
 
-const wabaId = ref(userStore.selectAccount);
+const wabaId = ref(userStore.currentWabaId);
 function showQuickMsg() {
   nextTick(() => quickRef.value!.setOpen(wabaId.value));
 }

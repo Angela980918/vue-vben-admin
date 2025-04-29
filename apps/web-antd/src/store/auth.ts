@@ -21,12 +21,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginLoading = ref(false);
 
-  const MockParams = {
-    account: 'admin',
-    password: 'admin168',
-    role: 'super',
-  };
-
   /**
    * 异步处理登录操作
    * Asynchronously handle the login process
@@ -60,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessStore.setRefreshToken(refreshToken);
 
         // 获取用户信息并存储到 accessStore 中
-        await fetchUserInfo(MockParams);
+        // await fetchUserInfo(MockParams);
 
         const userData = await userStore.getUserInfo();
 
@@ -78,7 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
         // 設置默認的apiKey
         userStore.setYcouldApiKey(currentApiKey || '');
         accessStore.setYCloudApiKey(currentApiKey || ''); */
-        await useGetApiKey(wabaId || '');
+        await useGetApiKey(wabaId);
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
