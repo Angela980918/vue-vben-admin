@@ -5,6 +5,7 @@ import type { Rule } from 'ant-design-vue/es/form';
 import type { UnwrapRef } from 'vue';
 
 import {
+  computed,
   nextTick,
   onBeforeMount,
   onUnmounted,
@@ -13,8 +14,6 @@ import {
   toRaw,
   watch,
 } from 'vue';
-
-import { useUserStore } from '@vben/stores';
 
 import {
   FileImageOutlined,
@@ -71,14 +70,9 @@ const isUpdated = ref(false); // 可更新状态
 const isPending = ref(false); // 审核状态
 const isDisable = ref(false);
 const TempStore = useTemplateStore();
-const UserStore = useUserStore();
 
 // 所有賬號
-const allAccounts = ref(
-  TempStore.selectOptions.filter(
-    (item) => item.value !== UserStore.userProfile?.waba_account,
-  ),
-);
+const allAccounts = computed(() => TempStore.selectOptions);
 
 // 分類
 const allCategory = ref<SelectProps['options']>(categoryMap);

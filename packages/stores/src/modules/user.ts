@@ -52,7 +52,6 @@ interface UserState {
    * 用户公司列表
    */
   companies: UserCompanyResponse[];
-  currentApiKey: string;
   /**
    * 当前用户选择的公司ID
    */
@@ -144,7 +143,6 @@ export const useUserStore = defineStore('core-user', {
       // 设置角色信息
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
-      this.currentApiKey = userInfo?.currentApiKey ?? '';
       const { wabaAccount } = userInfo;
       if (wabaAccount[0]) {
         this.selectAccount = wabaAccount[0].wabaId;
@@ -165,7 +163,6 @@ export const useUserStore = defineStore('core-user', {
     getCurrentWabaInfo: (state) => {
       const wabaID: string | undefined =
         state.currentWabaId || state.userProfile?.waba_account;
-
       const waba = state.wabaAccounts.find((waba) => waba.waba_id === wabaID);
       state.yCloudAPIKey = waba?.api_key;
       return waba;
@@ -188,7 +185,6 @@ export const useUserStore = defineStore('core-user', {
   },
   state: (): UserState => ({
     companies: [],
-    currentApiKey: '',
     currentCompanyId: '',
     currentWabaId: '',
     permissions: [],

@@ -70,7 +70,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       const accessStore = useAccessStore();
       const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
-      config.headers['X-API-Key'] = userStore.yCloudAPIKey;
+      config.headers['X-API-Key'] = userStore.getCurrentWabaInfo?.api_key;
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
     },

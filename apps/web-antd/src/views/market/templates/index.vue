@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import type { SelectProps } from 'ant-design-vue';
 
-import type { TemplateData } from '@vben/types';
-
-import type { MapValue } from '#/map';
+import type { RawTemplateData, RawTemplateList } from '@vben/types';
 
 import { computed, onBeforeMount, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -61,7 +59,7 @@ const selectStatus = ref([]);
 const tempStatus = ref<SelectProps['options']>(statusMap);
 
 // 表格显示数据
-const filterData = ref<TemplateData[]>([]);
+const filterData = ref<RawTemplateList[]>([]);
 
 // icon、顔色變化
 const getTagIcon = (status: Status) => {
@@ -118,11 +116,9 @@ const columns = [
 
 // 模板数据
 const TempStore = useTemplateStore();
-const UserStore = useUserStore();
+
 // 原始数据
-const data = computed(() => {
-  return TempStore.tempData as TemplateData[];
-});
+const data = ref<RawTemplateData[]>([]);
 
 // 数据过滤
 const dataFilter = () => {
@@ -152,11 +148,7 @@ watch(
 );
 
 // 賬號選擇
-const allAccounts = ref(
-  TempStore.selectOptions.filter(
-    (item) => item.value !== UserStore.userProfile?.waba_account,
-  ),
-);
+const allAccounts = computed(() => TempStore.selectOptions);
 const selectAccount = ref(TempStore.createTempAccount);
 
 // 新建模板
@@ -203,6 +195,7 @@ const isButtonDisabled = computed(() => state.selectedRowKeys.length > 0);
 const onSelectChange = (selectedRowKeys: Key[]) => {
   state.selectedRowKeys = selectedRowKeys;
 };
+type MapValue<T extends any[]> = T[number]['value'];
 
 // label映射
 const getStatusLabel = (status: MapValue<typeof statusMap>) =>
@@ -214,14 +207,6 @@ const getLangLabel = (lang: MapValue<typeof languageMap>) =>
 const getErrorLabel = (error: MapValue<typeof errorMap>) =>
   getLabel(errorMap, error);
 
-// 預覽模板 | 路由跳转
-// const onPreview = (index: number) => {
-//   TempStore.setTemplateData(data.value[index]);
-//   router.push({
-//     name: 'MarketCreateTemplate',
-//   });
-// };
-// 编辑模板 | 路由跳转
 const onEdit = (index: number) => {
   TempStore.setTemplateData(data.value[index]);
   router.push({
@@ -236,13 +221,14 @@ const updateSelection = (value, allItems, selectArray) => {
   selectArray.value = allItems.filter((item) => value.includes(item.value));
   dataFilter();
 };
-
+const userStore = useUserStore();
 // 筛选
 const accountChange = (value: string) => {
-  // eslint-disable-next-line no-console
-  console.log('accountChange', value);
-  TempStore.createTempAccount = value;
-  // updateSelection(value, allAccounts.value, selectAccount);
+  // console.log('accountChange', value);
+  userStore.setCurrentWabaId(value);
+  TempStore.loadTemplates().then(() => {
+    message.success('刷新成功');
+  });
 };
 const nameChange = (value: string) => {
   searchContents.value = value;
