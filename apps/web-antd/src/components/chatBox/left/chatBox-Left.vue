@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { computed, onBeforeMount } from 'vue';
+import { computed, onBeforeMount, watch } from 'vue';
 
 import { LayoutSider as ALayoutSider, message } from 'ant-design-vue';
 
@@ -11,6 +11,11 @@ import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue
 import { useChatStore, useCustomerStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
 import type { WhatsAppInformationInfo } from '@vben/types';
+import ChatBoxLeftSkeleton from './chatBox-Left-Skeleton .vue';
+
+const { isShow = true } = defineProps<{
+  isShow?: Boolean;
+}>();
 
 // 获取 userStore 和 chatStore
 const customerStore = useCustomerStore();
@@ -86,7 +91,8 @@ async function loadChatMessage(guestPhone: string, id: string) {
   }
 }
 const { getRawTemplateList, loadTemplates } = useTemplateStore();
-onBeforeMount(async () => {
+
+async function initial() {
   if (assignedCustomers.value.length === 0) {
     await loadCustomerList();
   } else {
@@ -103,6 +109,9 @@ onBeforeMount(async () => {
   if (getRawTemplateList.length === 0) {
     loadTemplates();
   }
+}
+onBeforeMount(async () => {
+  initial();
 });
 
 const siderStyle: CSSProperties = {
@@ -114,6 +123,24 @@ const siderStyle: CSSProperties = {
   overflowY: 'auto',
   backgroundColor: 'transparent',
 };
+
+// 監聽是否顯示 如果是從false變為true 則重新加載 但是初始的時候不需要加載
+watch(
+  () => isShow,
+  (newValue) => {
+    if (newValue) {
+      if (assignedCustomers.value[0]) {
+        chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
+        loadChatMessage(
+          assignedCustomers.value[0].phoneNumber,
+          assignedCustomers.value[0].id,
+        );
+      } else {
+        message.warn('尚未有客戶信息，請添加聯繫的客戶');
+      }
+    }
+  },
+);
 </script>
 
 <template>
@@ -123,9 +150,12 @@ const siderStyle: CSSProperties = {
 
     <!--  分配列表 :unassignedCustomersData="unassignedCustomers" -->
     <ChatBoxLeftList
+      v-if="isShow"
       :assigned-customers-data="assignedCustomers"
       @load-chat-message="loadChatMessage"
     />
+    <!--  骨架屏  -->
+    <ChatBoxLeftSkeleton v-else />
   </ALayoutSider>
 </template>
 

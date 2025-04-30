@@ -13,13 +13,14 @@ import {
   message,
 } from 'ant-design-vue';
 
-import ChatRoom from '#/components/chatBox/content/chatRoom.vue';
 import ChatBoxLeft from '#/components/chatBox/left/chatBox-Left.vue';
 import ChatBoxRight from '#/components/chatBox/right/chatBox-right.vue';
 import { useChatStore } from '#/store';
 import ToggleCompanyCarousel from '#/components/company/ToggleCompanyCarousel.vue';
 import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
 import { $t } from '@vben/locales';
+import ChatRoom from '#/components/chatBox/content/chatRoom.vue';
+import ChatroomSkeleton from '#/components/skeleton/chatroomSkeleton.vue';
 
 const chatStore = useChatStore();
 
@@ -63,6 +64,11 @@ const companiesList = computed<CompanieslistProp>(() => {
   );
 });
 
+/**
+ * 是否顯示聊天室
+ */
+const isShowChatRoom = ref(true);
+
 const toggleCompanyCallback: toggleCompanyCallbackProp = async (
   currentIndex: number,
 ) => {
@@ -79,6 +85,7 @@ const toggleCompanyCallback: toggleCompanyCallbackProp = async (
       key: 'switchCompany',
       duration: 0, // 不自动关闭
     });
+    isShowChatRoom.value = false; // 切換公司后，隱藏聊天室
     // 重新獲取全部的初始數據
     try {
       await useInitCommonDataBeforeEnterRoute();
@@ -89,6 +96,9 @@ const toggleCompanyCallback: toggleCompanyCallbackProp = async (
         }),
         key: 'switchCompany',
       });
+
+      isShowChatRoom.value = true; // 切換公司后，顯示聊天室
+      // 顯示蒙版
     } catch (error) {
       // 出错时关闭提示，并给出错误信息
       message.error({
@@ -101,7 +111,7 @@ const toggleCompanyCallback: toggleCompanyCallbackProp = async (
 };
 
 /**
- * 此處調整大小,是否啟用存在白色
+ * 此處調整大小,是否啟用純白色
  */
 const CompanyCarouselHeight = 30;
 const isActivatePureWhite = true;
@@ -119,10 +129,7 @@ const isActivatePureWhite = true;
       />
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>
-          <ChatBoxLeft
-            :style="`display: flex; flex-direction: column;
-          height: calc(100vh - 134.1px - ${CompanyCarouselHeight}px);`"
-          />
+          <ChatBoxLeft :is-show="isShowChatRoom" />
           <ADivider
             type="vertical"
             :style="`height: calc(100vh - 134.1px - ${CompanyCarouselHeight}px); margin: unset`"
@@ -130,7 +137,10 @@ const isActivatePureWhite = true;
           <ALayout>
             <!--            <ALayoutContent style="text-align: center; min-height: 600px; line-height: 120px; color: #000">-->
             <ALayoutContent :style="contentStyle">
-              <ChatRoom @set-show-right="setShowRight" />
+              <ChatRoom v-if="isShowChatRoom" @set-show-right="setShowRight" />
+              <template v-else>
+                <ChatroomSkeleton />
+              </template>
             </ALayoutContent>
             <ALayoutSider
               v-if="showRight"

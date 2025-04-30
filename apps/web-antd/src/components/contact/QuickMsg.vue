@@ -145,7 +145,14 @@ const fileList = ref<UploadProps['fileList']>([]);
 // 選擇上傳庫
 const selectItemRef = ref(null);
 
-const options = computed(() => templateStore.selectOptions);
+/**
+ *賬號列表選擇
+ */
+const options = computed(() =>
+  templateStore.selectOptions.filter(
+    (item) => item.value === userStore.currentWabaId,
+  ),
+);
 const value1 = ref(options.value[0] && options.value[0].value);
 const isCheck = ref(false);
 
@@ -368,18 +375,23 @@ defineExpose({
       :width="1000"
     >
       <!--                   选择公共库还是个人账号 -->
-      <div
-        v-show="showQuickList"
-        style="display: flex; flex-direction: column; padding: 10px"
-      >
-        <span style="font-size: 18px">賬號</span>
+      <div v-show="showQuickList" class="current-info">
         <div style="max-width: 400px; margin-top: 10px">
-          <ASelect
-            v-model:value="value1"
-            style="width: 200px"
-            :options="options"
-            @change="loadAccountQuickMsg"
-          />
+          <h2>
+            <div class="accont-info">
+              <span class="accont-info-side">當前賬號:</span>
+              <span v-if="options && options.length === 1">{{
+                options[0] && options[0].label
+              }}</span>
+              <ASelect
+                v-else
+                v-model:value="value1"
+                style="width: 200px"
+                :options="options"
+                @change="loadAccountQuickMsg"
+              />
+            </div>
+          </h2>
         </div>
       </div>
 
@@ -795,5 +807,24 @@ defineExpose({
 
 .ant-table-striped :deep(.table-striped) td {
   background-color: #e8e8e8;
+}
+
+/* 快捷回復-頂部-賬號 */
+.current-info {
+  display: flex;
+  font-size: 18px;
+
+  /* 副標題顏色 */
+  color: #1c5563;
+
+  .accont-info {
+    color: #1890ff;
+  }
+
+  .accont-info-side {
+    padding-right: 10px;
+    font-weight: 600;
+    color: #1c5563;
+  }
 }
 </style>

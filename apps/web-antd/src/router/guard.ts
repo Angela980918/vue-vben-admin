@@ -6,7 +6,6 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
 import { accessRoutes, coreRouteNames } from '#/router/routes';
-import { useTemplateStore } from '#/store';
 
 import { generateAccess } from './access';
 import { useGetApiKey } from '#/hooks/useGetApiKey';
@@ -51,7 +50,7 @@ function setupAccessGuard(router: Router) {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
 
-    const tempStore = useTemplateStore();
+    // const tempStore = useTemplateStore();
 
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {
@@ -115,9 +114,9 @@ function setupAccessGuard(router: Router) {
       routes: accessRoutes,
     });
 
-    // 讀取數據
-    if (userStore.currentWabaId)
-      await tempStore.loadQuickMsg(userStore.currentWabaId);
+    // 讀取數據 (初始-加載快捷消息)
+    /*    if (userStore.currentWabaId)
+      await tempStore.loadQuickMsg(userStore.currentWabaId); */
 
     if (!userStore.yCloudAPIKey || userStore.yCloudAPIKey === '') {
       await useGetApiKey(
