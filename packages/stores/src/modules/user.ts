@@ -53,13 +53,13 @@ interface UserState {
    */
   companies: UserCompanyResponse[];
   /**
-   * 当前用户选择的公司ID
-   */
-  currentCompanyId?: string;
-  /**
    * 当前用户选择的waba账户ID
    */
   currentWabaId?: string;
+  /**
+   * 用户默認选择的公司ID
+   */
+  defaultCompanyId?: string;
   permissions: Permission[];
   roles: Role[];
   selectAccount: string;
@@ -120,7 +120,7 @@ export const useUserStore = defineStore('core-user', {
         this.userProfile = userInfo;
         this.permissions = permissions;
         this.roles = roles;
-        this.currentCompanyId = userInfo.company_id;
+        this.defaultCompanyId = userInfo.company_id;
         this.currentWabaId = userInfo.waba_account;
         return data;
       } catch {
@@ -157,6 +157,13 @@ export const useUserStore = defineStore('core-user', {
     },
   },
   getters: {
+    getCurrentCompanyId: (state) => {
+      return (
+        state.wabaAccounts.find((waba) => waba.waba_id === state.currentWabaId)
+          ?.company_id || state.defaultCompanyId
+      );
+    },
+
     /**
      * 获取当前用户选择的waba账户信息
      */
@@ -167,7 +174,6 @@ export const useUserStore = defineStore('core-user', {
       state.yCloudAPIKey = waba?.api_key;
       return waba;
     },
-
     getDefaultCompanyInfo: (state) => {
       return {
         companyId: state.userProfile?.company_id,
@@ -185,8 +191,8 @@ export const useUserStore = defineStore('core-user', {
   },
   state: (): UserState => ({
     companies: [],
-    currentCompanyId: '',
     currentWabaId: '',
+    defaultCompanyId: '',
     permissions: [],
     roles: [],
     selectAccount: '',

@@ -56,15 +56,24 @@ const wsConfigs: WSConfigMap = {};
 
 // @ts-ignore: ws链接
 export const wsconnect = {
-  createConnect: (wabaId: string) => {
-    // ws = await new WebSocket('ws://ws.jackycode.cn:4000', {});
-    wsConfigs[wabaId] = {
-      id: wabaId,
-      url: 'https://whatsapi.jackycode.cn/socket.io',
-      isContect: false,
-    };
-    // wsconnect.resConnect('449711484896804');
-    // 遍历配置并建立 WebSocket 连接
+  createConnect: (wabaId: string[]) => {
+    //  wsConfigs[wabaId] = {
+    //    id: wabaId,
+    //    url: 'https://whatsapi.jackycode.cn/socket.io',
+    //    isContect: false,
+    //  };
+
+    // 遍歷添加配置
+    wabaId.forEach((id) => {
+      if (!wsConfigs[id]) {
+        wsConfigs[id] = {
+          id,
+          url: 'https://whatsapi.jackycode.cn/socket.io',
+          isContect: false,
+        };
+      }
+    });
+
     Object.values(wsConfigs).forEach((config) => {
       wsconnect.resConnect(config.id);
     });
@@ -98,7 +107,7 @@ export const wsconnect = {
     let connectWS;
 
     if (!config.isContect) {
-      // console.log("重連開始")
+      // console.log('重連開始');
       connectWS = await io(config.url, {
         query: {
           id: config.id,

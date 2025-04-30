@@ -14,9 +14,10 @@ export async function useInitCommonDataBeforeEnterRoute() {
   await customerStore.setContactList();
   await customerStore.setAssignedCustomers();
   const userStore = useUserStore();
-  const currentWabaId = userStore.currentWabaId;
-  if (currentWabaId) {
-    await wsconnect.createConnect(currentWabaId);
+  // 获取用户的waba账户列表
+  const currentWabaIds = userStore.wabaAccounts.map((item) => item.waba_id);
+  if (currentWabaIds) {
+    await wsconnect.createConnect(currentWabaIds);
   } else {
     message.warning('请先选择一个waba账户');
   }

@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import type { ToggleCompanyProps } from '@vben/types';
-import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import StringToColor from 'string-to-color';
-import { useUserStore } from '@vben/stores';
-import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
+import type { SelectProps } from 'ant-design-vue';
 
 interface Props {
   companiesList: ToggleCompanyProps;
@@ -13,12 +12,17 @@ interface Props {
    * 是否啟用頂部tag標籤是純白背景，默認為否，默認是根據ID生成特殊的背景顏色
    */
   activatePureWhite?: boolean;
+  onToggleCompany?: (currentIndex: number) => void;
+  defaultCompanyId?: string;
 }
 
 const {
   companiesList,
   height,
   activatePureWhite = false,
+  onToggleCompany,
+
+  defaultCompanyId,
 } = defineProps<Props>();
 const activeIndex = ref(0);
 const listRef = ref<HTMLDivElement | null>(null);
@@ -30,8 +34,7 @@ const coloredCompanies = computed(() =>
     color: StringToColor(company.companyName),
   })),
 );
-
-watch(activeIndex, async () => {
+watch(activeIndex, async (newValue) => {
   await nextTick();
   const listEl = listRef.value;
   if (listEl) {
@@ -44,34 +47,22 @@ watch(activeIndex, async () => {
       });
     }
   }
+  onToggleCompany && onToggleCompany(newValue);
 });
-const userStore = useUserStore();
+
 /**
  * 點擊事件切換臨時會話的wabaId和apiKey
  */
 async function changeComapny(event: Event, index: number) {
   activeIndex.value = index;
-  // 獲取當前選擇公司的id
-  const wabaInfo = coloredCompanies.value[index]?.companyWabaInfo;
-
-  // 獲取公司的waba賬號優選選擇第一個
-  if (wabaInfo) {
-    // 設置新的wabaid和apiKey
-    userStore.setCurrentWabaId(wabaInfo.waba_id);
-    userStore.setYcouldApiKey(wabaInfo.api_key);
-
-    // 重新獲取全部的初始數據
-    await useInitCommonDataBeforeEnterRoute();
-  }
 }
 
-onBeforeMount(() => {
-  // 获取当前仓库选择的公司
-  const currentCompanyId = userStore.currentCompanyId;
-  if (currentCompanyId) {
+onMounted(() => {
+  if (defaultCompanyId) {
     const index = companiesList.findIndex(
-      (company) => company.companyId === currentCompanyId,
+      (company) => company.companyId === defaultCompanyId,
     );
+
     if (index !== -1) {
       activeIndex.value = index;
     }
@@ -86,6 +77,25 @@ onBeforeMount(() => {
     width: `${height ?? 30}px`,
   };
 });
+
+/**
+ * 左側選擇框
+ */
+const leftOptions = ref<SelectProps['options']>(
+  companiesList.map((item) => ({
+    label: item.companyName,
+    value: item.companyId,
+  })),
+);
+
+const handleChange = (value: string) => {
+  const index = companiesList.findIndex(
+    (company) => company.companyId === value,
+  );
+  if (index !== -1) {
+    activeIndex.value = index;
+  }
+};
 </script>
 <template>
   <div class="carousel-horizontal" :style="{ height: elementStyle.height }">
@@ -94,6 +104,19 @@ onBeforeMount(() => {
       ref="listRef"
       :style="{ height: elementStyle.height }"
     >
+      <a-select
+        :value="companiesList[activeIndex]?.companyId"
+        class="my-select"
+        @change="handleChange"
+      >
+        <a-select-option
+          v-for="item in leftOptions"
+          :key="item.value"
+          :value="item.value"
+        >
+          {{ item.label }}
+        </a-select-option>
+      </a-select>
       <div
         v-for="(item, index) in coloredCompanies"
         :key="item.companyId"
@@ -184,6 +207,27 @@ onBeforeMount(() => {
       );
     filter: blur(50px);
     background-blend-mode: normal, normal, darken, normal, normal;
+  }
+
+  .my-select {
+    position: relative;
+    box-sizing: border-box;
+    width: fit-content;
+    min-width: 140px;
+    max-width: 100%;
+    padding-right: 10px;
+    white-space: nowrap;
+  }
+
+  .my-select::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    content: '';
+    background: linear-gradient(180deg, #a7dfdc 0%, #fed6e3 100%);
+    border-radius: 2px;
   }
 
   .thumbnail-list,

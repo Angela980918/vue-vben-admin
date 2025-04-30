@@ -11,6 +11,7 @@ declare module 'vue' {
     ADivider: typeof import('ant-design-vue/es')['Divider']
     AModal: typeof import('ant-design-vue/es')['Modal']
     ASelect: typeof import('ant-design-vue/es')['Select']
+    ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
     ASpace: typeof import('ant-design-vue/es')['Space']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     ChatBoxLeft: typeof import('./src/components/chatBox/left/chatBox-Left.vue')['default']

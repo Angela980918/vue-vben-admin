@@ -18,6 +18,8 @@ import ChatBoxLeft from '#/components/chatBox/left/chatBox-Left.vue';
 import ChatBoxRight from '#/components/chatBox/right/chatBox-right.vue';
 import { useChatStore } from '#/store';
 import ToggleCompanyCarousel from '#/components/company/ToggleCompanyCarousel.vue';
+import { useInitCommonDataBeforeEnterRoute } from '#/hooks/useInit';
+import { $t } from '@vben/locales';
 
 const chatStore = useChatStore();
 
@@ -44,6 +46,8 @@ type MyToggleCompanyCarouselInstance = InstanceType<
 
 type CompanieslistProp =
   MyToggleCompanyCarouselInstance['$props']['companiesList'];
+type toggleCompanyCallbackProp =
+  MyToggleCompanyCarouselInstance['$props']['onToggleCompany'];
 
 const userStore = useUserStore();
 const companiesList = computed<CompanieslistProp>(() => {
@@ -58,6 +62,44 @@ const companiesList = computed<CompanieslistProp>(() => {
     }) || []
   );
 });
+
+const toggleCompanyCallback: toggleCompanyCallbackProp = async (
+  currentIndex: number,
+) => {
+  // 獲取當前選擇公司的id
+  const wabaInfo = companiesList.value[currentIndex]?.companyWabaInfo;
+  // 獲取公司的waba賬號優選選擇第一個
+  if (wabaInfo) {
+    // 設置新的wabaid和apiKey
+    userStore.setCurrentWabaId(wabaInfo.waba_id);
+    userStore.setYcouldApiKey(wabaInfo.api_key);
+    // 显示加载中提示
+    message.loading({
+      content: $t('page.chat.tips.3'),
+      key: 'switchCompany',
+      duration: 0, // 不自动关闭
+    });
+    // 重新獲取全部的初始數據
+    try {
+      await useInitCommonDataBeforeEnterRoute();
+      // 成功后更新为成功提示
+      message.success({
+        content: $t('page.chat.tips.2', {
+          name: $t('page.routermenu.company.name'),
+        }),
+        key: 'switchCompany',
+      });
+    } catch (error) {
+      // 出错时关闭提示，并给出错误信息
+      message.error({
+        content: '公司切換失敗，請重試',
+        key: 'switchCompany',
+      });
+      console.error('切换公司出错：', error);
+    }
+  }
+};
+
 /**
  * 此處調整大小,是否啟用存在白色
  */
@@ -72,6 +114,8 @@ const isActivatePureWhite = true;
         :height="CompanyCarouselHeight"
         :companies-list="companiesList"
         :activate-pure-white="isActivatePureWhite"
+        :on-toggle-company="toggleCompanyCallback"
+        :default-company-id="userStore.getCurrentCompanyId"
       />
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>

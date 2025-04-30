@@ -206,6 +206,7 @@
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sortKeys": true,
   "i18n-ally.namespace": true,
+  "i18n-ally.extract.autoDetect": false,
 
   // 控制相关文件嵌套展示
   "explorer.fileNesting.enabled": true,
