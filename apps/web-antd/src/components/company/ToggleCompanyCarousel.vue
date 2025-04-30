@@ -53,7 +53,7 @@ watch(activeIndex, async (newValue) => {
 /**
  * 點擊事件切換臨時會話的wabaId和apiKey
  */
-async function changeComapny(event: Event, index: number) {
+async function changeCompany(event: Event, index: number) {
   activeIndex.value = index;
 }
 
@@ -96,33 +96,75 @@ const handleChange = (value: string) => {
     activeIndex.value = index;
   }
 };
+
+// #region 橫向滾動
+
+const showScrollButtons = ref(false);
+
+const scrollLeft = () => {
+  listRef.value?.scrollBy({
+    left: -400,
+    behavior: 'smooth',
+  });
+};
+
+const scrollRight = () => {
+  listRef.value?.scrollBy({
+    left: 400,
+    behavior: 'smooth',
+  });
+};
+
+const checkIfScrollable = () => {
+  if (listRef.value) {
+    const el = listRef.value;
+    showScrollButtons.value = el.scrollWidth > el.clientWidth;
+  }
+};
+
+// 自动判断是否需要滚动按钮
+onMounted(() => {
+  checkIfScrollable();
+  window.addEventListener('resize', checkIfScrollable);
+});
+// #endregion
 </script>
 <template>
   <div class="carousel-horizontal" :style="{ height: elementStyle.height }">
+    <!-- 左按钮 -->
+    <button
+      class="nav-button left"
+      @click="scrollLeft"
+      v-if="showScrollButtons"
+    >
+      ‹
+    </button>
+
+    <a-select
+      :value="companiesList[activeIndex]?.companyId"
+      class="my-select"
+      @change="handleChange"
+    >
+      <a-select-option
+        v-for="item in leftOptions"
+        :key="item.value"
+        :value="item.value"
+      >
+        {{ item.label }}
+      </a-select-option>
+    </a-select>
+
     <div
       class="thumbnail-list"
       ref="listRef"
       :style="{ height: elementStyle.height }"
     >
-      <a-select
-        :value="companiesList[activeIndex]?.companyId"
-        class="my-select"
-        @change="handleChange"
-      >
-        <a-select-option
-          v-for="item in leftOptions"
-          :key="item.value"
-          :value="item.value"
-        >
-          {{ item.label }}
-        </a-select-option>
-      </a-select>
       <div
         v-for="(item, index) in coloredCompanies"
         :key="item.companyId"
         class="thumbnail"
         :class="{ active: index === activeIndex }"
-        @click="changeComapny($event, index)"
+        @click="changeCompany($event, index)"
         :style="{
           height: elementStyle.height,
           lineHeight: elementStyle.lineHeight,
@@ -158,6 +200,14 @@ const handleChange = (value: string) => {
         </a-tooltip>
       </div>
     </div>
+    <!-- 右按钮 -->
+    <button
+      class="nav-button right"
+      @click="scrollRight"
+      v-if="showScrollButtons"
+    >
+      ›
+    </button>
     <div class="background-layer"></div>
   </div>
 </template>
@@ -166,7 +216,6 @@ const handleChange = (value: string) => {
 .carousel-horizontal {
   position: relative;
   display: flex;
-  align-items: center;
   width: 100%;
   padding: 0 10px;
   overflow: hidden; // 重要：避免背景层溢出
@@ -236,7 +285,6 @@ const handleChange = (value: string) => {
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
 
     .thumbnail {
       position: relative;
@@ -311,5 +359,28 @@ const handleChange = (value: string) => {
       }
     }
   }
+}
+
+.nav-button {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  background: rgb(0 0 0 / 30%);
+  border: none;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background: rgb(154 144 144 / 50%);
+}
+
+.nav-button.left {
+  margin-right: 10px;
 }
 </style>
