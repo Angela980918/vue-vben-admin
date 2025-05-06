@@ -71,10 +71,11 @@ onMounted(() => {
 const elementStyle = ref<CSSProperties>({});
 
 onBeforeMount(() => {
+  const elementHeight = height ? height - 10 : 30;
   elementStyle.value = {
-    height: `${height ?? 30}px`,
-    lineHeight: `${height ?? 30}px`,
-    width: `${height ?? 30}px`,
+    height: `${elementHeight}px`,
+    lineHeight: `${elementHeight}px`,
+    width: `${elementHeight}px`,
   };
 });
 
@@ -130,12 +131,16 @@ onMounted(() => {
 // #endregion
 </script>
 <template>
-  <div class="carousel-horizontal" :style="{ height: elementStyle.height }">
+  <div
+    class="carousel-horizontal"
+    :style="{ height: `${height}px`, padding: '5px 0' }"
+  >
     <!-- 左按钮 -->
     <button
       class="nav-button left"
       @click="scrollLeft"
       v-if="showScrollButtons"
+      :style="elementStyle"
     >
       ‹
     </button>
@@ -143,6 +148,7 @@ onMounted(() => {
     <a-select
       :value="companiesList[activeIndex]?.companyId"
       class="my-select"
+      :style="`height:${height}px; display: flex; align-items: center;margin-left:5px;`"
       @change="handleChange"
     >
       <a-select-option
@@ -205,6 +211,7 @@ onMounted(() => {
       class="nav-button right"
       @click="scrollRight"
       v-if="showScrollButtons"
+      :style="elementStyle"
     >
       ›
     </button>
@@ -216,8 +223,8 @@ onMounted(() => {
 .carousel-horizontal {
   position: relative;
   display: flex;
+  align-items: center;
   width: 100%;
-  padding: 0 10px;
   overflow: hidden; // 重要：避免背景层溢出
   border-radius: 0;
 
@@ -309,7 +316,7 @@ onMounted(() => {
         padding: 0 10px;
 
         .img {
-          margin-right: 5px;
+          margin-right: 10px;
           border-radius: 50%;
         }
       }
@@ -363,10 +370,12 @@ onMounted(() => {
 
 .nav-button {
   z-index: 2;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px 12px;
+  margin-left: 5px;
   font-size: 20px;
   color: white;
   cursor: pointer;
@@ -382,5 +391,9 @@ onMounted(() => {
 
 .nav-button.left {
   margin-right: 10px;
+}
+
+.nav-button.right {
+  margin-right: 5px;
 }
 </style>

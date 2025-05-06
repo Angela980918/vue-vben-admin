@@ -113,7 +113,7 @@ const toggleCompanyCallback: toggleCompanyCallbackProp = async (
 /**
  * 此處調整大小,是否啟用純白色
  */
-const CompanyCarouselHeight = 30;
+const CompanyCarouselHeight = 50;
 const isActivatePureWhite = true;
 </script>
 
