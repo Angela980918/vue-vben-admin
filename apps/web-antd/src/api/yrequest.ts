@@ -70,6 +70,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       const accessStore = useAccessStore();
       const userStore = useUserStore();
       config.headers.Authorization = formatToken(accessStore.accessToken);
+      const ycouldKey = userStore.getCurrentWabaInfo?.api_key;
+      if (!ycouldKey) {
+        const err = new Error('X-API-Key is missing');
+        err.name = '401';
+        throw err;
+      }
       config.headers['X-API-Key'] = userStore.getCurrentWabaInfo?.api_key;
       config.headers['Accept-Language'] = preferences.app.locale;
       return config;
@@ -93,6 +99,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   // 通用的错误处理,如果没有进入上面的错误处理逻辑，就会进入这里
   client.addResponseInterceptor(
     errorMessageResponseInterceptor((msg: string, error) => {
+      // api缺少的请求拦截不提醒
+      if (error.name === '401') {
+        console.error(error);
+        return;
+      }
+
       // 这里可以根据业务进行定制,你可以拿到 error 内的信息进行定制化处理，根据不同的 code 做不同的提示，而不是直接使用 message.error 提示 msg
       // 当前mock接口返回的错误字段是 error 或者 message
       const responseData = error?.response?.data ?? {};

@@ -87,25 +87,42 @@ watch(
       <span>{{ $t('page.chat.customerList') }}</span>
     </div>
     <!--    客户列表    -->
-    <ASpace
-      v-for="customer in userData"
-      @click="handleItemClick(customer.id, customer.phoneNumber)"
-      direction="vertical"
-      style="width: 100%"
-      :key="customer.id"
-    >
-      <ChatBoxLeftItem
-        :color="customer.color"
-        :name="customer.name"
-        :time="customer.time"
-        :message="customer.message"
-        :badge-count="customer.badgeCount"
-        style="color: #1a1a1a"
-        :class="
-          currentChatId === customer.id ? 'chat-box-left-item-active' : ''
-        "
-      />
-    </ASpace>
+
+    <template v-if="userData.length === 0">
+      <div
+        class="flex flex-col items-center justify-center py-16 text-gray-500"
+      >
+        <p class="mb-4 text-lg">{{ $t('page.chat.tips.5') }}</p>
+        <router-link
+          to="/customer/list"
+          class="rounded-md bg-blue-500 px-5 py-2 text-white shadow transition duration-200 hover:bg-blue-600"
+        >
+          去添加客户
+        </router-link>
+      </div>
+    </template>
+
+    <template v-else>
+      <ASpace
+        v-for="customer in userData"
+        @click="handleItemClick(customer.id, customer.phoneNumber)"
+        direction="vertical"
+        style="width: 100%"
+        :key="customer.id"
+      >
+        <ChatBoxLeftItem
+          :color="customer.color"
+          :name="customer.name"
+          :time="customer.time"
+          :message="customer.message"
+          :badge-count="customer.badgeCount"
+          style="color: #1a1a1a"
+          :class="
+            currentChatId === customer.id ? 'chat-box-left-item-active' : ''
+          "
+        />
+      </ASpace>
+    </template>
   </ASpace>
 </template>
 

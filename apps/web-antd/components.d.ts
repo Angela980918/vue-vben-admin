@@ -8,10 +8,7 @@ export {};
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AButton: typeof import('ant-design-vue/es')['Button']
-    ACarousel: typeof import('ant-design-vue/es')['Carousel']
     ADivider: typeof import('ant-design-vue/es')['Divider']
-    AInputSearch: typeof import('ant-design-vue/es')['InputSearch']
     AModal: typeof import('ant-design-vue/es')['Modal']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
@@ -21,7 +18,6 @@ declare module 'vue' {
     ChatBoxLeftItem: typeof import('./src/components/chatBox/left/chatBox-Left-Item.vue')['default']
     ChatBoxLeftList: typeof import('./src/components/chatBox/left/chatBox-Left-List.vue')['default']
     ChatBoxLeftSearch: typeof import('./src/components/chatBox/left/chatBox-Left-Search.vue')['default']
-    ChatBoxLeftSearchSkeleton: typeof import('./src/components/chatBox/left/chatBox-Left-Search-Skeleton.vue')['default']
     'ChatBoxLeftSkeleton ': typeof import('./src/components/chatBox/left/chatBox-Left-Skeleton .vue')['default']
     ChatBoxRight: typeof import('./src/components/chatBox/right/chatBox-right.vue')['default']
     ChatBoxRightFile: typeof import('./src/components/chatBox/right/chatBox-right-file.vue')['default']
@@ -34,7 +30,6 @@ declare module 'vue' {
     ChatroomSkeleton: typeof import('./src/components/skeleton/chatroomSkeleton.vue')['default']
     Confirm: typeof import('./src/components/chatBox/content/message/Confirm.vue')['default']
     ContactModal: typeof import('./src/components/ContactModal.vue')['default']
-    copy: typeof import('./src/components/chatBox/left/chatBox-Left-Search copy.vue')['default']
     FileList: typeof import('./src/components/contact/FileList.vue')['default']
     FindList: typeof import('./src/components/chatBox/content/message/FindList.vue')['default']
     ImageView: typeof import('./src/components/chatBox/content/message/ImageView.vue')['default']

@@ -41,7 +41,10 @@
     "tips": {
       "1": "You can add any reservations for this customer",
       "2": "Loading {name} successfully",
-      "3": "Switch to ..."
+      "3": "Switch to ...",
+      "4": "No company yet",
+      "5": "No customers yet, please add customers",
+      "6": "There is no company information or waba account information yet. Please improve the relevant information or contact the administrator to add it."
     },
     "titles": {
       "1": "Phone Number",

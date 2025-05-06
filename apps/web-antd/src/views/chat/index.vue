@@ -120,13 +120,29 @@ const isActivatePureWhite = true;
 <template>
   <div class="px-1 py-1">
     <div class="card-box h-full flex-col lg:flex">
-      <ToggleCompanyCarousel
-        :height="CompanyCarouselHeight"
-        :companies-list="companiesList"
-        :activate-pure-white="isActivatePureWhite"
-        :on-toggle-company="toggleCompanyCallback"
-        :default-company-id="userStore.getCurrentCompanyId"
-      />
+      <template v-if="companiesList.length === 0">
+        <div
+          class="flex items-center justify-center rounded-md border border-dashed border-blue-300 bg-gradient-to-r from-blue-50 via-white to-blue-50 text-red-600 shadow-sm"
+          :style="{ height: `${CompanyCarouselHeight}px` }"
+        >
+          <router-link
+            to="/company/add"
+            class="hover:text--700 text-sm font-medium transition hover:underline"
+          >
+            {{ $t('page.chat.tips.6') }}
+          </router-link>
+        </div>
+      </template>
+      <template v-else>
+        <ToggleCompanyCarousel
+          :height="CompanyCarouselHeight"
+          :companies-list="companiesList"
+          :activate-pure-white="isActivatePureWhite"
+          :on-toggle-company="toggleCompanyCallback"
+          :default-company-id="userStore.getCurrentCompanyId"
+        />
+      </template>
+
       <ASpace direction="vertical" :style="{ width: '100%' }" :size="[0, 48]">
         <ALayout>
           <ChatBoxLeft :is-show="isShowChatRoom" />

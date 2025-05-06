@@ -1,5 +1,4 @@
 import { useUserStore } from '@vben/stores';
-import { message } from 'ant-design-vue';
 
 export async function useGetApiKey(wabaId?: string) {
   const userStore = useUserStore();
@@ -12,7 +11,7 @@ export async function useGetApiKey(wabaId?: string) {
     wabasAccounts.find((account) => account.waba_id === wabaId)?.api_key ||
     wabasAccounts[0]?.api_key;
   if (!currentApiKey) {
-    return message.error('請先設置API Key');
+    return console.error('請先設置API Key');
   }
   // 設置默認的apiKey
   userStore.setYcouldApiKey(currentApiKey);

@@ -12,6 +12,7 @@ import { useChatStore, useCustomerStore, useTemplateStore } from '#/store';
 import { handleTemplateMsg } from '#/utils/common';
 import type { WhatsAppInformationInfo } from '@vben/types';
 import ChatBoxLeftSkeleton from './chatBox-Left-Skeleton .vue';
+import { $t } from '@vben/locales';
 
 const { isShow = true } = defineProps<{
   isShow?: Boolean;
@@ -30,7 +31,7 @@ const loadCustomerList = async () => {
     chatStore.setCurrentUserInfo(customer[0]);
     loadChatMessage(customer[0]?.phoneNumber, assignedCustomers?.value[0]?.id);
   } else {
-    message.warn('暫無聯繫客戶，請添加');
+    message.warn($t('page.chat.tips.5'));
   }
 };
 
