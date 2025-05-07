@@ -44,7 +44,8 @@
       "3": "Switch to ...",
       "4": "No company yet",
       "5": "No customers yet, please add customers",
-      "6": "There is no company information or waba account information yet. Please improve the relevant information or contact the administrator to add it."
+      "6": "There is no company information or waba account information yet. Please improve the relevant information or contact the administrator to add it.",
+      "7": "The template message does not exist or has been deleted"
     },
     "titles": {
       "1": "Phone Number",

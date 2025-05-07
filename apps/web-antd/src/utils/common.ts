@@ -1,3 +1,4 @@
+import { $t } from '@vben/locales';
 import dayjs from 'dayjs';
 
 import { useTemplateStore } from '#/store';
@@ -28,15 +29,22 @@ interface RawTemplateItem {
 }
 
 export const handleTemplateMsg = (name: string, language: string): Content => {
-  // console.log("name, language", name, language)
+  // console.log('name, language', name, language);
   const rawTemplate = useTemplateStore()
     .getRawTemplateList as RawTemplateItem[];
   const result = rawTemplate.find(
     (item) => item.name === name && item.language === language,
   );
   if (!result) {
-    message.loading('模板消息加載中...');
-    throw new Error('模板消息尚未加載');
+    return {
+      body: {
+        content: $t('page.chat.tips.7'),
+        format: 'BODY',
+      },
+      footer: {
+        content: $t('demos.normal.1'),
+      },
+    };
   }
   const { components } = result;
   // 正确初始化 msgContent

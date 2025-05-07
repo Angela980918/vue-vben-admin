@@ -9,10 +9,10 @@ import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore, useTemplateStore } from '#/store';
-import { handleTemplateMsg } from '#/utils/common';
 import type { WhatsAppInformationInfo } from '@vben/types';
 import ChatBoxLeftSkeleton from './chatBox-Left-Skeleton .vue';
 import { $t } from '@vben/locales';
+import { handleTemplateMsg } from '#/utils/common';
 
 const { isShow = true } = defineProps<{
   isShow?: Boolean;

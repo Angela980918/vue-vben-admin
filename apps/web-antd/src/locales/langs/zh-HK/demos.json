@@ -1,12 +1,15 @@
 {
-  "title": "演示",
   "antd": "Ant Design Vue",
+  "normal": {
+    "1": "資源不存在"
+  },
+  "title": "演示",
   "vben": {
-    "title": "項目",
     "about": "關於",
-    "document": "文檔",
     "antdv": "Ant Design Vue 版本",
+    "document": "文檔",
+    "element-plus": "Element Plus 版本",
     "naive-ui": "Naive UI 版本",
-    "element-plus": "Element Plus 版本"
+    "title": "項目"
   }
 }

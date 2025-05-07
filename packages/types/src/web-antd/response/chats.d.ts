@@ -12,7 +12,7 @@ export type Type = 'audio' | 'document' | 'template' | 'text' | 'video';
 export interface Content {
   body?: {
     content?: string;
-    format?: BODY;
+    format?: ComponentType;
   };
   footer?: {
     content?: string;
