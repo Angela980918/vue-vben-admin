@@ -55,9 +55,16 @@ export const useCustomerStore = defineStore('customerStore', {
       result.forEach((item: any, index: number) => {
         item.key = item.id;
         const color = stringToColor(item.customerId);
+
+        // 根据
+        const contactInfo = this.contactList.find((contact) => {
+          return contact.phoneNumber === item.customerId;
+        });
+
         const newCustomer = {
           id: item.id,
           key: item.key,
+          nickName: contactInfo?.nickname || undefined,
           name: item.customerId,
           time: item.messageList[0].deliverTime,
           badgeCount: item.messageCount,

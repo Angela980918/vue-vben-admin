@@ -112,7 +112,7 @@ watch(
       >
         <ChatBoxLeftItem
           :color="customer.color"
-          :name="customer.name"
+          :name="customer.nickName || customer.name"
           :time="customer.time"
           :message="customer.message"
           :badge-count="customer.badgeCount"

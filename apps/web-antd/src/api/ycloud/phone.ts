@@ -1,5 +1,7 @@
 import { ycloudRequestClient } from '#/api/yrequest';
-
+/**
+ * 註冊WhatsApp 商业电话号码
+ */
 export async function createPhoneNumber({
   wabaId,
   phoneNumber,
@@ -12,11 +14,14 @@ export async function createPhoneNumber({
   );
 }
 
+/**
+ * 列出电话号码
+ */
 export async function getPhoneList(
   page: number = 1,
   limit: number = 10,
   includeTotal: boolean = false,
-  filter: object = {},
+  filter: { [key: string]: string } = {},
 ) {
   const acc: Record<string, any> = {};
   for (const key of Object.keys(filter)) {
@@ -33,6 +38,9 @@ export async function getPhoneList(
   return await ycloudRequestClient.get<any>(`/whatsapp/phoneNumbers`, data);
 }
 
+/**
+ * 更新手機號碼
+ */
 export async function updatePhoneProfile({
   wabaId,
   phoneNumber,
@@ -53,6 +61,9 @@ export async function updatePhoneProfile({
   );
 }
 
+/**
+ *检索电话号码
+ */
 export async function retrievePhoneNumber({
   wabaId,
   phoneNumber,
@@ -74,6 +85,9 @@ export async function retrievePhoneNumber({
   return await ycloudRequestClient.get<any>(url);
 }
 
+/**
+ * 检索 WhatsApp 商业电话号码的商业设置。
+ */
 export async function retrieveCommerceSetting({
   wabaId,
   phoneNumber,
@@ -86,6 +100,9 @@ export async function retrieveCommerceSetting({
   return await ycloudRequestClient.get<any>(url);
 }
 
+/**
+ * 更新 WhatsApp 商业电话号码的商业设置。
+ */
 export async function updateCommerceSetting({
   wabaId,
   phoneNumber,

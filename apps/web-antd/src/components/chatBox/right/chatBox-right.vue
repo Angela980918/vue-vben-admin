@@ -43,7 +43,11 @@ const getAvatarText = (name: string) => {
           size="large"
           :style="{ backgroundColor: currentCustomerInfo.color }"
         >
-          {{ getAvatarText(currentCustomerInfo.name) }}
+          {{
+            getAvatarText(
+              currentCustomerInfo.nickName || currentCustomerInfo.name,
+            )
+          }}
         </AAvatar>
         <div class="sampleInfo">
           <span>{{
@@ -55,7 +59,15 @@ const getAvatarText = (name: string) => {
     </div>
     <div class="remarkCard">
       <div class="rmarkMain">
-        <span>{{ $t('page.chat.titles.3') }}</span>
+        <span>
+          {{
+            `${$t('page.chat.titles.3')}: ${
+              currentCustomerInfo
+                ? currentCustomerInfo.nickName || currentCustomerInfo.name
+                : ''
+            }`
+          }}
+        </span>
         <ATooltip>
           <PlusCircleOutlined
             class="inputText"

@@ -15,6 +15,18 @@ interface Template {
   };
   components?: ComponentObject[];
 }
+
+interface MessageText {
+  body: string;
+  preview_url: string;
+}
+
+interface MessageExtraFile {
+  link: string;
+  caption?: string;
+  filename?: string;
+}
+
 interface MessageData {
   from: string;
   to: string;
@@ -28,6 +40,11 @@ interface MessageData {
   enqueue?: boolean;
   template?: Template; // 使用具体的 Template 类型
   parameters?: Parameter[];
+  text?: MessageText;
+  image?: MessageExtraFile;
+  video?: MessageExtraFile;
+  document?: MessageExtraFile;
+  sticker?: MessageExtraFile;
 }
 
 export type { MessageData };

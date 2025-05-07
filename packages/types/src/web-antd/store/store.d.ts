@@ -3,6 +3,7 @@ export interface AssignedCustomer {
   id: string;
   key: string;
   name: string;
+  nickName?: string;
   time: string;
   badgeCount: number;
   phoneNumber: string;

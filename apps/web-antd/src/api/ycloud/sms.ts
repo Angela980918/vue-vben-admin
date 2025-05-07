@@ -1,5 +1,8 @@
 import { ycloudRequestClient } from '#/api/yrequest';
 
+/**
+ *  发送短信
+ */
 export async function sendSMS(to: string, text: string, signature: string) {
   // return ycloudInstance({
   //   url: '/sms', method: 'post', data: {
@@ -14,6 +17,9 @@ export async function sendSMS(to: string, text: string, signature: string) {
   return await ycloudRequestClient.post<any>('/sms', data);
 }
 
+/**
+ * 列出短信记录
+ */
 export async function getSMSList(
   page: number = 1,
   limit: number = 10,

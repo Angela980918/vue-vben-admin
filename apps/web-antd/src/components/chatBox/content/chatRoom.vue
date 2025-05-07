@@ -82,7 +82,7 @@ watch(
 
 const data = computed(() => {
   // console.log("chatStore.chatMessages",chatStore.chatMessages)
-  return chatStore.chatMessages;
+  return chatStore.getChatMessages;
 });
 
 // 样式
@@ -279,7 +279,7 @@ function markedToHtml(markedValue) {
                     size="large"
                     :style="{ backgroundColor: item.color }"
                   >
-                    {{ getAvatarText(item.name) }}
+                    {{ getAvatarText(item.nickName || item.name) }}
                   </AAvatar>
                   <!--                                    <a-avatar size="large" :style="{ backgroundColor: item.color }">{{ item.name }}</a-avatar>-->
                 </div>

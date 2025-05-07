@@ -23,6 +23,7 @@ export interface CurrentCustomerInfo {
   color: string;
   isActive: boolean;
   message: string;
+  nickName?: string;
 }
 
 export const useChatStore = defineStore('chatStore', () => {
@@ -37,8 +38,22 @@ export const useChatStore = defineStore('chatStore', () => {
 
   const page = ref(1);
   const scrollTo = ref(false);
+  const customerStore = useCustomerStore();
+  const getChatMessages = computed(() => {
+    const chatMessage = chatMessages.value.map((chatMessage) => {
+      customerStore.assignedCustomers.forEach((customer) => {
+        if (
+          customer.phoneNumber === chatMessage.from ||
+          customer.phoneNumber === chatMessage.to
+        ) {
+          chatMessage.nickName = customer.nickName;
+        }
+      });
+      return chatMessage;
+    });
 
-  const getChatMessages = computed(() => chatMessages.value);
+    return chatMessage;
+  });
   const getCurrentChatId = computed(() => currentChatId.value);
 
   const needSendTempFirst = ref(false);
@@ -113,7 +128,15 @@ export const useChatStore = defineStore('chatStore', () => {
   }
 
   function addMessage(message: ChatMessage) {
-    // console.log("messagemessagemessage", message)
+    // console.log('messagemessagemessage', message);
+    if (message.direction === 'inbound') {
+      customerStore.assignedCustomers.forEach((customer) => {
+        if (customer.phoneNumber === message.name) {
+          message.nickName = customer.nickName;
+        }
+      });
+    }
+
     if (message.direction === 'inbound' && needSendTempFirst.value) {
       needSendTempFirst.value = false;
     }

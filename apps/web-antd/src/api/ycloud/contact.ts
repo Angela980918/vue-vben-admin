@@ -2,6 +2,9 @@ import type { ContactInfo, ContactListInfo, OptionParams } from '@vben/types';
 
 import { ycloudRequestClient } from '#/api/yrequest';
 
+/**
+ * 獲取多個聯繫人
+ */
 export async function getContactListApi(
   page = 1,
   limit = 10,
@@ -34,8 +37,9 @@ export async function getContactListApi(
   return await ycloudRequestClient.get<ContactListInfo>(url);
 }
 
-//
-
+/**
+ * 創建聯繫人
+ */
 export async function createContactApi({
   nickname,
   phoneNumber,
@@ -56,10 +60,16 @@ export async function createContactApi({
   });
 }
 
+/**
+ * 檢索聯繫人
+ */
 export async function retrieveContact(id: string) {
   return await ycloudRequestClient.get<ContactInfo>(`/contact/contacts/${id}`);
 }
 
+/**
+ * 更新聯繫人信息
+ */
 export async function updateContactApi(data: ContactInfo) {
   const { id } = data;
   // return ycloudInstance({
@@ -70,7 +80,9 @@ export async function updateContactApi(data: ContactInfo) {
     data,
   );
 }
-
+/**
+ * 刪除聯繫人
+ */
 export async function deleteContactApi(id: number | string) {
   return await ycloudRequestClient.delete<any>(`/contact/contacts/${id}`);
 }

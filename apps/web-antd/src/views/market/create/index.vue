@@ -1,3 +1,4 @@
+<!-- eslint-disable regexp/prefer-w -->
 <script lang="ts" setup>
 import type { SelectProps } from 'ant-design-vue';
 import type { Rule } from 'ant-design-vue/es/form';
@@ -36,6 +37,7 @@ import { createTemplateApi, editTemplateApi } from '#/api';
 import SelectInput from '#/components/templates/SelectInput.vue';
 import { categoryMap, headerMap, languageMap, mediaMap } from '#/map';
 import { useTemplateStore } from '#/store';
+import { useUserStore } from '@vben/stores';
 
 interface FormState {
   selectAccount: string;
@@ -113,8 +115,8 @@ const rules: Record<string, Rule[]> = {
   tempName: [
     { required: true, message: '模板名稱不能為空', trigger: 'blur' },
     {
-      pattern: /^[a-z0-9_]{1,512}$/,
-      message: '模板名稱只能包含小寫字母和數字，且長度為1到512位',
+      pattern: /^[a-z0-9_]{1,512}$/i,
+      message: '模板名稱只能包含英文字母、數字與下劃線_，且長度為 1 到 512 位',
       trigger: 'blur',
     },
   ],
@@ -149,6 +151,8 @@ const rules: Record<string, Rule[]> = {
   editor: [{ required: true, message: '請輸入内容', trigger: 'blur' }],
   footer: [{ required: false, message: '請輸入底部', trigger: 'blur' }],
 };
+
+const isSummitIng = ref(false);
 
 // 表單請求體轉換
 const processFormData = (rwaData) => {
@@ -191,7 +195,7 @@ const processFormData = (rwaData) => {
     components, // 动态组件数组
   };
 };
-
+const userStore = useUserStore();
 // 提交
 const submitKey = 'submit';
 const submitContent = ref('模板數據校驗中');
@@ -214,7 +218,15 @@ const onSubmit = async () => {
   formRef.value
     .validate()
     .then(async () => {
-      submitContent.value = '模板數據提交中';
+      submitContent.value = '模板數據提交中,請耐心等待...';
+      const { selectHeader, titleContents } = formState;
+      if (
+        selectHeader === 'TEXT' &&
+        (!titleContents || !titleContents.trim())
+      ) {
+        return message.error('當頂部為文本類型時，標題不能為空');
+      }
+
       message.loading({
         content: submitContent.value,
         key: submitKey,
@@ -229,8 +241,9 @@ const onSubmit = async () => {
           item.text = turndownService.turndown(item.text);
         }
       });
-
+      userStore.setCurrentWabaId(reqData.wabaId);
       try {
+        isSummitIng.value = true;
         await (isUpdated.value
           ? editTemplateApi(reqData)
           : createTemplateApi(reqData));
@@ -246,6 +259,8 @@ const onSubmit = async () => {
           key: submitKey,
           duration: 2,
         });
+      } finally {
+        isSummitIng.value = false;
       }
     })
     .catch((validationError) => {
@@ -481,7 +496,11 @@ onUnmounted(() => {
                     :title="isPending ? '审核中禁止重复修改' : ''"
                     color="red"
                   >
-                    <AButton type="primary" @click.prevent="onSubmit">
+                    <AButton
+                      :disabled="isSummitIng"
+                      type="primary"
+                      @click.prevent="onSubmit"
+                    >
                       提交
                     </AButton>
                   </ATooltip>

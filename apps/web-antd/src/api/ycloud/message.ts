@@ -68,6 +68,10 @@ export async function sendMessageApi({
   return await ycloudRequestClient.post<any>(url, data);
 }
 
+/**
+ * 检索之前发送的消息
+ * @param {id} id为之前发送消息的id
+ */
 export async function retrieveMessage({ id }: { id: string }) {
   // return ycloudInstance({
   //   url: `/whatsapp/messages/${id}`,
@@ -76,6 +80,9 @@ export async function retrieveMessage({ id }: { id: string }) {
   return await ycloudRequestClient.get<any>(`/whatsapp/messages/${id}`);
 }
 
+/**
+ * 将消息标记为已读
+ */
 export async function markAsReadMessage({ id }: { id: string }) {
   // return ycloudInstance({
   //   url: `/whatsapp/inboundMessages/${id}/markAsRead`,

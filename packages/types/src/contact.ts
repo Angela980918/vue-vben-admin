@@ -9,21 +9,12 @@ interface ItemInfo {
   lastMessageToPhoneNumber: string;
   tags: Array<string>;
   createTime: string;
+  ownerEmail: string;
 }
 
 interface ContactListInfo {
-  /**
-   * 用户描述
-   */
   items: Array<ItemInfo>;
-  /**
-   * 首页地址
-   */
   offset: number;
-
-  /**
-   * accessToken
-   */
   limit: number;
   length: number;
   total: number;

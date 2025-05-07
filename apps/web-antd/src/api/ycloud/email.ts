@@ -22,6 +22,14 @@ interface EmailInfo {
   currency: string;
 }
 
+/**
+ * 發送電子郵箱
+ * @param from:发件人邮箱
+ * @param content content
+ * @param subject 主题
+ * @param to 预期收件人的电子邮件地址
+ *
+ */
 export async function sendEmail(
   from: string,
   to: string,

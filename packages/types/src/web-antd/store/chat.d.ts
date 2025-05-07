@@ -18,4 +18,5 @@ export interface ChatMessage {
   msgIndex: string;
   fileExtension?: string;
   fileExtension: string | undefined;
+  nickName?: string;
 }
