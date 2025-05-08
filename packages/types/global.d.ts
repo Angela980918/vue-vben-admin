@@ -12,6 +12,10 @@ export interface VbenAdminProAppConfigRaw {
   VITE_GLOB_YCLOUD_API_URL: string;
   VITE_GLOB_WHATS_API_URL: string;
   VITE_COS_BASE_URL: string;
+  /**
+   * 后端接口
+   */
+  VITE_WHATS_APP_API: string;
 }
 
 export interface ApplicationConfig {
