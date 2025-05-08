@@ -1,17 +1,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-
 import { InputSearch as AInputSearch, Space as ASpace } from 'ant-design-vue';
-
 import { useCustomerStore } from '#/store';
-import type { ChangeEvent } from 'ant-design-vue/es/_util/EventInterface';
 
-const value = ref<string>('');
+const value = ref('');
 const customerStore = useCustomerStore();
-const onSearch = (searchValue: ChangeEvent) => {
-  if (searchValue.target.value) {
-    customerStore.setSearchWord(searchValue.target.value);
-  }
+
+const onInputChange = (newValue: string) => {
+  value.value = newValue;
+  customerStore.setSearchWord(newValue);
 };
 </script>
 
@@ -21,8 +18,8 @@ const onSearch = (searchValue: ChangeEvent) => {
       name="customerPhone"
       v-model:value="value"
       :placeholder="$t('page.chat.chatTip')"
-      @change="onSearch"
       :allow-clear="true"
+      @update:value="onInputChange"
     />
   </ASpace>
 </template>

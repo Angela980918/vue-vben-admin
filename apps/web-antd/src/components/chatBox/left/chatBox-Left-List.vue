@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 
 import { UserOutlined } from '@ant-design/icons-vue';
 import { Space as ASpace } from 'ant-design-vue';
@@ -15,7 +15,7 @@ interface Props {
 const props = defineProps<Props>();
 const emits = defineEmits(['loadChatMessage']);
 
-const userData = ref(props.assignedCustomersData);
+const userData = ref<AssignedCustomer[]>();
 
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
@@ -45,10 +45,13 @@ watch(
       userData.value = props.assignedCustomersData;
     } else {
       const list: AssignedCustomer[] = [];
+
       props.assignedCustomersData.forEach((item) => {
         if (
           item.name.toLowerCase().includes(newValue.toLowerCase()) ||
-          item.phoneNumber.includes(newValue)
+          item.phoneNumber.includes(newValue) ||
+          (item.nickName &&
+            item.nickName.toLowerCase().includes(newValue.toLowerCase()))
         ) {
           list.push(item);
         }
@@ -57,6 +60,10 @@ watch(
     }
   },
 );
+
+onBeforeMount(() => {
+  userData.value = props.assignedCustomersData;
+});
 
 watch(
   () => props.assignedCustomersData,
@@ -88,7 +95,7 @@ watch(
     </div>
     <!--    客户列表    -->
 
-    <template v-if="userData.length === 0">
+    <template v-if="assignedCustomersData.length === 0">
       <div
         class="flex flex-col items-center justify-center py-16 text-gray-500"
       >
