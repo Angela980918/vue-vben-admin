@@ -5,6 +5,7 @@ export interface ToggleCompanyProp {
   companyName: string;
   companyLogo: string;
   companyWabaInfo?: WabaAccount;
+  wabaAccounts?: WabaAccount[];
 }
 
 export type ToggleCompanyProps = ToggleCompanyProp[];

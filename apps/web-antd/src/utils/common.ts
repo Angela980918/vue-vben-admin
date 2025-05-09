@@ -164,3 +164,19 @@ export const MessageType = {
   arrow: 'delivered',
   accept: 'accepted',
 };
+
+/**
+ * 获取手机号的最后 指定位数字
+ * @param phoneNumber - 完整的手机号字符串
+ * @param length - 長度
+ * @returns 手机号的最后 多少位，如果手机号长度不足 指定位數位则返回原手机号
+ */
+export function getLastFourPhoneDigits(
+  phoneNumber: string,
+  length: number = 4,
+): string {
+  if (typeof phoneNumber === 'string') {
+    return phoneNumber.slice(-length);
+  }
+  return '';
+}

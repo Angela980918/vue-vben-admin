@@ -88,7 +88,7 @@ watch(
 
 <template>
   <!-- 標籤頁頭部 -->
-  <ASpace direction="vertical" style="width: 100%">
+  <ASpace direction="vertical" style="width: 100%; height: 500px">
     <div style="width: 100%; padding: 10px 0; font-size: 16px; color: #1a1a1a">
       <UserOutlined />
       <span>{{ $t('page.chat.customerList') }}</span>

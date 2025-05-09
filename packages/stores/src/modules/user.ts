@@ -48,6 +48,7 @@ interface BasicUserInfo {
 }
 type StatusType = 'error' | 'idle' | 'loading' | 'success';
 interface UserState {
+  chatRoomPhoneNumber?: string;
   /**
    * 用户公司列表
    */
@@ -127,12 +128,16 @@ export const useUserStore = defineStore('core-user', {
         this.status = 'error';
       }
     },
+    setChatRoomPhoneNumber(phoneNumber: string) {
+      this.chatRoomPhoneNumber = phoneNumber;
+    },
     setCompanies(companies: UserCompanyResponse[]) {
       this.companies = companies;
     },
     setCurrentWabaId(wabaId: string) {
       this.currentWabaId = wabaId;
     },
+
     setSelectAccount(wabaId: string) {
       this.selectAccount = wabaId;
     },
@@ -148,7 +153,6 @@ export const useUserStore = defineStore('core-user', {
         this.selectAccount = wabaAccount[0].wabaId;
       }
     },
-
     setUserRoles(roles: string[]) {
       this.userRoles = roles;
     },
@@ -182,6 +186,7 @@ export const useUserStore = defineStore('core-user', {
     },
     selectPhone: (state) => {
       // 获取当前用户选择的电话号码
+      if (state.chatRoomPhoneNumber) return state.chatRoomPhoneNumber;
       const wabaId = state.currentWabaId || state.userProfile?.waba_account;
       const phoneNumber = state.wabaAccounts.find(
         (waba) => waba.waba_id === wabaId,
@@ -190,6 +195,7 @@ export const useUserStore = defineStore('core-user', {
     },
   },
   state: (): UserState => ({
+    chatRoomPhoneNumber: undefined,
     companies: [],
     currentWabaId: '',
     defaultCompanyId: '',

@@ -49,6 +49,8 @@ type CompanieslistProp =
   MyToggleCompanyCarouselInstance['$props']['companiesList'];
 type toggleCompanyCallbackProp =
   MyToggleCompanyCarouselInstance['$props']['onToggleCompany'];
+type onTogglePhonerNumberProp =
+  MyToggleCompanyCarouselInstance['$props']['onTogglePhonerNumber'];
 
 const userStore = useUserStore();
 const companiesList = computed<CompanieslistProp>(() => {
@@ -59,6 +61,7 @@ const companiesList = computed<CompanieslistProp>(() => {
         companyName: item.name,
         companyLogo: item.logo,
         companyWabaInfo: item.waba_accounts[0],
+        wabaAccounts: item.waba_accounts,
       };
     }) || []
   );
@@ -111,6 +114,17 @@ const toggleCompanyCallback: toggleCompanyCallbackProp = async (
 };
 
 /**
+ * 電話號碼改變時候的回調
+ */
+const onTogglePhonerNumberCallbak: onTogglePhonerNumberProp = async (
+  phoneNumber,
+) => {
+  userStore.setChatRoomPhoneNumber(phoneNumber);
+  message.success('代理號碼更新切換成功');
+  message.info(`當前號碼${phoneNumber}`);
+};
+
+/**
  * 此處調整大小,是否啟用純白色
  */
 const CompanyCarouselHeight = 50;
@@ -140,6 +154,7 @@ const isActivatePureWhite = true;
           :activate-pure-white="isActivatePureWhite"
           :on-toggle-company="toggleCompanyCallback"
           :default-company-id="userStore.getCurrentCompanyId"
+          :on-toggle-phoner-number="onTogglePhonerNumberCallbak"
         />
       </template>
 

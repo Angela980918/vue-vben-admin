@@ -4,6 +4,7 @@ import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import StringToColor from 'string-to-color';
 import type { SelectProps } from 'ant-design-vue';
+import { getLastFourPhoneDigits } from '#/utils/common';
 
 interface Props {
   companiesList: ToggleCompanyProps;
@@ -14,14 +15,15 @@ interface Props {
   activatePureWhite?: boolean;
   onToggleCompany?: (currentIndex: number) => void;
   defaultCompanyId?: string;
+  onTogglePhonerNumber?: (phonerNumber: string) => void;
 }
 
 const {
-  companiesList,
+  companiesList = [],
   height,
   activatePureWhite = false,
   onToggleCompany,
-
+  onTogglePhonerNumber,
   defaultCompanyId,
 } = defineProps<Props>();
 const activeIndex = ref(0);
@@ -50,13 +52,8 @@ watch(activeIndex, async (newValue) => {
   onToggleCompany && onToggleCompany(newValue);
 });
 
-/**
- * 點擊事件切換臨時會話的wabaId和apiKey
- */
-async function changeCompany(event: Event, index: number) {
-  activeIndex.value = index;
-}
-
+// 當前點擊的商業號碼位置
+const currentAgentActiveItem = ref(0);
 onMounted(() => {
   if (defaultCompanyId) {
     const index = companiesList.findIndex(
@@ -65,6 +62,7 @@ onMounted(() => {
 
     if (index !== -1) {
       activeIndex.value = index;
+      setPhonerNumber(0);
     }
   }
 });
@@ -95,6 +93,8 @@ const handleChange = (value: string) => {
   );
   if (index !== -1) {
     activeIndex.value = index;
+    currentAgentActiveItem.value = 0;
+    setPhonerNumber(0);
   }
 };
 
@@ -123,11 +123,61 @@ const checkIfScrollable = () => {
   }
 };
 
+/**
+ * 當前的商業號碼列表信息
+ */
+
+const agentAccounts = computed(() => {
+  return (
+    companiesList[activeIndex.value] &&
+    companiesList[activeIndex.value]?.companyWabaInfo?.agentAccounts.map(
+      (agentAccount) => {
+        // 當前的公司信息
+        const comapnyInfo = coloredCompanies.value[`${activeIndex.value}`];
+        // 獲取手機尾號
+        const lastFourNumber = getLastFourPhoneDigits(
+          agentAccount.phone_number,
+        );
+
+        return {
+          ...agentAccount,
+          comapnyInfo,
+          backgroundColor: StringToColor(agentAccount.id),
+          lastFourNumber,
+        };
+      },
+    )
+  );
+});
+
+const currentPhoneNumber = ref<string>();
+
+function setPhonerNumber(index: number) {
+  if (agentAccounts.value) {
+    currentPhoneNumber.value = agentAccounts.value[index]?.phone_number;
+  }
+}
+/**
+ * 點擊切換商業號碼的事件
+ */
+function changeAgentPhonerNumber(event: Event, index: number) {
+  // 當前的商業號碼信息
+  currentAgentActiveItem.value = index;
+  setPhonerNumber(index);
+}
+
 // 自动判断是否需要滚动按钮
 onMounted(() => {
   checkIfScrollable();
   window.addEventListener('resize', checkIfScrollable);
 });
+
+watch(currentPhoneNumber, (newVal) => {
+  if (onTogglePhonerNumber) {
+    newVal && onTogglePhonerNumber(newVal);
+  }
+});
+
 // #endregion
 </script>
 <template>
@@ -166,17 +216,20 @@ onMounted(() => {
       :style="{ height: elementStyle.height }"
     >
       <div
-        v-for="(item, index) in coloredCompanies"
-        :key="item.companyId"
+        v-for="(item, index) in agentAccounts"
+        :key="item.id"
         class="thumbnail"
-        :class="{ active: index === activeIndex }"
-        @click="changeCompany($event, index)"
+        :class="{ active: index === currentAgentActiveItem }"
+        @click="changeAgentPhonerNumber($event, index)"
         :style="{
           height: elementStyle.height,
           lineHeight: elementStyle.lineHeight,
         }"
       >
-        <a-tooltip :color="item.backgroundColor" placement="top">
+        <a-tooltip
+          :color="item.comapnyInfo ? item.backgroundColor : '#bfa'"
+          placement="top"
+        >
           <template #title>
             <div
               style="
@@ -185,7 +238,7 @@ onMounted(() => {
                 white-space: normal;
               "
             >
-              手機號碼： {{ item.companyWabaInfo?.phone_number }}
+              手機號碼： {{ item.phone_number }}
             </div>
           </template>
 
@@ -194,14 +247,20 @@ onMounted(() => {
             :style="{
               backgroundColor: activatePureWhite
                 ? '#F4F4F5'
-                : item?.backgroundColor,
-              color: item?.color,
+                : item.backgroundColor,
+              color: item?.comapnyInfo?.color || '#333',
             }"
           >
-            <img class="img" :src="item.companyLogo" :style="elementStyle" />
-            <p>
-              {{ item.companyName }}
-            </p>
+            <template v-if="item.comapnyInfo">
+              <img
+                class="img"
+                :src="item.comapnyInfo.companyLogo"
+                :style="elementStyle"
+              />
+              <p>
+                {{ `${item.account_name}+${item.lastFourNumber}` }}
+              </p>
+            </template>
           </div>
         </a-tooltip>
       </div>

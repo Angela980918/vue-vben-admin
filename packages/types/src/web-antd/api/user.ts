@@ -1,3 +1,5 @@
+import type { AgentAccountsListRes } from '../response';
+
 export interface WabaAccount {
   waba_id: string;
   name: string;
@@ -10,6 +12,7 @@ export interface WabaAccount {
   updated_by_id: string;
   company_id: string;
   phone_number: string;
+  agentAccounts: AgentAccountsListRes;
 }
 
 export interface UserCompanyResponse {
@@ -28,12 +31,14 @@ export interface UserCompanyResponse {
   website: string;
   waba_id: null | string;
   waba_accounts: WabaAccount[];
-
+  apiKey: string;
   [property: string]: any;
 }
 
 export interface UserCompaniesResponse {
   companys: UserCompanyResponse[];
+  agentAccounts: AgentAccountsListRes;
+
   message: string;
   [property: string]: any;
 }
@@ -91,6 +96,8 @@ export interface Company {
   tax_number: string;
   updated_at: string;
   website: string;
+  apiKey: string;
+
   [property: string]: any;
 }
 /**

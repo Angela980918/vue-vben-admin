@@ -170,7 +170,9 @@ const ycloudInstance = createRequestClient(
   true,
 );
 
-const whatsappInstance = createRequestClient('https://whatsapi.jackycode.cn');
+const whatsappInstance = createRequestClient(
+  import.meta.env.VITE_GLOB_WHATS_API_URL,
+);
 const apiClient = createRequestClient(import.meta.env.VITE_WHATS_APP_API);
 // 导出实例
 export { apiClient, whatsappInstance, ycloudInstance };
