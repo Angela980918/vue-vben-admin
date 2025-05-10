@@ -5,13 +5,12 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { LayoutSider as ALayoutSider, message } from 'ant-design-vue';
 
-import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
 import { useChatStore, useCustomerStore } from '#/store';
-import type { WhatsAppInformationInfo } from '@vben/types';
 import ChatBoxLeftSkeleton from './chatBox-Left-Skeleton .vue';
 import { handleTemplateMsg } from '#/utils/common';
+import { useUserStore } from '@vben/stores';
 
 const { isShow = true } = defineProps<{
   isShow?: Boolean;
@@ -37,12 +36,14 @@ const loadMessageList = async () => {
     return;
   }
   chatStore.setPage();
-  const data = {
-    id: currentChatId,
-    page: 1,
-    pageSize: 20,
-  };
-  const res: WhatsAppInformationInfo = await getMessageList(data);
+  // 注释获取聊天室全部消息的函数
+  // const data = {
+  //   id: currentChatId,
+  //   page: 1,
+  //   pageSize: 20,
+  // };
+  // const res: WhatsAppInformationInfo = await getMessageList(data);
+  const res = await chatStore.getChatRoomMessages({ page: 1, pageSize: 20 });
   res.messageList.reverse().forEach((item, index) => {
     let fileExtension = '';
     item.name = currentCustomerInfo.name;
@@ -82,6 +83,13 @@ async function loadChatMessage(guestPhone: string, id: string) {
   }
 }
 // const { getRawTemplateList, loadTemplates } = useTemplateStore();
+const userStore = useUserStore();
+watch(
+  () => userStore.selectPhone,
+  () => {
+    loadMessageList().then(() => {});
+  },
+);
 
 function initialGetMessageInfo() {
   setTimeout(() => {

@@ -1,18 +1,22 @@
 import type {
   ChatMessage,
   Content,
+  GetMessageListByPhoneNumberBody,
   MessageItem,
+  MessageSession,
   Status,
-  WhatsAppInformationInfo,
 } from '@vben/types';
 
 import { computed, ref } from 'vue';
 
 import { defineStore } from 'pinia';
 
-import { getContactListApi, getMessageList } from '#/api';
+import { getContactListApi } from '#/api';
 import { useCustomerStore } from '#/store/customerStore';
 import { handleTemplateMsg } from '#/utils/common';
+import { useUserStore } from '@vben/stores';
+import { message } from 'ant-design-vue';
+import { reqGetMessageListByPhoneNumber } from '#/api/common';
 
 export interface CurrentCustomerInfo {
   id: string;
@@ -30,7 +34,7 @@ export interface CurrentCustomerInfo {
 export const useChatStore = defineStore('chatStore', () => {
   const currentChatId = ref('1'); // 当前聊天的 ID
   // const currentIndex = ref(1);
-
+  const userStore = useUserStore();
   const currentPhone = ref('');
 
   const currentCustomerInfo = ref<CurrentCustomerInfo>();
@@ -66,6 +70,31 @@ export const useChatStore = defineStore('chatStore', () => {
   function setCurrentPhone(phone: string) {
     currentPhone.value = phone;
   }
+  /**
+   * 獲取聊天室聊天記錄
+   */
+  async function getChatRoomMessages({
+    page = 1,
+    pageSize = 20,
+  }: {
+    page: number;
+    pageSize: number;
+  }): Promise<MessageSession> {
+    try {
+      if (!userStore.selectPhone || !currentPhone.value)
+        throw new Error('為獲取到商業號碼信息');
+      const data: GetMessageListByPhoneNumberBody = {
+        roomId: currentChatId.value,
+        pageIndex: page,
+        pageSize,
+        businessPhoneNumber: userStore.selectPhone,
+        customerPhoneNumber: currentPhone.value,
+      };
+      return reqGetMessageListByPhoneNumber(data);
+    } catch (error: any) {
+      return message.warn(error.message);
+    }
+  }
 
   function setPage() {
     page.value = 1;
@@ -73,17 +102,24 @@ export const useChatStore = defineStore('chatStore', () => {
   // 加载聊天记录的模拟数据
   async function loadMoreMessages() {
     page.value = page.value + 1;
-    const data = {
-      id: currentChatId.value,
+    // const data = {
+    //   id: currentChatId.value,
+    //   page: page.value,
+    //   pageSize: 20,
+    // };
+    // const res: WhatsAppInformationInfo = await getMessageList(data).then(
+    //   (result) => {
+    //     scrollTo.value = true;
+    //     return result;
+    //   },
+    // );
+    const res: MessageSession = await getChatRoomMessages({
       page: page.value,
       pageSize: 20,
-    };
-    const res: WhatsAppInformationInfo = await getMessageList(data).then(
-      (result) => {
-        scrollTo.value = true;
-        return result;
-      },
-    );
+    }).then((result) => {
+      scrollTo.value = true;
+      return result;
+    });
     const currentCustomer = currentCustomerInfo.value;
     const messagesListPro: ChatMessage[] = res.messageList
       .reverse()
@@ -239,5 +275,6 @@ export const useChatStore = defineStore('chatStore', () => {
     setCurrentUserInfo,
     clearChat,
     changeChatByPhone,
+    getChatRoomMessages,
   };
 });

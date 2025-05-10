@@ -56,13 +56,13 @@ export interface MessageItemPro extends MessageItem {
  * @description:服務器查詢返回的數據
  */
 export interface WhatsAppInformationInfo {
+  _id: string;
   wabaId: number;
   customerId: string;
   messageList: MessageItem[];
   isProcessed: boolean;
   messageCount: number;
   id: string;
-  roomId: string;
 }
 
 export interface MessageTemplate {
