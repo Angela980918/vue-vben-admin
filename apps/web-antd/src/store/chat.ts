@@ -1,5 +1,6 @@
 import type {
   ChatMessage,
+  Content,
   MessageItem,
   Status,
   WhatsAppInformationInfo,
@@ -22,7 +23,7 @@ export interface CurrentCustomerInfo {
   phoneNumber: string;
   color: string;
   isActive: boolean;
-  message: string;
+  message: Content;
   nickName?: string;
 }
 

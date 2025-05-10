@@ -1,11 +1,8 @@
 import type { LowercaseComponentType } from './web-antd';
+import type { Parameter } from './ycloud';
 
-export type Parameter = {
-  text?: string;
-  type?: LowercaseComponentType;
-};
 export type ComponentObject = {
-  parameters: Parameter[];
+  parameters: Partial<Parameter>[];
   type: LowercaseComponentType;
 };
 interface Template {

@@ -8,6 +8,13 @@ import { getNewRoomId } from '#/api';
 import { useChatStore, useCustomerStore } from '#/store';
 // import {handleTemplateMsg} from "@/tools/index.js";
 import { handleTemplateMsg } from '#/utils/common';
+import type {
+  ChatMessage,
+  Direction,
+  Status,
+  WhatsAppInboundMessage,
+  WhatsAppInboundMessageEventRes,
+} from '@vben/types';
 
 const MAX_MISSED_PONGS = 3; // 最大未响应心跳次数
 const wsList = {};
@@ -186,14 +193,13 @@ export const wsconnect = {
       }, 5000); // 设置延时 5 秒后重试
     });
 
-    connectWS?.on(eventTypes.inbound_message, async (value) => {
+    connectWS?.on(eventTypes.inbound_message, async (value: any) => {
       const customerStore = useCustomerStore();
       const chatStore = useChatStore();
-      const newValue = JSON.parse(value);
+      const newValue: WhatsAppInboundMessageEventRes = JSON.parse(value);
 
       const jsonData = newValue.data;
-      let whatsappMessage = '';
-      whatsappMessage = jsonData.whatsappInboundMessage;
+      const whatsappMessage = jsonData.whatsappInboundMessage;
 
       const assignedCustomers = customerStore.getAssignedCustomers;
       // const unAssignedCustomers = customerStore.getUnassignedCustomers;
@@ -203,23 +209,20 @@ export const wsconnect = {
         const message = wsconnect.handleMessage(
           whatsappMessage,
           'inbound',
-          jsonData.time,
+          jsonData.createTime,
         );
         // console.log("查看处理的消息", message)
         // 為當前用戶添加未讀
 
         assignedCustomers.forEach((item) => {
           if (item.phoneNumber === whatsappMessage.from) {
-            if (item.badgeCount === undefined) item.badgeCount = 0;
-            item.badgeCount++;
-
             // if(message.type === 'text') {
             //   item.message = message.content.body;
             // }else {
             //   item.message = `${message.type} Message`
             // }
             item.message =
-              message.type === 'text'
+              message.type === 'text' && message.content && message.content.body
                 ? message.content.body
                 : `${message.type} Message`;
 
@@ -227,15 +230,13 @@ export const wsconnect = {
             message.color = item.color;
           }
         });
-
-        customerStore.setAssignedCustomers(assignedCustomers);
         chatStore.addMessage(message);
       }
 
       // 如果不是，为那条记录更新最新的消息、未读+1
       else {
         let inserOrNot = 0;
-        let message = '';
+        let message: string = '';
         // console.log("whatsappMessage.type",whatsappMessage.type,whatsappMessage.type==='text');
 
         // if(whatsappMessage.type === 'text') {
@@ -247,8 +248,8 @@ export const wsconnect = {
         //   message = `[${whatsappMessage.type} message]`
         // }
         message =
-          whatsappMessage.type === 'text'
-            ? whatsappMessage.text.body
+          whatsappMessage.type === 'text' && whatsappMessage.text?.body
+            ? whatsappMessage.text?.body
             : (message = `[${whatsappMessage.type} message]`);
         // console.log("111111messagemessage", message)
         // 查詢是否是來自已訂閱的用戶信息
@@ -265,7 +266,6 @@ export const wsconnect = {
         });
 
         if (inserOrNot === 1) {
-          customerStore.setAssignedCustomers(assignedCustomers);
           return;
         }
 
@@ -292,10 +292,11 @@ export const wsconnect = {
             badgeCount: 1,
             color,
           });
+
+          // 更新未訂閱
+          customerStore.setAssignedCustomers();
         }
 
-        // 更新未訂閱
-        customerStore.setAssignedCustomers(assignedCustomers);
         // 从ycloud获取新用户的信息
         // customerStore.getNewUser(whatsappMessage.from);
         // chatStore.addMessage(message);
@@ -348,9 +349,10 @@ export const wsconnect = {
           message: msgType,
           badgeCount: 1,
           color,
+          isActive: false,
         });
 
-        useCustomerStore().setAssignedCustomers(assignedCustomers);
+        useCustomerStore().setAssignedCustomers();
       }
       // console.log("message", message)
       // let message = {
@@ -400,9 +402,13 @@ export const wsconnect = {
     connectWS?.on('template', () => {});
   },
   // 处理信息模块
-  handleMessage: (whatsAppMessage, position, time) => {
+  handleMessage: (
+    whatsAppMessage: Partial<WhatsAppInboundMessage> & { status?: Status },
+    position: Direction,
+    time: string,
+  ): Partial<ChatMessage> => {
     whatsAppMessage.sendTime = undefined;
-    const message = {
+    const message: Partial<ChatMessage> = {
       direction: position,
       _id: whatsAppMessage.id,
       type: whatsAppMessage.type,
@@ -418,7 +424,6 @@ export const wsconnect = {
       case 'video': {
         message.content.link = whatsAppMessage[whatsAppMessage.type].link;
         message.content.caption = whatsAppMessage[whatsAppMessage.type].caption;
-
         break;
       }
       case 'template': {
@@ -431,7 +436,6 @@ export const wsconnect = {
       }
       case 'text': {
         message.content.body = whatsAppMessage.text.body;
-
         break;
       }
       // No default

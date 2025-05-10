@@ -1,3 +1,5 @@
+import type { Content } from '../response';
+
 /* 分配的客户 */
 export interface AssignedCustomer {
   id: string;
@@ -9,7 +11,7 @@ export interface AssignedCustomer {
   phoneNumber: string;
   color: string;
   isActive: boolean;
-  message: string;
+  message: Partial<Content>;
 }
 /* 联系人信息 */
 export interface ContactInformation {

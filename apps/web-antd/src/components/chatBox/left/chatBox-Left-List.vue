@@ -20,7 +20,7 @@ const userData = ref<AssignedCustomer[]>();
 const customerStore = useCustomerStore();
 const chatStore = useChatStore();
 // const currentCustomerId = computed(()=> customerStore.currentUserId)
-const currentChatId = computed(() => chatStore.currentChatId);
+const currentPhone = computed(() => chatStore.currentPhone);
 
 const assCount = ref(0);
 // const unAssCount = ref(0);
@@ -31,6 +31,10 @@ const assCount = ref(0);
 const handleItemClick = (id: string, phoneNumber: string) => {
   props.assignedCustomersData?.forEach((item) => {
     if (item.id === id) {
+      /**
+       * 点击重置未读消息
+       */
+      item.badgeCount = 0;
       chatStore.setCurrentUserInfo(item);
       return true;
     }
@@ -125,7 +129,9 @@ watch(
           :badge-count="customer.badgeCount"
           style="color: #1a1a1a"
           :class="
-            currentChatId === customer.id ? 'chat-box-left-item-active' : ''
+            currentPhone === customer.phoneNumber
+              ? 'chat-box-left-item-active'
+              : ''
           "
         />
       </ASpace>

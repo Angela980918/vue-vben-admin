@@ -1,17 +1,15 @@
 import type { Content, Direction, Status } from '../response';
 
-export type Type = 'audio' | 'document' | 'template' | 'text' | 'video';
-
 export interface ChatMessage {
   _id: string;
-  from: string;
+  from?: string;
   wamid: string;
   to: string;
-  type: Type;
+  type: MessageType;
   content: Content;
   direction: Direction;
   deliverTime: string;
-  status: Status;
+  status?: Status;
   __v: number;
   name: string;
   color: string;

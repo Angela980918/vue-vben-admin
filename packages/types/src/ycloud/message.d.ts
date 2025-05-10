@@ -1,3 +1,5 @@
+import type { LowercaseComponentType } from '../web-antd';
+
 // 定义 conversation 部分的类型
 export interface Conversation {
   id: string;
@@ -8,7 +10,7 @@ export interface Conversation {
 
 // 定义 header 组件中 parameters 部分的类型
 export interface Parameter {
-  type: 'text';
+  type: LowercaseComponentType;
   text: string;
   payload: string;
   coupon_code: string;

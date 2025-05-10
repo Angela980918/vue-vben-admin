@@ -1,17 +1,16 @@
 <script lang="ts" setup>
 import type { CSSProperties } from 'vue';
 
-import { computed, onBeforeMount, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { LayoutSider as ALayoutSider, message } from 'ant-design-vue';
 
 import { getMessageList } from '#/api';
 import ChatBoxLeftList from '#/components/chatBox/left/chatBox-Left-List.vue';
 import ChatBoxLeftSearch from '#/components/chatBox/left/chatBox-Left-Search.vue';
-import { useChatStore, useCustomerStore, useTemplateStore } from '#/store';
+import { useChatStore, useCustomerStore } from '#/store';
 import type { WhatsAppInformationInfo } from '@vben/types';
 import ChatBoxLeftSkeleton from './chatBox-Left-Skeleton .vue';
-import { $t } from '@vben/locales';
 import { handleTemplateMsg } from '#/utils/common';
 
 const { isShow = true } = defineProps<{
@@ -25,15 +24,6 @@ const chatStore = useChatStore();
 const assignedCustomers = computed(() => customerStore.getAssignedCustomers);
 
 // 加载用户列表
-const loadCustomerList = async () => {
-  const customer = await customerStore.setAssignedCustomers();
-  if (customer[0] && assignedCustomers?.value[0]?.id) {
-    chatStore.setCurrentUserInfo(customer[0]);
-    loadChatMessage(customer[0]?.phoneNumber, assignedCustomers?.value[0]?.id);
-  } else {
-    message.warn($t('page.chat.tips.5'));
-  }
-};
 
 /**
  * 加载聊天消息列表的异步函数
@@ -91,29 +81,34 @@ async function loadChatMessage(guestPhone: string, id: string) {
     loadMessageList().then(() => {});
   }
 }
-const { getRawTemplateList, loadTemplates } = useTemplateStore();
+// const { getRawTemplateList, loadTemplates } = useTemplateStore();
 
-async function initial() {
-  if (assignedCustomers.value.length === 0) {
-    await loadCustomerList();
-  } else {
-    if (assignedCustomers.value[0]) {
-      chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
+function initialGetMessageInfo() {
+  setTimeout(() => {
+    const AssignedCustomers = customerStore.getAssignedCustomers;
+    const initAssignedCustomer = AssignedCustomers[0];
+    if (AssignedCustomers.length > 0 && initAssignedCustomer) {
+      chatStore.setCurrentUserInfo(initAssignedCustomer);
       loadChatMessage(
-        assignedCustomers.value[0].phoneNumber,
-        assignedCustomers.value[0].id,
+        initAssignedCustomer.phoneNumber,
+        initAssignedCustomer.id,
       );
     } else {
       message.warn('尚未有客戶信息，請添加聯繫的客戶');
     }
-  }
-  if (getRawTemplateList.length === 0) {
-    loadTemplates();
+  }, 0);
+}
+const isMounted = ref(false);
+async function initial() {
+  if (assignedCustomers.value.length === 0) {
+    nextTick(async () => {
+      await customerStore.setAssignedCustomers();
+      await initialGetMessageInfo();
+    });
+  } else {
+    initialGetMessageInfo();
   }
 }
-onBeforeMount(async () => {
-  initial();
-});
 
 const siderStyle: CSSProperties = {
   textAlign: 'center',
@@ -125,21 +120,20 @@ const siderStyle: CSSProperties = {
   backgroundColor: 'transparent',
 };
 
-// 監聽是否顯示 如果是從false變為true 則重新加載 但是初始的時候不需要加載
+onMounted(() => {
+  isMounted.value = true;
+  initial();
+});
+
 watch(
   () => isShow,
-  (newValue) => {
-    if (newValue) {
-      if (assignedCustomers.value[0]) {
-        chatStore.setCurrentUserInfo(assignedCustomers.value[0]);
-        loadChatMessage(
-          assignedCustomers.value[0].phoneNumber,
-          assignedCustomers.value[0].id,
-        );
-      } else {
-        message.warn('尚未有客戶信息，請添加聯繫的客戶');
-      }
+  async (newVal) => {
+    if (newVal) {
+      initial();
     }
+  },
+  {
+    deep: true,
   },
 );
 </script>

@@ -26,7 +26,7 @@ interface OptionParams {
 
 // 联系人信息
 interface ContactInfo {
-  id: number;
+  id: string;
   nickname: string;
   countryCode: string;
   countryName?: string;
