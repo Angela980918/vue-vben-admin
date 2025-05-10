@@ -119,7 +119,7 @@ const sendDocMessage = async (event: Event) => {
   }); // 上传文件
 
   docTxt.value = {
-    file_path: `https://cos.jackycode.cn/${response.file_path}`,
+    file_path: `${response.file_path}`,
     file_name: response.file_name,
   };
 
@@ -306,7 +306,7 @@ const stopRecording = () => {
         roomId: chatStore.currentChatId.toString(),
       }).then((result) => {
         docTxt.value = {
-          file_path: `https://cos.jackycode.cn/${result.file_path}`,
+          file_path: `${result.file_path}`,
           file_name: result.file_name,
         };
         messageType.value = 'audio';

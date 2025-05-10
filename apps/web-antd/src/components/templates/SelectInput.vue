@@ -198,11 +198,11 @@ const customUpload = async (options) => {
   const { file, onSuccess } = options;
   // console.log('customUpload', file);
   message.loading({ content: () => uploadContent.value, key }); // 显示加载中的消息
-
+  const aliyunLink = 'https://assets-whatsapp.superssss.com/asset/';
   await uploadMaterialApi(file, 'temp', props.uploadType.toLowerCase(), {
     wabaId: TempStore.createTempAccount,
   }).then((response) => {
-    fileUrl.value = `https://cos.jackycode.cn/${response.file_path}`;
+    fileUrl.value = `${aliyunLink}${response.file_path}`;
     onSuccess(file);
     message.success({
       content: '文件上傳成功',

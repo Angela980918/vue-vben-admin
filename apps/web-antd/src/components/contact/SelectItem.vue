@@ -36,7 +36,7 @@ const fileList = ref([]);
 const startSelect = ref(null);
 const selectType = ref('*/*');
 const account = ref(props.account);
-
+const aliyunLink = 'https://assets-whatsapp.superssss.com/asset/';
 function getFileName(data) {
   return data.file_name;
 }
@@ -169,11 +169,11 @@ const handleOk = () => {
             <!--                        {{ 'https://cos.jackycode.cn/'+ record.file_path}}-->
             <AImage
               v-if="type === 'image'"
-              :src="`https://cos.jackycode.cn/${record.file_path}`"
+              :src="`${aliyunLink}${record.file_path}`"
             />
 
             <a
-              :href="`https://cos.jackycode.cn/${record.file_path}`"
+              :href="`${aliyunLink}${record.file_path}`"
               v-else-if="props.type === 'document'"
               download
               target="_blank"
@@ -200,7 +200,7 @@ const handleOk = () => {
               class="mt-2"
             >
               <source
-                :src="`https://cos.jackycode.cn/${record.file_path}`"
+                :src="`${aliyunLink}${record.file_path}`"
                 type="video/mp4"
               />
             </video>

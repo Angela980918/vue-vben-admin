@@ -64,6 +64,7 @@ const templateStore = useTemplateStore();
 const chatStore = useChatStore();
 const userStore = useUserStore();
 const open = ref(false);
+const aliyunLink = 'https://assets-whatsapp.superssss.com/asset/';
 
 // 确认栏
 const confirmRef = ref(null);
@@ -112,7 +113,7 @@ const sendQuickMsg = async () => {
         from: fromNumber,
         to: toNumber,
         type: item.file_type === 'file' ? 'document' : item.file_type,
-        link: `https://cos.jackycode.cn/${item.file_path}`,
+        link: `${aliyunLink}` + `${item.file_path}`,
         message: '',
       });
     }
@@ -121,7 +122,7 @@ const sendQuickMsg = async () => {
       from: fromNumber,
       to: toNumber,
       type: files[0].file_type === 'file' ? 'document' : files[0].file_type,
-      link: `https://cos.jackycode.cn/${files[0].file_path}`,
+      link: `${aliyunLink}` + `${files[0].file_path}`,
       message: messageContent,
     });
   }
@@ -300,7 +301,7 @@ const setRowClassName = (record: any) => {
             name: item?.file_name,
             status: 'done',
             response: '',
-            url: `https://cos.jackycode.cn/${item?.file_path}`,
+            url: `${aliyunLink}` + `${item?.file_path}`,
           };
           fileList.value.push(newFile);
         });
@@ -541,7 +542,7 @@ defineExpose({
                           <AImage
                             height="100%"
                             width="100%"
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                           />
                         </AFlex>
                       </div>
@@ -553,7 +554,7 @@ defineExpose({
                           style="width: 100%; height: 130px"
                         >
                           <iframe
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                             style="width: 100%; height: 100%"
                           >
                           </iframe>
@@ -567,7 +568,7 @@ defineExpose({
                           style="width: 100%; height: 130px"
                         >
                           <iframe
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                             style="width: 100%; height: 130px"
                           >
                           </iframe>
@@ -608,7 +609,7 @@ defineExpose({
                           <AImage
                             height="100%"
                             width="100%"
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                           />
                         </AFlex>
                       </div>
@@ -620,7 +621,7 @@ defineExpose({
                           style="width: 100%; height: 130px"
                         >
                           <iframe
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                             style="width: 100%; height: 100%"
                           >
                           </iframe>
@@ -634,7 +635,7 @@ defineExpose({
                           style="width: 100%; height: 130px"
                         >
                           <iframe
-                            :src="`https://cos.jackycode.cn/${item.file_path}`"
+                            :src="`${aliyunLink}${item.file_path}`"
                             style="width: 100%; height: 130px"
                           >
                           </iframe>

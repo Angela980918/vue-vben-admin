@@ -38,7 +38,7 @@ const handleFileList = (list) => {
     reactive({
       id: item.id,
       title: item.file_name,
-      imageSrc: `https://cos.jackycode.cn/${item.file_path}`,
+      imageSrc: `https://assets-whatsapp.superssss.com/asset/${item.file_path}`,
       selected: false,
     }),
   );
